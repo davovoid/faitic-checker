@@ -4,13 +4,13 @@
 
 Faichecker is a Java based NON OFFICIAL application to manage the *Faitic Platform (Universidad de Vigo)*, allowing to log in the Faitic account, list the files from the subjects and download the files. It is possible to select the files to download or to check the files not download yet.
 
-If you are looking for the ready-to-use program go to *Releases* and download the latest *Jar* available so as to get the latest version. You will require *Java* to execute the program.
+If you are looking for the ready-to-use program go to https://github.com/davovoid/faitic-checker/releases and download the latest *Jar* available so as to get the latest version. You will require *Java* to execute the program.
 
 ### Spanish
 
 Faichecker es una aplicación NO OFICIAL basada en Java para gestionar la *Plataforma Faitic (Universidad de Vigo)*, perimitiendo iniciar sesión en la cuenta de Faitic, listar los archivos de las asignaturas y descargar los archivos. Es posible también seleccionar los archivos a descargar o seleccionar los archivos todavía no descargados.
 
-Si buscas el programa preparado para su uso busca el botón *Releases* y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
+Si buscas el programa preparado para su uso busca el botón https://github.com/davovoid/faitic-checker/releases y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
 
 # How was the project compiled?
 
