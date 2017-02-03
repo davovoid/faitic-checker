@@ -20,7 +20,7 @@ Si buscas el programa preparado para su uso busca el botón https://github.com/d
 
 This project was compiled using Eclipse Luna Service Release 2 (4.4.2) (See https://www.eclipse.org/ for more details) using as JAR libraries json-simple 1.1.1 and Forms 1.3.0 (Attached to this repository, see in this text above for license details).
 
-# Is there any arguments that I can give to this application?
+# Are there any arguments that I can give to this application?
 
 Yes.
 
