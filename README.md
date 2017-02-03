@@ -24,7 +24,7 @@ This project was compiled using Eclipse Luna Service Release 2 (4.4.2) (See http
 
 Yes.
 
- * `--verbose` shows http petitions with their url, post data and redirections at the program log. CAUTION: using this argument implies that your password would also be visible in the log. Use at your own risk, and only if you know what you are doing!
+ * `--verbose` shows http petitions with their url, post data and redirections at the program log. CAUTION: using this argument implies that your password would also be visible in the log. Use it at your own risk, and only if you know what you are doing!
  
 By now there are no more arguments to be given, as the procedures would be available by using the Graphical User Interface.
 
@@ -32,6 +32,7 @@ By now there are no more arguments to be given, as the procedures would be avail
 ## Faicheck
 
 *Faicheck - A NON OFFICIAL application to manage the Faitic Platform*
+
 *Copyright (C) 2016, 2017 David Ricardo Araújo Piñeiro*
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
