@@ -2,13 +2,17 @@
 
 ### English
 
-Faicheck is a Java based NON OFFICIAL application to manage the *Faitic Platform (Universidad de Vigo)*, allowing to log in the Faitic account, list the files from the subjects and download the files. It is possible to select the files to download or to check the files not download yet.
+Faicheck is a Java based NON OFFICIAL application to manage the *Faitic Platform* (A tool from the *Universidad de Vigo*), This application allows to log in the Faitic account, and offers the user the possibility of listing and downloading the subject files. It also counts on an intelligent system to select several files or simply the ones that have not been downloaded yet.
+
+The application was also tested to work on Windows and Linux (It was not tested on Mac OS X yet).
 
 If you are looking for the ready-to-use program go to https://github.com/davovoid/faitic-checker/releases and download the latest *Jar* available so as to get the latest version. You will require *Java* to execute the program.
 
 ### Spanish
 
-Faicheck es una aplicación NO OFICIAL basada en Java para gestionar la *Plataforma Faitic (Universidad de Vigo)*, permitiendo iniciar sesión en la cuenta de Faitic, listar los archivos de las asignaturas y descargar los archivos. Es posible también seleccionar los archivos a descargar o seleccionar los archivos todavía no descargados.
+Faicheck es una aplicación NO OFICIAL basada en Java para gestionar la *Plataforma Faitic* (Una herramienta de la *Universidad de Vigo*). Esta aplicación permite iniciar sesión en la cuenta de Faitic y ofrece al usuario la posibilidad de listar y descargar los archivos pertenecientes a las distintas asignaturas. Cuenta también con un sistema inteligente para seleccionar varios archivos o incluso solo aquellos que aún no hayan sido descargados.
+
+La aplicación ha sido probada en Windows y Linux (Todavía no ha sido probada en Mac OS X).
 
 Si buscas el programa preparado para su uso busca el botón https://github.com/davovoid/faitic-checker/releases y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
 
