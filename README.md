@@ -8,7 +8,7 @@ If you are looking for the ready-to-use program go to https://github.com/davovoi
 
 ### Spanish
 
-Faicheck es una aplicación NO OFICIAL basada en Java para gestionar la *Plataforma Faitic (Universidad de Vigo)*, perimitiendo iniciar sesión en la cuenta de Faitic, listar los archivos de las asignaturas y descargar los archivos. Es posible también seleccionar los archivos a descargar o seleccionar los archivos todavía no descargados.
+Faicheck es una aplicación NO OFICIAL basada en Java para gestionar la *Plataforma Faitic (Universidad de Vigo)*, permitiendo iniciar sesión en la cuenta de Faitic, listar los archivos de las asignaturas y descargar los archivos. Es posible también seleccionar los archivos a descargar o seleccionar los archivos todavía no descargados.
 
 Si buscas el programa preparado para su uso busca el botón https://github.com/davovoid/faitic-checker/releases y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
 
