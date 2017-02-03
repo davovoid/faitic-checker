@@ -1,5 +1,5 @@
 /*
- * 	Faichecker - A NON OFFICIAL application to manage the Faitic Platform
+ * 	Faicheck - A NON OFFICIAL application to manage the Faitic Platform
  * 	Copyright (C) 2016, 2017 David Ricardo Araújo Piñeiro
  * 	
  * 	This program is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@ import java.awt.event.MouseEvent;
 
 public class About {
 
-	private static final String VERSION="0.0.3c";
+	private static final String VERSION="0.0.3d";
 	private static final String WEBPAGE="https://github.com/davovoid/faitic-checker";
 
 	protected static TextData textdata;
@@ -84,7 +84,7 @@ public class About {
 	private static JTextPane txtAbout;
 	private static JLabel lblLicensesAndAttributions;
 	private static JLabel lblContributors;
-	private static JLabel lblFaicheckerLicense;
+	private static JLabel lblFaicheckLicense;
 	private JLabel labelWebPage;
 
 	/**
@@ -130,7 +130,7 @@ public class About {
 	
 	private static void selectOption(JLabel selectedLabel, String filename){
 		
-		JLabel[] labels=new JLabel[]{lblLicensesAndAttributions, lblFaicheckerLicense, lblContributors};
+		JLabel[] labels=new JLabel[]{lblLicensesAndAttributions, lblFaicheckLicense, lblContributors};
 		
 		for(JLabel label : labels){
 			
@@ -289,7 +289,7 @@ public class About {
 				FormFactory.DEFAULT_ROWSPEC,
 				FormFactory.GLUE_ROWSPEC,}));
 		
-		lblFaiticChecker = new JLabel("Faichecker");
+		lblFaiticChecker = new JLabel("Faicheck");
 		lblFaiticChecker.setForeground(new Color(0,110,198,255));
 		//lblFaiticChecker.setHorizontalAlignment(SwingConstants.CENTER);
 		lblFaiticChecker.setFont(new Font("SansSerif", Font.BOLD, 20));
@@ -405,17 +405,17 @@ public class About {
 		lblLicensesAndAttributions.setForeground(new Color(0,110,198,255));
 		panelFooter.add(lblLicensesAndAttributions, "2, 2");
 		
-		lblFaicheckerLicense = new JLabel(textdata.getKey("programlicense"));
-		lblFaicheckerLicense.addMouseListener(new MouseAdapter() {
+		lblFaicheckLicense = new JLabel(textdata.getKey("programlicense"));
+		lblFaicheckLicense.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				selectOption(lblFaicheckerLicense,"COPYING");
+				selectOption(lblFaicheckLicense,"COPYING");
 				//txtAbout.setText(txtAbout.getText().replace("\\", "\\\\").replace("\n\n", "\\n\\n").replace("\n", " ").replace("\\n\\n", "\n\n").replace("\\\\", "\\"));
 			}
 		});
-		lblFaicheckerLicense.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblFaicheckerLicense.setForeground(new Color(0,110,198,255));
-		panelFooter.add(lblFaicheckerLicense, "4, 2");
+		lblFaicheckLicense.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblFaicheckLicense.setForeground(new Color(0,110,198,255));
+		panelFooter.add(lblFaicheckLicense, "4, 2");
 		
 		lblContributors = new JLabel(textdata.getKey("contributors"));
 		lblContributors.addMouseListener(new MouseAdapter() {

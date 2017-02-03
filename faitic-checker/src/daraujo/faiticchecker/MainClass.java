@@ -1,5 +1,5 @@
 /*
- * 	Faichecker - A NON OFFICIAL application to manage the Faitic Platform
+ * 	Faicheck - A NON OFFICIAL application to manage the Faitic Platform
  * 	Copyright (C) 2016, 2017 David Ricardo Araújo Piñeiro
  * 	
  * 	This program is free software: you can redistribute it and/or modify

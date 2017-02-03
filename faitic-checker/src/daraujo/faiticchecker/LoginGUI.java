@@ -1,5 +1,5 @@
 /*
- * 	Faichecker - A NON OFFICIAL application to manage the Faitic Platform
+ * 	Faicheck - A NON OFFICIAL application to manage the Faitic Platform
  * 	Copyright (C) 2016, 2017 David Ricardo Araújo Piñeiro
  * 	
  * 	This program is free software: you can redistribute it and/or modify
@@ -799,12 +799,12 @@ public class LoginGUI {
 			public void mouseClicked(MouseEvent e) {
 				
 				/*JOptionPane.showMessageDialog(null,
-						  "Faichecker v." + VERSION + "\n\nCreado por David R. Araújo\n\n"
+						  "Faicheck v." + VERSION + "\n\nCreado por David R. Araújo\n\n"
 						+ "Creado para gestionar los archivos de las distintas asignaturas de Faitic de\n"
 						+ "forma cómoda y sencilla, permitiendo sincronizarlos con un simple gesto de ratón.\n\n"
 						+ "Nota: esta aplicación ha sido creada sin ánimo de lucro, y se ofrece sin ningún\n"
 						+ "tipo de garantía.",
-						"Faichecker - Acerca de", JOptionPane.PLAIN_MESSAGE);*/
+						"Faicheck - Acerca de", JOptionPane.PLAIN_MESSAGE);*/
 				
 				try {
 					
