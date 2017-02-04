@@ -14,13 +14,17 @@ Faicheck es una aplicación NO OFICIAL basada en Java para gestionar la *Platafo
 
 La aplicación ha sido probada en Windows y Linux (Todavía no ha sido probada en Mac OS X).
 
-Si buscas el programa preparado para su uso busca el botón https://github.com/davovoid/faitic-checker/releases y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
+Si buscas el programa preparado para su uso entra en https://github.com/davovoid/faitic-checker/releases y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
+
+# Privacy policy: what happens with my personal data?
+
+Summing up, the application will only ask you the username and password so as to connect with them to the Faitic Platform (faitic.uvigo.es) to log in, or to keep the username and/or the password locally saved on your computer, and only in case you ask the application to do it (The *Remember username* and *Remember password* options). Never would we collect any personal information from you. For more information about the Faitic Platform and this topic, go to the Faitic Platform subsection: https://github.com/davovoid/faitic-checker#faitic-platform
 
 # How was the project compiled?
 
 This project was compiled using Eclipse Luna Service Release 2 (4.4.2) (See https://www.eclipse.org/ for more details) using as JAR libraries json-simple 1.1.1 and Forms 1.3.0 (Attached to this repository, see the 'License and attributions' section for license details).
 
-# Are there any arguments that I can give to this application?
+# Is there any argument that I can give to this application?
 
 Yes.
 
@@ -71,6 +75,6 @@ Consult the webpage for more information about the project.
 
 This program uses as server the *Faitic Platform* (faitic.uvigo.es), property of the *'Servicio de Teledocencia'* from the *'Universidad de Vigo'* (uvigo.gal). All the rights from that platform are reserved to that entity, and the usage of that platform (Including, but not limited to, the personal data usage) are subjected to the terms and conditions from the *Faitic Platform*.
 
-In order to connect to the *Faitic Platform*, *Faicheck* will request the user name and the password to connect to that platform, and would never send the personal data to anything else than the *Faitic Platform*. Faicheck will only save this information on the local machine if it is requested by the user. Regardless, *Faicheck* is not responsible and will not be responsible in any way about any kind of data loss. See the *GNU General Public License* for the details.
+In order to connect to the *Faitic Platform*, *Faicheck* will request the user name and the password to connect to that platform, and would never send the personal data to anything else than the *Faitic Platform* from the *'Universidad de Vigo'*. Faicheck will only save this information on the local machine if it is requested by the user, as part of the *Remember username* and *Remember password* options. Regardless, *Faicheck* will *never* be responsible in any way about any kind of data loss. See the *GNU General Public License* for the details.
 
 The *'Faicheck'* project and program is not related with the *'Universidad de Vigo'* nor the *'Servicio de Teledocencia'* nor the *'Faitic Platform'*.
