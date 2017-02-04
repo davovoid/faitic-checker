@@ -18,7 +18,7 @@ Si buscas el programa preparado para su uso entra en https://github.com/davovoid
 
 # Privacy policy: what happens with my personal data?
 
-Summing up, the application will only ask you the username and password so as to connect with it to the Faitic Platform (faitic.uvigo.es) to log in, or to keep the username and/or the password saved locally on your computer in case you ask the application to do it (The *Remember username* and *Remember password* options). Never would we collect any personal information from you. For more information about the Faitic Platform and this topic, go to the Faitic Platform subsection: https://github.com/davovoid/faitic-checker#faitic-platform
+Summing up, the application will only ask you the username and password so as to connect with them to the Faitic Platform (faitic.uvigo.es) to log in, or to keep the username and/or the password locally saved on your computer, and only in case you ask the application to do it (The *Remember username* and *Remember password* options). Never would we collect any personal information from you. For more information about the Faitic Platform and this topic, go to the Faitic Platform subsection: https://github.com/davovoid/faitic-checker#faitic-platform
 
 # How was the project compiled?
 
