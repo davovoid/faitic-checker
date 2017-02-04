@@ -38,7 +38,7 @@ Consult the webpage for more information about the project.
 
 This program uses as server the Faitic platform (faitic.uvigo.es), property of the 'Servicio de Teledocencia' from the 'Universidad de Vigo' (uvigo.gal). All the rights from that platform are reserved to that entity, and the usage of that platform (Including, but not limited to, the personal data usage) are subjected to the terms and conditions from the Faitic Platform.
 
-In order to connect to the Faitic Platform, Faicheck will request the user name and the password to connect to that platform, and would never send the personal data to anything else than the Faitic Platform. Faicheck will only save this information on the local machine if it is requested by the user. Regardless, Faicheck is not responsible and will not be responsible in any way about any kind of data loss. See the GNU General Public License for the details.
+In order to connect to the Faitic Platform, Faicheck will request the user name and the password to connect to that platform, and would never send the personal data to anything else than the Faitic Platform from the 'Universidad de Vigo'. Faicheck will only save this information on the local machine if it is requested by the user, as part of the Remember username and Remember password options. Regardless, Faicheck will never be responsible in any way about any kind of data loss. See the GNU General Public License for the details.
 
 The 'Faicheck' project and program is not related with the 'Universidad de Vigo' nor the 'Servicio de Teledocencia' nor the 'Faitic Platform'.
 
