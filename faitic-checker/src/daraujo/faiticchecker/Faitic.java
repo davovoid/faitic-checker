@@ -98,7 +98,6 @@ public class Faitic {
 		connection.setInstanceFollowRedirects(false);
 		connection.setUseCaches(false);
 
-		//connection.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36 OPR/40.0.2308.90");
 		connection.setRequestProperty("Accept-Encoding", "gzip");
 		
 		if(post.length()>0){
@@ -220,9 +219,6 @@ public class Faitic {
 		connection.setInstanceFollowRedirects(false);
 		connection.setUseCaches(false);
 
-		//connection.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36 OPR/40.0.2308.90");
-		//connection.setRequestProperty("Accept-Encoding", "gzip");
-		
 		if(post.length()>0){
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); 
@@ -242,18 +238,8 @@ public class Faitic {
 		
 		InputStream reader;	// Response document
 		
-		/*if(connection.getContentEncoding().equals("gzip")){
-			
-			reader=new GZIPInputStream(connection.getInputStream());
-			logger.log(Logger.INFO, " + GZIP ENCODED");
-			
-		}*/
-		//else{
-			
-			reader = connection.getInputStream();
-			
-		//}
-		
+		reader = connection.getInputStream();
+
 		logger.log(Logger.INFO, " + Saving as: " + filename);
 		
 		FileOutputStream filewriter = new FileOutputStream(filename);
@@ -346,7 +332,6 @@ public class Faitic {
 		connection.setInstanceFollowRedirects(false);
 		connection.setUseCaches(false);
 
-		//connection.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36 OPR/40.0.2308.90");
 		connection.setRequestProperty("Accept-Encoding", "gzip");
 		
 		if(post.length()>0){
@@ -721,14 +706,10 @@ public class Faitic {
 			
 			// More complicated :( pay attention because this is about to start...
 
-			//System.out.println("\n\nPASO 0\n\n");
-			
 			int endOfURLShouldStartWith= platformURL.indexOf("/", platformURL.indexOf("/moodle")+1);
 			
 			if(endOfURLShouldStartWith>=0){
 
-				//System.out.println("\n\nPASO 1\n\n");
-				
 				String logoutURLShouldStartWith=platformURL.substring(0, endOfURLShouldStartWith) + "/login/logout.php";
 				// This is the url that should appear on the document, but with all the parameters given as GET
 				
@@ -742,8 +723,6 @@ public class Faitic {
 				
 				if(hereIsTheLogoutURL>=0 && hereEndsTheLogoutURL>hereIsTheLogoutURL){
 
-					//System.out.println("\n\nPASO 2\n\n");
-					
 					// Gotcha!
 					
 					requestDocument(platformDocument.substring(hereIsTheLogoutURL, hereEndsTheLogoutURL),"");
@@ -1122,86 +1101,6 @@ public class Faitic {
 		
 		
 		return list;
-		
-	}
-	
-	
-	
-	
-	public static void mainold(String[] args) {
-		// TODO Auto-generated method stub
-
-		try {
-			
-			toDoAtStartup(true);
-			
-			Scanner escaner=new Scanner(System.in);
-			
-			System.out.println("Usuario:");
-			
-			String usuario=escaner.nextLine();
-			
-			System.out.println("Clave:");
-			
-			String mainDocument=faiticLogin(usuario,escaner.nextLine());
-			
-			ArrayList<String[]> subjectList=faiticSubjects(mainDocument);
-			
-			int subjectIndex=0;
-			
-			for(String[] subject : subjectList){
-				
-				System.out.println(subjectIndex++ + "\t" + subject[1] + " --> " + subject[0]);
-				
-			}
-			
-			System.out.println("Numero de asignatura:");
-			
-			String[] subject=goToSubject(subjectList.get(escaner.nextInt())[0]);
-			int subjectType=subjectPlatformType(subject[0]);
-			String subjectURL=subject[0];
-			
-			System.out.println(" - Subject url: " + subjectURL);
-			System.out.println(" - Subject detected int type: " + subjectType);
-			//System.out.println("\n\n" + subject[1]);
-			
-			if(subjectType == CLAROLINE){
-				
-				ArrayList<String[]> fileList = listDocumentsClaroline(subjectURL);
-			
-				System.out.println("\n\n --- Files ---");
-				
-				for(String[] elements : fileList){
-					System.out.println(elements[0] + " <==> " + elements[1]);
-				}
-
-				System.out.println(" --- End of files ---\n\n");
-				
-			}
-			else if(subjectType == MOODLE){
-					
-					ArrayList<String[]> fileList = listDocumentsMoodle(lastRequestedURL);
-				
-					System.out.println("\n\n --- Files ---");
-					
-					for(String[] elements : fileList){
-						System.out.println(elements[0] + " <==> " + elements[1]);
-					}
-
-					System.out.println(" --- End of files ---\n\n");
-					
-					//downloadFile(fileList.get(0)[1],"","/home/david/Escritorio/archivodeprueba");
-					
-				}
-			
-			logoutSubject(subjectURL, subject[1], subjectType);
-			
-			faiticLogout(mainDocument);
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 	}
 

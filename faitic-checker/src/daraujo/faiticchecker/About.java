@@ -68,8 +68,6 @@ public class About {
 
 	protected static TextData textdata;
 	
-	//private final static Image imgUVigo=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoUVigo.png")).getImage();
-	//private final static Image imgFaitic=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaitic.png")).getImage();
 	private final static Image imgIcon=new ImageIcon(About.class.getResource("/daraujo/faiticchecker/icon.png")).getImage();
 
 	private final static Image imgFaicheck=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaicheck.png")).getImage();
@@ -203,37 +201,6 @@ public class About {
 				
 				int leftIcon=140;
 				
-				/*
-				
-				g.setColor(borderColor);
-				
-				g.drawLine(0, topHeight, super.getWidth(), topHeight);
-				g.drawLine(0, super.getHeight()-bottomHeight, super.getWidth(), super.getHeight()-bottomHeight);
-				
-				//g.setColor(new Color(200,200,200,255));
-				//g.drawLine(leftIcon, 0, leftIcon, topHeight-1);
-				
-				for(int i=0; i<3; i++){
-
-					g.setColor(new Color(120,120,120,150*(3-i)/3));
-					g.drawLine(0, topHeight+i, super.getWidth(), topHeight+i);
-					g.drawLine(0, super.getHeight()-bottomHeight-i, super.getWidth(), super.getHeight()-bottomHeight-i);
-					
-				}
-				*/
-				/*g.setColor(new Color(120,120,120,100));
-				
-				for(int i=0; i<2 * (super.getWidth() > super.getHeight() ? super.getWidth() : super.getHeight()); i+=10){
-					
-					g.drawLine(i, topHeight, i-super.getHeight()+bottomHeight+topHeight, super.getHeight()-bottomHeight);
-					
-				}*/
-/*
-				g.setColor(new Color(239,244,248,120));
-				for(int i=topHeight; i<super.getHeight()-bottomHeight; i++){
-					g.drawLine(0, i, super.getWidth(), i);
-				}
-*/
 			}
 			
 		};
@@ -346,39 +313,7 @@ public class About {
 		//txtAbout.setBackground(new Color(255,255,255,200));
 		scrollPane.setViewportView(txtAbout);
 		
-		panelFooter = new JPanel()/*{
-			
-			@Override
-			public void paintComponent(Graphics g){
-				
-				// Inherited
-				super.paintComponent(g);
-
-				Graphics2D g2 = (Graphics2D) g;
-
-			    //g2.setComposite(AlphaComposite.Src);
-			    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			    
-				// Parameters
-				int imgheight=super.getHeight()-4*2;
-				int imgwidth=imgheight*imgFaicheck.getWidth(null)/imgFaicheck.getHeight(null);
-				
-				//int faiticWidth=imgheight*imgFaitic.getWidth(null)/imgFaitic.getHeight(null);
-				
-				//int uniHeight=faiticWidth*imgUVigo.getHeight(null)/imgUVigo.getWidth(null);
-				//int uniWidth=faiticWidth;
-				
-				//g2.drawImage(imgUVigo, (super.getWidth() - faiticWidth - 4 - uniWidth)/2, 4 + (imgheight-uniHeight)/2, uniWidth, uniHeight, null);
-				//g2.drawImage(imgFaitic, (super.getWidth() - faiticWidth - 4 - uniWidth)/2 + 4 + faiticWidth, 4, faiticWidth, imgheight, null);
-				
-				g2.drawImage(imgFaicheck, (super.getWidth()-imgwidth)/2, 4, imgwidth, imgheight, null);
-				
-			    
-			}
-			
-		}*/;
+		panelFooter = new JPanel();
 		panelFooter.setOpaque(false);
 		panelWithEverything.add(panelFooter, "1, 5, 3, 1, fill, fill");
 		panelFooter.setLayout(new FormLayout(new ColumnSpec[] {

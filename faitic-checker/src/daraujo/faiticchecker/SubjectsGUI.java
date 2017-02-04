@@ -102,9 +102,6 @@ public class SubjectsGUI {
 	
 	private static JPanel panelLogos, panelSubjects, panelSubject, panelOptions, panelEverything;
 	
-	//private final static Image imgUVigo=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoUVigo.png")).getImage();
-	//private final static Image imgFaitic=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaitic.png")).getImage();
-	
 	private final static Image imgFaicheck=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaicheck.png")).getImage();
 	
 	private static JButton btnDescargarMarcados;
@@ -187,19 +184,17 @@ public class SubjectsGUI {
 		for(Component comp : panelOptions.getComponents()){
 			comp.setEnabled(false);
 		}
-		//popupSetSubject.setEnabled(false);
+
 		itemSelectSubjectFolder.setVisible(false);
 		lblOpenFolder.setVisible(false);
-		//btnSetSubject.setVisible(false);
+
 
 	}
 	
 	private static void activateInterface(){
 
-		//popupSetSubject.setEnabled(selectedSubject>=0);
 		itemSelectSubjectFolder.setVisible(selectedSubject>=0);
 		lblOpenFolder.setVisible(subjectPath!=null && selectedSubject>=0);
-		//btnSetSubject.setVisible(selectedSubject>=0);
 
 		panelLoading.setVisible(false);
 		scrollPane.setVisible(true);
@@ -922,14 +917,6 @@ public class SubjectsGUI {
 						
 				// Background
 				
-				/*g.setColor(new Color(120,120,120,100));
-				
-				for(int i=0; i<2*(super.getWidth()> super.getHeight() ? super.getWidth() : super.getHeight()); i+=10){
-					
-					g.drawLine(i, panellogoheight, i-super.getHeight(), super.getHeight()+panellogoheight);
-					
-				}*/
-				
 				g.setColor(new Color(239,244,248,120));
 				for(int i=panellogoheight; i<super.getHeight(); i++){
 					g.drawLine(0, i, super.getWidth(), i);
@@ -1079,15 +1066,6 @@ public class SubjectsGUI {
 				//System.out.println(imgwidth);
 				
 				int logowidth=panelLogoSpace != null ? (int) panelLogoSpace.getMinimumSize().getWidth() : 260;
-				
-				
-				//int faiticWidth=imgheight*imgFaitic.getWidth(null)/imgFaitic.getHeight(null);
-				
-				//int uniHeight=faiticWidth*imgUVigo.getHeight(null)/imgUVigo.getWidth(null);
-				//int uniWidth=faiticWidth;
-				
-				//g2.drawImage(imgUVigo, 15, 15 + (imgheight-uniHeight)/2, uniWidth, uniHeight, null);
-				//g2.drawImage(imgFaitic, super.getWidth() - faiticWidth - 15, 15, faiticWidth, imgheight, null);
 				
 				g2.drawImage(imgFaicheck, 15, 25, imgwidth, imgheight, null);
 				

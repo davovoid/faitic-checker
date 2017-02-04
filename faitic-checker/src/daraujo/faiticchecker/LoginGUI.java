@@ -405,46 +405,6 @@ public class LoginGUI {
 				
 				int loginposy=panelLogin != null ? panelLogin.getY() : 300;
 				
-				//int uvigoheight=imgwidth*imgUVigo.getHeight(null)/imgUVigo.getWidth(null);
-				//int faiticheight=imgwidth*imgFaitic.getHeight(null)/imgFaitic.getWidth(null);
-				
-				// Background
-				
-				//g.setColor(backgroundColor);
-				
-				//g.fillRect(0, 0, super.getWidth(), faiticheight+40);
-
-				// Divider and its shadows
-				
-				/*g.setColor(borderColor);
-				
-				g.drawLine(0, imgheight+40, super.getWidth(), imgheight+40);
-				
-				for(int i=0; i<5; i++){
-
-					g.setColor(new Color(120,120,120,150*(5-i)/5));
-					g.drawLine(0, imgheight+40+i, super.getWidth(), imgheight+40+i);
-					
-				}*/
-				
-				// Diagonal lines
-				
-				/*g.setColor(new Color(120,120,120,100));
-				
-				for(int i=0; i<2*(super.getWidth()> super.getHeight() ? super.getWidth() : super.getHeight()); i+=10){
-					
-					g.drawLine(i, imgheight+40, i-super.getHeight(), super.getHeight()+imgheight+40);
-					
-				}*/
-				
-				// Logo
-				
-				//int heightdiff=faiticheight-uvigoheight;
-				
-				//g2.drawImage(imgUVigo, 20, 20+heightdiff/2, imgwidth, uvigoheight, null);
-
-				//g2.drawImage(imgFaitic, super.getWidth()-imgwidth-20, 20, imgwidth, faiticheight, null);
-				
 				g2.drawImage(imgFaicheck, (super.getWidth()-imgwidth)/2, (loginposy-imgheight)/2, imgwidth, imgheight, null);
 				
 			}
@@ -602,29 +562,6 @@ public class LoginGUI {
 			@Override
 			public void paintComponent(Graphics g){
 
-				//super.paintComponent(g);
-				
-				//Color borderColor=new Color(0,64,117,255);
-				
-				//Color backColor=new Color(94,177,239,30);
-				
-				/*
-				g.setColor(backColor);
-				g.fillRect(0, 0, super.getWidth(), super.getHeight());
-
-				g.setColor(borderColor);
-				g.drawLine(0, 0, 0, super.getHeight());
-				g.drawLine(super.getWidth()-1, 0, super.getWidth()-1, super.getHeight());
-				
-				g.drawLine(0, 0, super.getWidth(), 0);
-				g.drawLine(0, 1, super.getWidth(), 1);
-				g.drawLine(0, 2, super.getWidth(), 2);
-
-				g.drawLine(0, super.getHeight() - 1, super.getWidth(), super.getHeight() - 1);
-				g.drawLine(0, super.getHeight() - 2, super.getWidth(), super.getHeight() - 2);
-				g.drawLine(0, super.getHeight() - 3, super.getWidth(), super.getHeight() - 3);
-				*/
-				
 				Color borderColor=new Color(140,140,140,255);
 				
 				for(int i=0; i<8; i++){
@@ -726,23 +663,6 @@ public class LoginGUI {
 				
 				Color borderColor=super.getBackground();
 				
-				/*Color backColor=new Color(255,255,255,140);
-				
-				g.setColor(backColor);
-				g.fillRect(0, 0, super.getWidth(), super.getHeight());
-
-				g.setColor(borderColor);
-				g.drawLine(0, 0, 0, super.getHeight());
-				g.drawLine(super.getWidth()-1, 0, super.getWidth()-1, super.getHeight());
-				
-				g.drawLine(0, 0, super.getWidth(), 0);
-				g.drawLine(0, 1, super.getWidth(), 1);
-				g.drawLine(0, 2, super.getWidth(), 2);
-
-				g.drawLine(0, super.getHeight() - 1, super.getWidth(), super.getHeight() - 1);
-				g.drawLine(0, super.getHeight() - 2, super.getWidth(), super.getHeight() - 2);
-				g.drawLine(0, super.getHeight() - 3, super.getWidth(), super.getHeight() - 3);*/
-				
 
 				for(int i=0; i<8; i++){
 					
@@ -797,14 +717,6 @@ public class LoginGUI {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				
-				/*JOptionPane.showMessageDialog(null,
-						  "Faicheck v." + VERSION + "\n\nCreado por David R. Araújo\n\n"
-						+ "Creado para gestionar los archivos de las distintas asignaturas de Faitic de\n"
-						+ "forma cómoda y sencilla, permitiendo sincronizarlos con un simple gesto de ratón.\n\n"
-						+ "Nota: esta aplicación ha sido creada sin ánimo de lucro, y se ofrece sin ningún\n"
-						+ "tipo de garantía.",
-						"Faicheck - Acerca de", JOptionPane.PLAIN_MESSAGE);*/
 				
 				try {
 					

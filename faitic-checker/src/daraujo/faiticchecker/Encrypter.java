@@ -35,19 +35,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class Encrypter {
 
-	/*public static byte[] createSalt(int length){
-		
-		Random random=new SecureRandom();
-		
-		byte[] outputSalt=new byte[length];
-		random.nextBytes(outputSalt);
-		
-		return outputSalt;
-		
-	}
-	
-	*/
-	
 	public static byte[] encodeToSHA256(String password) throws Exception{
 		
 		MessageDigest digester=MessageDigest.getInstance("SHA-256");
