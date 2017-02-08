@@ -1522,6 +1522,8 @@ public class SubjectsGUI {
 							faitic.setCancelDownload(false);
 							btnDescargarMarcados.setEnabled(true);
 							descargando=false;
+							
+							updateDownloadMarkedText();
 
 						}
 
