@@ -111,6 +111,7 @@ public class SubjectsGUI {
 	
 	private static JLabel[] lblSubjects;
 	private static JCheckBox[] cArchivos;
+	private static JLabel[] lArchivos;
 	private static JButton[] btnAbrirArchivos;
 	
 	private static int selectedSubject=-1, prevSelectedSubject=-1;
@@ -139,6 +140,8 @@ public class SubjectsGUI {
 	private JPanel panelLogoSpace;
 	private static JLabel lblSubjectFolder;
 	private static JLabel lblOpenFolder;
+	
+	private static boolean descargando=false;
 	
 	/**
 	 * Application functions
@@ -509,6 +512,7 @@ public class SubjectsGUI {
 		panelToDownload.add(lblArchivo, "4, 2");
 		
 		cArchivos=new JCheckBox[fileListString.length];
+		lArchivos=new JLabel[fileListString.length];
 		btnAbrirArchivos=new JButton[fileListString.length];
 		
 		for(int i=0; i<fileListString.length; i++){
@@ -534,9 +538,59 @@ public class SubjectsGUI {
 			
 			panelToDownload.add(cArchivos[i], "2, " + (int)(i*2+4));
 			
-			JLabel lblArchivo1=new JLabel(fileListString[i]);
-			lblArchivo1.setFont(new Font("Monospaced", Font.PLAIN, 12));
-			panelToDownload.add(lblArchivo1, "4, " + (int)(i*2+4));
+			lArchivos[i]=new JLabel(fileListString[i]);
+			lArchivos[i].setFont(new Font("Monospaced", Font.PLAIN, 12));
+			lArchivos[i].addMouseListener(new MouseListener(){
+
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+
+					int index=-1;
+					
+					for(int i=0; i<lArchivos.length; i++){
+						
+						if(lArchivos[i].equals(arg0.getComponent())) index=i;
+						
+					}
+					
+					if(index>=0){
+						
+						// Detected the element clicked
+						
+						cArchivos[index].setSelected(!cArchivos[index].isSelected());
+						
+					}
+					
+					
+				}
+
+				@Override
+				public void mouseEntered(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseExited(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mousePressed(MouseEvent arg0) {
+					// TODO Auto-generated method stub
+					
+				}
+
+				@Override
+				public void mouseReleased(MouseEvent e) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+			});
+			
+			panelToDownload.add(lArchivos[i], "4, " + (int)(i*2+4));
 			
 			btnAbrirArchivos[i]=new JButton(isAlreadyDownloaded ? textdata.getKey("filelistopen") : textdata.getKey("filelistdownload"));
 			
@@ -1384,80 +1438,99 @@ public class SubjectsGUI {
 		btnDescargarMarcados = new JButton(textdata.getKey("btndownloadmarked",""));
 		btnDescargarMarcados.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				if(isLoading) return;
-				isLoading=true;
-				
-				if(fileList==null){
-					
-					JOptionPane.showMessageDialog(subjectsFrame, 
-							textdata.getKey("subjectnotselectederror"), 
-							textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
-					
-					isLoading=false;
-					
-					return;
-				}
-				
-				if(cArchivos==null) {
 
-					isLoading=false;
-					
-					return;
-				}
+				if(descargando){
 
-				if(subjectPath==null) askToSelectSubjectFolder();
-				if(subjectPath==null) {
+					faitic.setCancelDownload(true);
+					btnDescargarMarcados.setEnabled(false);
 
-					isLoading=false;
-					
-					return;
-				}
-				
-				blockInterface();
-				
-				writeLoadingText("Descargando...");
-				
-				SwingWorker thread=new SwingWorker(){
+				} else{
 
-					@Override
-					protected Object doInBackground() throws Exception {
-						
-						int nDownloadedFiles=0;
+					if(isLoading) return;
+					isLoading=true;
 
-						for(int i=0; i<fileList.size(); i++){
-							
-							if(cArchivos[i].isSelected()){
-								
-								downloadFileFromList(i);
+					if(fileList==null){
 
-								writeLoadingText(textdata.getKey("loadingdownloading", ++nDownloadedFiles + ""));
-								
-							}
-							
-						}
-
-						writeLoadingText(textdata.getKey("loadingdefaulttext"));
-						
-						return null;
-					}
-					
-					@Override
-					protected void done(){
+						JOptionPane.showMessageDialog(subjectsFrame, 
+								textdata.getKey("subjectnotselectederror"), 
+								textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
 
 						isLoading=false;
-						
-						selectNotDownloadedFiles();
-						setDownloadButtonsText();
-						
-						activateInterface();
-						
+
+						return;
 					}
-					
-				};
-				
-				thread.execute();
-				
+
+					if(cArchivos==null) {
+
+						isLoading=false;
+
+						return;
+					}
+
+					if(subjectPath==null) askToSelectSubjectFolder();
+					if(subjectPath==null) {
+
+						isLoading=false;
+
+						return;
+					}
+
+					blockInterface();
+
+					faitic.setCancelDownload(false);
+					descargando=true;
+					btnDescargarMarcados.setEnabled(true);
+
+					btnDescargarMarcados.setText(textdata.getKey("btncanceldownload"));
+
+					writeLoadingText("Descargando...");
+
+					SwingWorker thread=new SwingWorker(){
+
+						@Override
+						protected Object doInBackground() throws Exception {
+
+							int nDownloadedFiles=0;
+
+							for(int i=0; i<fileList.size(); i++){
+
+								if(cArchivos[i].isSelected()){
+
+									downloadFileFromList(i);
+
+									writeLoadingText(textdata.getKey("loadingdownloading", ++nDownloadedFiles + ""));
+
+								}
+
+							}
+
+							writeLoadingText(textdata.getKey("loadingdefaulttext"));
+
+							return null;
+						}
+
+						@Override
+						protected void done(){
+
+							isLoading=false;
+
+							selectNotDownloadedFiles();
+							setDownloadButtonsText();
+
+							activateInterface();
+
+							faitic.setCancelDownload(false);
+							btnDescargarMarcados.setEnabled(true);
+							descargando=false;
+
+						}
+
+					};
+
+					thread.execute();
+
+				}
+
 			}
 		});
 		panelOptions.add(btnDescargarMarcados, "2, 2");

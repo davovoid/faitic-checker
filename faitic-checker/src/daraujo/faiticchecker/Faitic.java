@@ -20,6 +20,7 @@
 package daraujo.faiticchecker;
 
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.CookieHandler;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.zip.GZIPInputStream;
 
 public class Faitic {
@@ -48,6 +50,9 @@ public class Faitic {
 	private static CookieManager cookieManager;
 	public static Logger logger;
 	
+	private static boolean cCancelDownload=false;
+	private static Semaphore sCancelDownload=new Semaphore(1);
+	
 	public Faitic(boolean verbose){
 		toDoAtStartup(verbose);
 	}
@@ -56,6 +61,43 @@ public class Faitic {
 		
 		startCookieSession();
 		logger=new Logger(verbose);
+		
+	}
+	
+	protected static boolean getCancelDownload(){
+		
+		try{
+			
+			sCancelDownload.acquire();
+			boolean out=cCancelDownload;
+			sCancelDownload.release();
+			
+			return out;
+			
+		} catch(Exception ex){
+			
+			// Weird. Stop the download just in case
+			
+			ex.printStackTrace();
+			return true;
+			
+		}
+
+	}
+	
+	protected static void setCancelDownload(boolean value){
+
+		try{
+			
+			sCancelDownload.acquire();
+			cCancelDownload=value;
+			sCancelDownload.release();
+		
+		} catch(Exception ex){
+			
+			ex.printStackTrace();
+			
+		}
 		
 	}
 	
@@ -94,6 +136,10 @@ public class Faitic {
 
 		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
 
+		// Time out settings
+		connection.setConnectTimeout(10000);
+		connection.setReadTimeout(10000);
+		
 		connection.setDoOutput(true);
 		connection.setInstanceFollowRedirects(false);
 		connection.setUseCaches(false);
@@ -195,6 +241,8 @@ public class Faitic {
 
 	public static void downloadFile(String strurl, String post, String filename) throws Exception{
 
+		if(getCancelDownload()) return;	// Download cancelled, don't dare to continue
+		
 		lastRequestedURL=strurl;
 		
 		logger.log(Logger.INFO, "Requesting URL: " + strurl);
@@ -215,6 +263,10 @@ public class Faitic {
 
 		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
 
+		// Time out settings
+		connection.setConnectTimeout(10000);
+		connection.setReadTimeout(10000);
+		
 		connection.setDoOutput(true);
 		connection.setInstanceFollowRedirects(false);
 		connection.setUseCaches(false);
@@ -236,26 +288,7 @@ public class Faitic {
 		
 		logger.log(Logger.INFO, "--- Petition sent. Reading ---");
 		
-		InputStream reader;	// Response document
-		
-		reader = connection.getInputStream();
-
-		logger.log(Logger.INFO, " + Saving as: " + filename);
-		
-		FileOutputStream filewriter = new FileOutputStream(filename);
-
-		byte[] temp = new byte[1000];
-		int read = reader.read(temp);
-
-		while (read != -1) {
-			filewriter.write(temp, 0, read);
-			
-			read = reader.read(temp);
-			
-		}
-
-		reader.close();
-		filewriter.close();
+		// Check cookies and if the document redirects
 		
 		int status=connection.getResponseCode();
 		
@@ -281,29 +314,117 @@ public class Faitic {
 			}
 			
 		}
+
+		// Does the document redirect?
 		
 		if (status == HttpURLConnection.HTTP_MOVED_TEMP
 				|| status == HttpURLConnection.HTTP_MOVED_PERM
-					|| status == HttpURLConnection.HTTP_SEE_OTHER){
-				
+				|| status == HttpURLConnection.HTTP_SEE_OTHER){
 
-				logger.log(Logger.INFO, "--- Redirected ---");
-				
-				downloadFile(connection.getHeaderField("Location"),"", filename);
-				
-				return;
-				
+
+			logger.log(Logger.INFO, "--- Redirected ---");
+
+			downloadFile(connection.getHeaderField("Location"),"", filename);
+
+			return;
+
 		}
-			
-			else{
-				
-				logger.log(Logger.INFO, "--- Request finished ---\n");
-				
-				
-				return;
 
-			}
+		// OK, the document doesn't redirect. Download it
 		
+		InputStream reader;	// Response document
+		
+		reader = connection.getInputStream();
+
+		// Let's write the document
+		
+		FileOutputStream filewriter;
+		
+		int tempfilenumber=1;
+		String tempfilename=filename + ".tmp" + tempfilenumber;
+		
+		while(new File(tempfilename).exists()){
+			
+			// Iterates until the file doesn't exist
+			
+			tempfilename=filename + ".tmp" + (++tempfilenumber);
+			
+		}
+		
+		logger.log(Logger.INFO, " + Saving temp as: " + tempfilename);
+		
+		filewriter = new FileOutputStream(tempfilename);
+
+		byte[] temp; int read;
+		
+		try{
+			
+			temp = new byte[1000];
+			read = reader.read(temp);
+
+			while (read != -1 && !getCancelDownload()) {
+				filewriter.write(temp, 0, read);
+				
+				read = reader.read(temp);
+				
+			}
+			
+			// Close the writers
+
+			filewriter.close();
+			reader.close();
+			
+			if(!getCancelDownload()){
+			
+			// Success. Substitute the file
+
+			logger.log(Logger.INFO, " + Renaming temp to: " + filename);
+			
+			File oldfile=new File(filename);
+			File tempfile=new File(tempfilename);
+			
+			boolean deletingsuccess=true;
+			
+			if(oldfile.exists()){
+				if(!oldfile.isDirectory()){
+					
+					deletingsuccess=oldfile.delete();
+					
+				} else{
+					
+					deletingsuccess=false;
+					
+				}
+			}
+			
+			if(deletingsuccess){
+				
+				// Correctly deleted
+				
+				tempfile.renameTo(oldfile);
+				
+			}
+			
+			} else{
+				
+				logger.log(Logger.ERROR, "--- Download cancelled ---\n");
+				
+			}
+			
+		} catch(Exception ex){
+			
+			ex.printStackTrace();
+			
+			try{filewriter.close();} catch(Exception ex2){ex2.printStackTrace();}
+			try{reader.close();} catch(Exception ex2){ex2.printStackTrace();}
+			
+		}
+		
+		logger.log(Logger.INFO, "--- Request finished ---\n");
+
+
+		return;
+
 	}
 
 	public static String getRedirectedURL(String strurl, String post) throws Exception{
@@ -328,6 +449,10 @@ public class Faitic {
 
 		HttpURLConnection connection= (HttpURLConnection) url.openConnection();
 
+		// Time out settings
+		connection.setConnectTimeout(10000);
+		connection.setReadTimeout(10000);
+		
 		connection.setDoOutput(true);
 		connection.setInstanceFollowRedirects(false);
 		connection.setUseCaches(false);
