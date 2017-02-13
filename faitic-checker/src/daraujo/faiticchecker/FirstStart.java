@@ -88,7 +88,7 @@ public class FirstStart extends JDialog {
 	
 	private static String appdatapath, relativepath;
 	
-	private static void updateWindowText(){
+	private void updateWindowText(){
 		
 		btnNext.setText(textdata.getKey("nextbutton"));
 		btnCancel.setText(textdata.getKey("cancelbutton"));
@@ -105,6 +105,8 @@ public class FirstStart extends JDialog {
 		rSaveRelative.setText(textdata.getKey("relativecheck"));
 		
 		lblWelcome.setText(textdata.getKey("welcome"));
+		
+		setTitle(textdata.getKey("firststarttitle"));
 		
 	}
 	
@@ -190,6 +192,8 @@ public class FirstStart extends JDialog {
 	 * Create the dialog.
 	 */
 	public FirstStart() {
+		setTitle("Faicheck - Bienvenido");
+		setIconImage(Toolkit.getDefaultToolkit().getImage(FirstStart.class.getResource("/daraujo/faiticchecker/icon.png")));
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowOpened(WindowEvent arg0) {

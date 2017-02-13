@@ -20,6 +20,15 @@
 package daraujo.faiticchecker;
 
 import java.awt.EventQueue;
+import java.io.File;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Timer;
 
 import javax.swing.JDialog;
 import javax.swing.UIManager;
@@ -28,6 +37,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 public class MainClass {
 
 	protected static boolean verbose=false;
+	
+	protected static boolean detectupdateenabled=true;
 
 	/**
 	 * Launch the application.
@@ -35,6 +46,139 @@ public class MainClass {
 		
 	public static void main(String[] args) {
 		
+		// Get args
+		
+		int i=0;
+		
+		while(i<args.length){
+			
+			String arg=args[i];
+			
+			if(arg.toLowerCase().equals("--verbose"))
+				verbose=true;
+			
+			else if(arg.toLowerCase().equals("--update")){
+				
+				// Updating. Copy one file to the other
+				String from=args[i+1];	// New
+				String to=args[i+2];	// Previous
+				i+=2;
+				
+				System.out.println(" - Copying file " + from + " to " + to);
+				
+				// Check if the file can be written
+				int iteraciones=10;
+				boolean isWritable=false;
+				
+				try {
+
+					while(!new File(to).canWrite() && iteraciones>0){
+
+						System.out.println(" ERROR: no write permission to the destination. Waiting 1 second...");
+						
+						Timer timer=new Timer();
+
+						timer.wait(1000);	// Wait for the next try
+
+						iteraciones--;
+
+					}
+
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(new File(to).canWrite()){
+					
+					// Writable, copy the file
+					
+					try {
+						
+						Files.copy(new File(from).toPath(), new File(to).toPath(), StandardCopyOption.REPLACE_EXISTING);
+						
+						System.out.println(" File copied.");
+
+						String toexecute=to;
+						
+						System.out.println(" - Executing " + toexecute);
+						
+						ProcessBuilder procUpdater=new ProcessBuilder();
+						
+						ArrayList<String> listaComandos=new ArrayList<String>();
+						listaComandos.add("java");
+						listaComandos.add("-jar");
+						listaComandos.add(toexecute);
+						listaComandos.add("--deleteupdate");
+						listaComandos.add(from);
+						procUpdater.command(listaComandos);
+						
+						try {
+							
+							procUpdater.start();
+							
+							return;
+							
+						} catch (IOException e) {
+
+							e.printStackTrace();
+							
+						}
+						
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
+				}
+				
+			} else if(arg.toLowerCase().equals("--deleteupdate")){
+				
+				String todelete=args[i+1];
+				i++;
+				
+				detectupdateenabled=false;
+				
+				System.out.println(" - Deleting update from " + todelete);
+				
+				// Check if the file can be written
+				int iteraciones=10;
+				boolean isWritable=false;
+				
+				try {
+
+					while(!new File(todelete).canWrite() && iteraciones>0){
+
+						System.out.println(" ERROR: no write permission to the destination. Waiting 1 second...");
+						
+						Timer timer=new Timer();
+
+						timer.wait(1000);	// Wait for the next try
+
+						iteraciones--;
+
+					}
+
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				if(new File(todelete).canWrite()){
+					
+					if(new File(todelete).exists()) new File(todelete).delete();
+					
+					System.out.println(" Done.");
+					
+				}
+					
+				
+			}
+			
+			
+			i++;
+			
+		}
+
 		// Set UI
 		
 		try {
@@ -45,15 +189,6 @@ public class MainClass {
 				| IllegalAccessException | UnsupportedLookAndFeelException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-		}
-		
-		// Get args
-		
-		for(String arg : args){
-						
-			if(arg.toLowerCase().equals("--verbose"))
-				verbose=true;
-						
 		}
 		
 		// Open app
@@ -76,9 +211,23 @@ public class MainClass {
 					
 						// If it is correctly configured
 						
-						LoginGUI window = new LoginGUI(verbose);
-						window.loginFrame.setVisible(true);
-					
+						// Check if there is waiting an update
+						
+						/*if(new File(ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/update.jar")).exists() && LoginGUI.isTheJarPathAFile() && detectupdateenabled){
+							
+							// An update waiting, do your best :3
+							
+							
+							
+						} else{
+						*/
+							// Open GUI
+							
+							LoginGUI window = new LoginGUI(verbose);
+							window.loginFrame.setVisible(true);
+						
+						//}
+						
 					}
 					
 				} catch (Exception e) {

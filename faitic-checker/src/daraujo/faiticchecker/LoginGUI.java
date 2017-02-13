@@ -34,6 +34,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.List;
 import java.awt.RenderingHints;
 
 import com.jgoodies.forms.layout.FormLayout;
@@ -51,6 +52,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JTextField;
 import javax.swing.JPasswordField;
 import javax.swing.JButton;
+import javax.swing.SwingWorker;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -59,11 +61,16 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.font.TextAttribute;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Semaphore;
 import java.awt.Cursor;
 import java.awt.Toolkit;
 
@@ -72,6 +79,8 @@ import javax.swing.JCheckBox;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 import java.awt.FlowLayout;
+
+import javax.swing.JTextPane;
 
 public class LoginGUI {
 
@@ -86,6 +95,9 @@ public class LoginGUI {
 	protected static Faitic faitic;
 	protected static String mainDocument;
 	protected static Settings settings;
+	protected static Updater updater;
+	
+	private static String updateJar=null;
 	
 	protected static JFrame loginFrame;
 	
@@ -107,6 +119,8 @@ public class LoginGUI {
 	
 	private static JCheckBox cRememberUsename, cRememberPassword;
 	
+	private static JButton btnLogin;
+	
 	private static String username;
 
 	private static ActionListener enterPressed = new ActionListener() {
@@ -116,20 +130,163 @@ public class LoginGUI {
 	};
 	private JPanel panel_1;
 	private JLabel lblConfigurationFolder;
+	private static JPanel panelUpdater;
+	private static JLabel lblUpdateHeader;
+	private static JTextPane txtUpdate;
+	private static JLabel lblMoreInfo;
+	private static JLabel lblUpdate;
+	
+	private static Semaphore semLang=new Semaphore(1);
+	
+	protected static String getJarPath(){
+
+		try{
+			
+			String jarPath=URLDecoder.decode(MainClass.class.getProtectionDomain().getCodeSource().getLocation().getPath(),"UTF-8");
+
+			return jarPath;
+			
+		} catch(Exception ex){
+			
+			ex.printStackTrace();
+			
+		}
+		
+		// If there is an error
+		return null;
+
+	}
+	
+	protected static boolean isTheJarPathAFile(){
+		
+		String jarPath=getJarPath();
+		
+		if(jarPath==null) return false;
+		
+		return jarPath.lastIndexOf("\\") < jarPath.length()-1 && jarPath.lastIndexOf("/") < jarPath.length() -1;
+		
+	}
+	
+	private static void showUpdates(){
+		
+		SwingWorker trabajador=new SwingWorker(){
+
+			@Override
+			protected Updater doInBackground() {
+
+				try {
+					
+					updater=new Updater();
+					updater.fillUpdateInfo(getLanguage());
+					
+				} catch (Exception e) {
+					
+					e.printStackTrace();
+					updater=null;
+					
+				}
+				
+				return null;
+				
+			}
+			
+			@Override
+			protected void done(){
+				
+				try {
+					
+					if(updater==null){
+						
+						panelUpdater.setVisible(false);
+						return;
+						
+					}
+					
+					// Testing purposes
+
+					System.out.println(updater.sha256);
+					System.out.println(updater.downloadname);
+					System.out.println(updater.currentversion);
+					System.out.println(updater.urlmoreinfo);
+					System.out.println(updater.downloadurl);
+					System.out.println(updater.description);
+					
+					System.out.println(updater.isThereANewVersion());
+				
+					// Real thing
+					
+					if(updater.isThereANewVersion() && isTheJarPathAFile()){
+						
+						lblUpdateHeader.setText("Faicheck v." + updater.currentversion + " is available (You have v." + About.VERSION + ")");
+						txtUpdate.setText(updater.description + "\n\nMore info: " + updater.urlmoreinfo);
+						panelUpdater.setVisible(true);
+						
+					} else{
+						
+						panelUpdater.setVisible(false);
+						
+					}
+					
+				} catch (Exception e) {
+					
+					e.printStackTrace();
+					panelUpdater.setVisible(false);
+					
+				}
+				
+			}
+			
+			
+			
+		};
+		
+		
+		trabajador.execute();
+
+		
+	}
 	
 	private static void setLanguage(String lang){
 		
-		language=new Locale(lang);
-		textdata=new TextData(language);
+		try{
 		
-		if(settings != null) settings.jsonConf.put("Language", lang);
+			semLang.acquire();
+		
+			language=new Locale(lang);
+			textdata=new TextData(language);
+		
+			if(settings != null) settings.jsonConf.put("Language", lang);
 
+			semLang.release();
+		
+		} catch(Exception ex){
+			
+			ex.printStackTrace();
+			
+		}
+		
 	}
 	
 	private static String getLanguage(){
 		
-		return language.getLanguage();
+		try{
 		
+			semLang.acquire();
+		
+			String output=language.getLanguage();
+			
+			semLang.release();
+			
+			return output;
+		
+		} catch(Exception ex){
+			
+			ex.printStackTrace();
+			
+		}
+		
+		return "";
+
 	}
 	
 	private static void updateLanguageMenu(){
@@ -278,6 +435,39 @@ public class LoginGUI {
 		initialize();
 	}
 
+	private void toDoOnClosing(){
+
+		settings.saveSettings();
+
+		loginFrame.dispose();
+		
+		if(updateJar!=null){
+			
+			ProcessBuilder procUpdater=new ProcessBuilder();
+			
+			ArrayList<String> listaComandos=new ArrayList<String>();
+			listaComandos.add("java");
+			listaComandos.add("-jar");
+			listaComandos.add(updateJar);
+			listaComandos.add("--update");
+			listaComandos.add(updateJar);		// New one
+			listaComandos.add(getJarPath());	// Previous (Current) one
+			
+			procUpdater.command(listaComandos);
+			try {
+				
+				procUpdater.start();
+				
+			} catch (IOException e) {
+
+				e.printStackTrace();
+				
+			}
+			
+		}
+		
+	}
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -287,11 +477,7 @@ public class LoginGUI {
 		loginFrame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent arg0) {
-
-				settings.saveSettings();
-				
-				loginFrame.dispose();
-				
+				toDoOnClosing();
 			}
 			@Override
 			public void windowOpened(WindowEvent arg0) {
@@ -371,6 +557,10 @@ public class LoginGUI {
 				// Show config folder
 				lblConfigurationFolder.setText(textdata.getKey("configfolder", ClassicRoutines.getUserDataPath(true)));
 				
+				// Faicheck updater. Should be done as the last thing
+				System.out.println("My JAR file: " + getJarPath());
+				if(isTheJarPathAFile()) showUpdates();
+				
 			}
 		});
 		loginFrame.getContentPane().setBackground(Color.WHITE);
@@ -422,6 +612,8 @@ public class LoginGUI {
 				FormFactory.MIN_ROWSPEC,
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,
 				FormFactory.MIN_ROWSPEC,
+				FormFactory.UNRELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
 				RowSpec.decode("default:grow(3)"),
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.UNRELATED_GAP_ROWSPEC,
@@ -644,7 +836,7 @@ public class LoginGUI {
 		panel_2.setOpaque(false);
 		panelLogin.add(panel_2, "2, 10, 3, 1, fill, fill");
 		
-		JButton btnLogin = new JButton(textdata.getKey("btnlogin"));
+		btnLogin = new JButton(textdata.getKey("btnlogin"));
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
@@ -693,22 +885,162 @@ public class LoginGUI {
 		panelStatus.setLayout(new BorderLayout(0, 0));
 		
 		lblLoginStatus = new JLabel("Error text");
+		panelStatus.add(lblLoginStatus, BorderLayout.CENTER);
 		lblLoginStatus.setHorizontalAlignment(SwingConstants.CENTER);
 		lblLoginStatus.setMinimumSize(new Dimension(85, 45));
-		panelStatus.add(lblLoginStatus);
+		
+		panelUpdater = new JPanel(){
+
+			@Override
+			public void paintComponent(Graphics g){
+
+				//super.paintComponent(g);
+				
+				Color borderColor=super.getBackground();
+				
+
+				for(int i=0; i<8; i++){
+					
+					g.setColor(new Color(200,200,200,200*(i+1)/8));
+					
+					if(i%3==0){
+						g.drawLine(i/3, 7+i/3, super.getWidth()-i, 7+i/3);	// top
+						g.drawLine(i/3, 7+i/3+1, i/3, super.getHeight()-i-1);	// left
+					}
+
+					g.drawLine(super.getWidth()-i, 7+i/3+1, super.getWidth()-i, super.getHeight()-i-1);	// Right
+					g.drawLine(i/3, super.getHeight()-i, super.getWidth()-i, super.getHeight()-i);	// Bottom
+					
+				}
+
+				g.setColor(borderColor);
+				g.drawRect(3, 10, super.getWidth()-11, super.getHeight()-11-7);
+				g.drawRect(3, 10, super.getWidth()-12, super.getHeight()-12-7);
+				
+				
+			}
+
+		};
+		panelUpdater.setBackground(Color.LIGHT_GRAY);
+		panelUpdater.setVisible(false);
+		panelUpdater.setOpaque(false);
+		panelWithEverything.add(panelUpdater, "2, 6, fill, fill");
+		panelUpdater.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.GLUE_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				ColumnSpec.decode("12dlu"),},
+			new RowSpec[] {
+				RowSpec.decode("12dlu"),
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.LINE_GAP_ROWSPEC,
+				RowSpec.decode("pref:grow"),
+				FormFactory.LINE_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				RowSpec.decode("11dlu"),}));
+		
+		lblUpdateHeader = new JLabel("Update header");
+		lblUpdateHeader.setHorizontalAlignment(SwingConstants.CENTER);
+		panelUpdater.add(lblUpdateHeader, "2, 2, 4, 1");
+		
+		txtUpdate = new JTextPane();
+		txtUpdate.setEditable(false);
+		txtUpdate.setVisible(false);
+		panelUpdater.add(txtUpdate, "2, 4, 4, 1, fill, fill");
+		
+		lblMoreInfo = new JLabel("More info");
+		lblMoreInfo.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				((JLabel)arg0.getComponent()).setText(txtUpdate.isVisible() ? "More info" : "Less info");
+				panelLogin.setVisible(txtUpdate.isVisible());
+				txtUpdate.setVisible(!txtUpdate.isVisible());
+				
+			}
+		});
+		lblMoreInfo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblMoreInfo.setForeground(new Color(0,110,198,255));
+		panelUpdater.add(lblMoreInfo, "3, 6");
+		
+		lblUpdate = new JLabel("Update now");
+		lblUpdate.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(!arg0.getComponent().isEnabled()) return;
+				
+				btnLogin.setEnabled(false);
+				
+				((JLabel) arg0.getComponent()).setText("In process...");
+				
+				arg0.getComponent().setEnabled(false);
+				
+				SwingWorker trabajador = new SwingWorker(){
+
+					@Override
+					protected String doInBackground() throws Exception {
+						
+						return updater.updateMyself();
+					}
+					
+					@Override
+					protected void done(){
+						
+
+						String updateResult=null;
+						
+						try {
+							
+							updateResult = (String) get();
+							
+						} catch (InterruptedException | ExecutionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						if(updateResult!=null){
+							
+							// There is the jar path
+							
+							updateJar=updateResult;
+							
+							//toDoOnClosing();
+							lblUpdate.setText("Done. Restart to update");
+							
+						} else{
+
+							lblUpdate.setText("Error updating");
+							
+						}
+						
+						
+					}
+					
+				};
+				
+				trabajador.execute();
+				
+			}
+		});
+		lblUpdate.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblUpdate.setForeground(new Color(0,110,198,255));
+		panelUpdater.add(lblUpdate, "5, 6");
 		
 		lblConfigurationFolder = new JLabel("Configuration folder:");
 		lblConfigurationFolder.setForeground(Color.GRAY);
 		lblConfigurationFolder.setHorizontalAlignment(SwingConstants.CENTER);
-		panelWithEverything.add(lblConfigurationFolder, "1, 6, 3, 1");
+		panelWithEverything.add(lblConfigurationFolder, "2, 8");
 		
 		JLabel lblAbout = new JLabel(textdata.getKey("appbriefdescription"));
-		panelWithEverything.add(lblAbout, "2, 8");
+		panelWithEverything.add(lblAbout, "2, 10");
 		lblAbout.setForeground(Color.GRAY);
 		lblAbout.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		JLabel lblAcercaDe = new JLabel(textdata.getKey("btnabout") + "     ");
-		panelWithEverything.add(lblAcercaDe, "3, 8");
+		panelWithEverything.add(lblAcercaDe, "3, 10");
 		lblAcercaDe.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblAcercaDe.setForeground(new Color(0,110,198,255));
 		lblAcercaDe.setHorizontalAlignment(SwingConstants.RIGHT);
