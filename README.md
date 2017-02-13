@@ -4,7 +4,7 @@
 
 Faicheck is a Java based NON OFFICIAL application to manage the *Faitic Platform* (A tool from the *Universidad de Vigo*), This application allows to log in the Faitic account, and offers the user the possibility of listing and downloading the subject files. It also counts on an intelligent system to select several files or simply the ones that have not been downloaded yet.
 
-The application was also tested to work on Windows and Linux (It was not tested on Mac OS X yet).
+The application was also tested to work on Windows, Mac OS X and Linux.
 
 If you are looking for the ready-to-use program go to https://github.com/davovoid/faitic-checker/releases and download the latest *Jar* available so as to get the latest version. You will require *Java* to execute the program.
 
@@ -12,7 +12,7 @@ If you are looking for the ready-to-use program go to https://github.com/davovoi
 
 Faicheck es una aplicación NO OFICIAL basada en Java para gestionar la *Plataforma Faitic* (Una herramienta de la *Universidad de Vigo*). Esta aplicación permite iniciar sesión en la cuenta de Faitic y ofrece al usuario la posibilidad de listar y descargar los archivos pertenecientes a las distintas asignaturas. Cuenta también con un sistema inteligente para seleccionar varios archivos o incluso solo aquellos que aún no hayan sido descargados.
 
-La aplicación ha sido probada en Windows y Linux (Todavía no ha sido probada en Mac OS X).
+La aplicación ha sido probada en Windows, Mac OS X y Linux.
 
 Si buscas el programa preparado para su uso entra en https://github.com/davovoid/faitic-checker/releases y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
 
@@ -29,7 +29,7 @@ This project was compiled using Eclipse Luna Service Release 2 (4.4.2) (See http
 Yes.
 
  * `--verbose` shows http petitions with their url, post data and redirections at the program log. CAUTION: using this argument implies that your password would also be visible in the log. Use it at your own risk, and only if you know what you are doing!
- 
+
 By now there are no more arguments to be given, as the procedures would be available by using the Graphical User Interface.
 
 # License and attributions
@@ -71,10 +71,14 @@ Authors: Yidong Fang, Chris Nokleberg, Dave Hughes.
 
 Consult the webpage for more information about the project.
 
-## Faitic Platform
+# Faitic Platform
 
-This program uses as server the *Faitic Platform* (faitic.uvigo.es), property of the *'Servicio de Teledocencia'* from the *'Universidad de Vigo'* (uvigo.gal). All the rights from that platform are reserved to that entity, and the usage of that platform (Including, but not limited to, the personal data usage) are subjected to the terms and conditions from the *Faitic Platform*.
+### IMPORTANT NOTE: The statements listed below as the 'Faitic Platform' section may change without confirmation. The user is responsible of periodically checking these statements.
 
-In order to connect to the *Faitic Platform*, *Faicheck* will request the user name and the password to connect to that platform, and would never send the personal data to anything else than the *Faitic Platform* from the *'Universidad de Vigo'*. Faicheck will only save this information on the local machine if it is requested by the user, as part of the *Remember username* and *Remember password* options. Regardless, *Faicheck* will *never* be responsible in any way about any kind of data loss. See the *GNU General Public License* for the details.
+This program uses as server the Faitic platform (faitic.uvigo.es), property of the 'Servicio de Teledocencia' from the 'Universidad de Vigo' (uvigo.gal). All the rights from that platform are reserved to that entity, and the usage of that platform (Including, but not limited to, the personal data usage), as well as the Faitic platform contents, are responsibility of the Faitic platform and subjected to the terms and conditions from the Faitic Platform.
 
-The *'Faicheck'* project and program is not related with the *'Universidad de Vigo'* nor the *'Servicio de Teledocencia'* nor the *'Faitic Platform'*.
+In order to connect to the Faitic Platform, Faicheck will request the user name and the password to connect to that platform, and would never send the personal data to anything else than the Faitic Platform from the 'Universidad de Vigo'. Faicheck will only save this information on the local machine if it is requested by the user, as part of the Remember username and Remember password options. Regardless, Faicheck will never be responsible in any way about any kind of data loss. See the GNU General Public License for the details.
+
+In order to check for updates, this application may attempt to download a JSON static database from 'https://davovoid.github.io/update-v1.json' (Using a GET petition without URL parameters), and the application may download the files listed in that JSON database so as to update Faicheck. The automatic update check is by default activated, but the updates download and installation are triggered by the user, and the automatic update check can be turned off in the settings menu from the login screen.
+
+The 'Faicheck' project and program is not related with the 'Universidad de Vigo' nor the 'Servicio de Teledocencia' nor the 'Faitic Platform'.
