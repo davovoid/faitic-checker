@@ -1154,7 +1154,7 @@ public class LoginGUI {
 		lblConfigurationFolder = new JLabel("Configuration folder:");
 		lblConfigurationFolder.setForeground(Color.GRAY);
 		lblConfigurationFolder.setHorizontalAlignment(SwingConstants.CENTER);
-		panelWithEverything.add(lblConfigurationFolder, "2, 9");
+		panelWithEverything.add(lblConfigurationFolder, "1, 9, 3, 1");
 		
 		JLabel lblAbout = new JLabel(textdata.getKey("appbriefdescription"));
 		panelWithEverything.add(lblAbout, "2, 11");

@@ -880,15 +880,17 @@ public class Faitic {
 			
 			String urlBase = platformURL.substring(0, untilWhenUrlToUse);
 			String urlToUse =  urlBase + "/document/document.php";
-			list=listDocumentsClarolineInternal(urlToUse,list, urlBase);	// Recursive
+			listDocumentsClarolineInternal(urlToUse,list, urlBase);	// Recursive
 			
 		}
+		
+		deleteRepeatedFiles(list);
 		
 		return list;
 		
 	}
 	
-	private static ArrayList<String[]> listDocumentsClarolineInternal(String urlToAnalyse, ArrayList<String[]> list, String urlBase) throws Exception{
+	private static void listDocumentsClarolineInternal(String urlToAnalyse, ArrayList<String[]> list, String urlBase) throws Exception{
 
 		String document;
 		
@@ -898,11 +900,11 @@ public class Faitic {
 			
 		} catch(Exception ex){
 			
-			return list;
+			return;
 			
 		}
 		
-		if(!urlToAnalyse.equals(lastRequestedURL)) return list;		// If the page redirected us
+		if(!urlToAnalyse.equals(lastRequestedURL)) return;		// If the page redirected us
 		
 		// Check for documents...
 		
@@ -961,156 +963,8 @@ public class Faitic {
 		
 		
 		
-		return list;
-		
 	}
-//	
-//	public static ArrayList<String[]> listDocumentsMoodle(String platformURL) throws Exception{
-//		
-//		/*
-//		 * 0 -> Path (incl. filename)
-//		 * 1 -> URL to file
-//		 */
-//		
-//		ArrayList<String[]> list=new ArrayList<String[]>();
-//		
-//		int untilWhenUrlToUse= platformURL.indexOf("/", platformURL.indexOf("/moodle")+1);
-//		
-//		if(untilWhenUrlToUse>=0){
-//			
-//			String urlBase = platformURL.substring(0, untilWhenUrlToUse);
-//			String urlGetMethod=platformURL.indexOf("?") >= 0 ? platformURL.substring(platformURL.indexOf("?") + 1, platformURL.length()) : "";
-//			String urlForResources= urlBase + "/mod/resource/index.php" + (urlGetMethod.length()>0 ? "?" + urlGetMethod : "");
-//			
-//			String resourcePage=requestDocument(urlForResources, "");
-//			
-//			// Resources page, get the list of lists. Yes. The list of lists. Because there are several lists :3
-//			
-//			int bodyStart=resourcePage.indexOf("<!-- END OF HEADER -->");
-//			
-//			int bodyEnd=resourcePage.indexOf("<!-- START OF FOOTER -->", bodyStart);
-//			
-//			if(bodyStart >=0 && bodyEnd > bodyStart){
-//				
-//				String whereToSearchForLists=resourcePage.substring(bodyStart, bodyEnd);
-//				
-//				//System.out.println(whereToSearchForLists);
-//				
-//				int listURLStart=whereToSearchForLists.indexOf("view.php?");
-//				int listURLEnd=whereToSearchForLists.indexOf("\"", listURLStart);
-//				
-//				while(listURLStart>=0 && listURLStart<listURLEnd){
-//					
-//					String urlList=urlBase + "/mod/resource/" + whereToSearchForLists.substring(listURLStart, listURLEnd);
-//					urlList=urlList.replace("&amp;", "&");
-//					
-//					int listNameStart=whereToSearchForLists.indexOf(">", listURLStart);
-//					int listNameEnd=whereToSearchForLists.indexOf("</a>", listNameStart);
-//					
-//					if(listNameStart<0 || listNameEnd<=listNameStart) return list;
-//					
-//					String listName=whereToSearchForLists.substring(listNameStart+1, listNameEnd);
-//					
-//					listDocumentsMoodleInternal(urlList, list, urlBase, listName);
-//					
-//					// For next loop
-//					
-//					listURLStart=whereToSearchForLists.indexOf("view.php?", listURLEnd);
-//					listURLEnd=whereToSearchForLists.indexOf("\"", listURLStart);
-//					
-//				}
-//				
-//			}
-//			
-//			//String urlToUse =  urlBase + "/document/document.php";
-//			//list=listDocumentsClarolineInternal(urlToUse,list, urlBase);	// Recursive
-//			
-//		}
-//		
-//		return list;
-//		
-//	}
-//	
-//	private static ArrayList<String[]> listDocumentsMoodleInternal(String urlToUse, ArrayList<String[]> list, String urlBase, String listName) throws Exception{
-//		
-//		//System.out.println("---Accessed---");
-//
-//		String resourcePage;
-//		
-//		try{
-//			
-//			resourcePage=requestDocument(urlToUse, "");
-//			
-//		} catch(Exception ex){
-//			
-//			return list;
-//			
-//		}
-//		
-//		if(!urlToUse.equals(lastRequestedURL)) return list;		// If the page redirected us
-//		
-//		// The list of files from this resource
-//		
-//		int bodyStart=resourcePage.indexOf("<!-- END OF HEADER -->");
-//		
-//		int bodyEnd=resourcePage.indexOf("<!-- START OF FOOTER -->", bodyStart);
-//		
-//		if(bodyStart >=0 && bodyEnd > bodyStart){
-//			
-//			String whereToSearch=resourcePage.substring(bodyStart, bodyEnd);
-//			
-//			//System.out.println(whereToSearch);
-//			
-//			// First files
-//			
-//			int URLStart=whereToSearch.indexOf(urlBase + "/file.php/");
-//			int URLEnd=whereToSearch.indexOf("\"", URLStart);
-//			
-//			while(URLStart>=0 && URLStart<URLEnd){
-//				
-//				String urlToFile=whereToSearch.substring(URLStart, URLEnd);
-//				urlToFile=urlToFile.replace("&amp;", "&");
-//				
-//				int filePathStart=urlToFile.indexOf("/", (urlBase + "/file.php/").length()+1);
-//				
-//				String filePath=urlToFile.substring(filePathStart, urlToFile.length());
-//				
-//				list.add(new String[]{URLDecoder.decode(filePath, "iso-8859-1"),urlToFile});	// Added to list
-//				
-//				// For next loop
-//				
-//				URLStart=whereToSearch.indexOf(urlBase + "/file.php/", URLEnd);
-//				URLEnd=whereToSearch.indexOf("\"",URLStart);
-//				
-//			}
-//			
-//			// Then directories
-//			
-//			URLStart=whereToSearch.indexOf("view.php?");
-//			URLEnd=whereToSearch.indexOf("\"", URLStart);
-//			
-//			while(URLStart>=0 && URLStart<URLEnd){
-//				
-//				String urlList=urlBase + "/mod/resource/" + whereToSearch.substring(URLStart, URLEnd);
-//				urlList=urlList.replace("&amp;", "&");
-//				
-//				listDocumentsMoodleInternal(urlList, list, urlBase, listName);
-//				
-//				// For next loop
-//				
-//				URLStart=whereToSearch.indexOf("view.php?", URLEnd);
-//				URLEnd=whereToSearch.indexOf("\"", URLStart);
-//				
-//			}
-//			
-//		}
-//		
-//		
-//		return list;
-//		
-//	}
-//	
-	
+
 
 	public static ArrayList<String[]> listDocumentsMoodle(String platformURL) throws Exception{
 		
@@ -1133,12 +987,14 @@ public class Faitic {
 			
 		}
 		
+		deleteRepeatedFiles(list);
+		
 		return list;
 		
 	}
 	
 
-	private static ArrayList<String[]> listDocumentsMoodleInternal(String urlToUse, ArrayList<String[]> list, String urlBase) throws Exception{
+	private static void listDocumentsMoodleInternal(String urlToUse, ArrayList<String[]> list, String urlBase) throws Exception{
 		
 		//System.out.println("---Accessed---");
 
@@ -1150,11 +1006,11 @@ public class Faitic {
 			
 		} catch(Exception ex){
 			
-			return list;
+			return;
 			
 		}
 		
-		if(!urlToUse.equals(lastRequestedURL)) return list;		// If the page redirected us
+		if(!urlToUse.equals(lastRequestedURL)) return;		// If the page redirected us
 		
 		// The list of files from this resource
 
@@ -1222,17 +1078,6 @@ public class Faitic {
 
 					String realname="undefined";
 
-					/*int questionMarkIndex=realurl.indexOf("?");
-					int lastDivider=realurl.substring(0, questionMarkIndex >=0 ? questionMarkIndex : realurl.length()).lastIndexOf("/");	// No error because it starts at 0
-
-					if(lastDivider>=0){
-
-						// Got a name
-
-						realname=URLDecoder.decode(realurl.substring(lastDivider+1, questionMarkIndex>=0 ? questionMarkIndex : realurl.length()),"UTF-8");
-
-					}*/
-
 					int filePathStart=realurl.indexOf("/", (urlBase + "/file.php/").length()+1);
 					
 					if(filePathStart>=0){
@@ -1260,7 +1105,7 @@ public class Faitic {
 		}
 
 
-		return list;
+		
 
 	}
 
@@ -1286,12 +1131,14 @@ public class Faitic {
 			
 		}
 		
+		deleteRepeatedFiles(list);
+		
 		return list;
 		
 	}
 	
 
-	private static ArrayList<String[]> listDocumentsMoodle2Internal(String urlToUse, ArrayList<String[]> list, String urlBase, String folder) throws Exception{
+	private static void listDocumentsMoodle2Internal(String urlToUse, ArrayList<String[]> list, String urlBase, String folder) throws Exception{
 		
 		//System.out.println("---Accessed---");
 
@@ -1303,11 +1150,11 @@ public class Faitic {
 			
 		} catch(Exception ex){
 			
-			return list;
+			return;
 			
 		}
 		
-		if(!urlToUse.equals(lastRequestedURL)) return list;		// If the page redirected us
+		if(!urlToUse.equals(lastRequestedURL)) return;		// If the page redirected us
 		
 		// The list of files from this resource
 		
@@ -1388,9 +1235,39 @@ public class Faitic {
 			
 		}
 		
-		
-		return list;
-		
 	}
 
+	protected static void deleteRepeatedFiles(ArrayList<String[]> list){	// Deletes files with same url
+		
+		// Make a copy of list
+		
+		int pos=0;
+		
+		while(pos<list.size()){	// From 0 to size
+			
+			String[] element=list.get(pos);	// To compare
+			
+			int i=pos+1;
+			
+			while(i<list.size()){	// From pos+1 to size
+				
+				// 1 is url
+				if(element[1].equals(list.get(i)[1])){
+					
+					list.remove(i);	// Delete element
+					i--;			// The i index must be reduced
+					
+					//out.set(i, new String[]{"Repeated:" + out.get(i)[0],out.get(i)[1]});
+					
+				}
+				
+				i++;
+			}
+			
+			pos++;
+			
+		}
+	
+	}
+	
 }
