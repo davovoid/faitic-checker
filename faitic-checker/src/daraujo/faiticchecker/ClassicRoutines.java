@@ -21,8 +21,10 @@ package daraujo.faiticchecker;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
 
 public class ClassicRoutines {
 
@@ -33,10 +35,15 @@ public class ClassicRoutines {
 
 	public final static String APPNAME="faitic_checker";
 	
-
+	public static boolean isPortable(){
+		
+		return getUserDataPath(true).equals(getUserDataPath(true,true));
+		
+	}
+	
 	public static String getUserDataPath(boolean useMyDataPath){
 
-		String out=getUserDataPath(true,true);
+		String out=getUserDataPath(useMyDataPath,true);
 		
 		if(new File(out).exists()){
 			
@@ -44,7 +51,7 @@ public class ClassicRoutines {
 			
 		} else{
 			
-			return getUserDataPath(true,false);
+			return getUserDataPath(useMyDataPath,false);
 			
 		}
 		
@@ -65,6 +72,73 @@ public class ClassicRoutines {
 		
 	}
 	
+	public static String getJarPathFolder(){
+		
+		String jarPath=LoginGUI.getJarPath();
+		return jarPath.substring(0, jarPath.lastIndexOf(cpath("/")));
+		
+	}
+	
+	public static String getRelativePath(String path, String folderAsReference){
+		
+		String divider=cpath("/");
+		
+		int indexofdivider=folderAsReference.lastIndexOf(divider) == folderAsReference.length()-1 ? folderAsReference.lastIndexOf(divider) : folderAsReference.length();
+		// if it ends with a /, it is taken as the last /, if not everything is taken (/ in length())
+		
+		StringBuffer out=new StringBuffer();
+		
+		while(indexofdivider>=0){
+			
+			String result=folderAsReference.substring(0, indexofdivider) + divider;	// going to parents. Path WITH / !!!
+			
+			if(path.indexOf(result)==0){
+				
+				// It starts with the same string, that means it is relative to this folder
+				
+				out.append(path.substring(result.length(), path.length()));
+				
+				return out.toString();	// Ready
+				
+			} else{
+				
+				out.append("../");
+				
+			}
+			
+			indexofdivider=folderAsReference.lastIndexOf(divider, indexofdivider-1);
+			
+		}
+		
+		return path;	// No relative found
+		
+	}
+	
+	public static String getAbsolutePath(String relPath, String folderAsReference){
+		
+
+		String divider=cpath("/");
+		
+		int indexofdivider=folderAsReference.lastIndexOf(divider) == folderAsReference.length()-1 ? folderAsReference.lastIndexOf(divider) : folderAsReference.length();
+		// if it ends with a /, it is taken as the last /, if not everything is taken (/ in length())
+		
+		String folderCorrected=folderAsReference.substring(0, indexofdivider) + divider;	// going to parents. Path WITH / !!!
+		
+		File path=new File(folderCorrected + relPath);
+		
+		try {
+			
+			return path.getCanonicalPath();
+			
+		} catch (IOException e) {
+
+			e.printStackTrace();
+			return path.getAbsolutePath();
+			
+		}
+		
+	}
+	
 	public static String getUserDataPath(boolean useMyDataPath, boolean portable){
 
 		String out;
@@ -76,16 +150,16 @@ public class ClassicRoutines {
 			if (OS.contains("WIN")) out=cpath(System.getenv("APPDATA") + "/." + APPNAME);
 			else if (OS.contains("MAC")) out=cpath(System.getProperty("user.home") + "/Library/Application Support/" + APPNAME);
 			else if (OS.contains("NUX")) out=cpath(System.getProperty("user.home") + "/." + APPNAME);
-			else out=cpath(System.getProperty("user.dir") + "/." + APPNAME);
+			else out=cpath(getJarPathFolder() + "/." + APPNAME);
 	    
 		} else{
 			
-			out=cpath(System.getProperty("user.dir") + "/" + APPNAME + "-settings");
+			out=cpath(getJarPathFolder() + "/" + APPNAME + "-settings");
 			
 		}
 			
 	    if(!useMyDataPath)
-	    	return out.substring(0, out.lastIndexOf("/"));
+	    	return out.substring(0, out.lastIndexOf(cpath("/")));
 	    else
 	    	return out;
 	    
@@ -119,7 +193,7 @@ public class ClassicRoutines {
 		
 	    /* End */
 	    
-	    System.out.println("Path referenced: " + newpath);
+	    //System.out.println("Path referenced: " + newpath);
 	    
 	    return newpath;
 	    

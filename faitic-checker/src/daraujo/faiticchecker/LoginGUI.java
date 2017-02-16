@@ -149,7 +149,7 @@ public class LoginGUI {
 
 		try{
 			
-			String jarPath=URLDecoder.decode(MainClass.class.getProtectionDomain().getCodeSource().getLocation().getPath(),"UTF-8");
+			String jarPath=ClassicRoutines.cpath(URLDecoder.decode(MainClass.class.getProtectionDomain().getCodeSource().getLocation().getPath(),"UTF-8"));
 
 			return jarPath;
 			
@@ -616,7 +616,7 @@ public class LoginGUI {
 		loginFrame.getContentPane().add(panelWithEverything, BorderLayout.CENTER);
 		panelWithEverything.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.GLUE_COLSPEC,
-				FormFactory.MIN_COLSPEC,
+				ColumnSpec.decode("460px"),
 				FormFactory.GLUE_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,

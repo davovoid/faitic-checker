@@ -63,7 +63,7 @@ import java.awt.event.MouseEvent;
 
 public class About {
 
-	protected static final String VERSION="0.0.4a";
+	protected static final String VERSION="0.0.4b";
 	private static final String WEBPAGE="https://github.com/davovoid/faitic-checker";
 
 	protected static TextData textdata;

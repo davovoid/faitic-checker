@@ -80,6 +80,8 @@ public class Updater {
 
 	private static boolean saveFileFromInternet(String url, File fileDestination) throws Exception{	// Really simplified version of the Faitic.java class
 		
+		System.out.println("Downloading \"" + url + "\" and saving into \"" + fileDestination.getAbsolutePath() + "\"...");
+		
 		HttpURLConnection connection= (HttpURLConnection) new URL(url).openConnection();
 		
 		connection.setConnectTimeout(10000);
@@ -107,6 +109,8 @@ public class Updater {
 
 			filewriter.close();
 			strin.close();
+			
+			System.out.println("Success.");
 			
 			return true;
 			

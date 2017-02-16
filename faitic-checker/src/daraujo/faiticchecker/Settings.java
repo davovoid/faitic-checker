@@ -102,35 +102,55 @@ public class Settings {
 	
 	protected static String getSubjectPath(String subject){
 		
-		if(!jsonConf.containsKey("SubjectFolders")) return null;
+		JSONObject jsonfoldersabs=null, jsonfoldersrel=null;
 		
-		JSONObject jsonfolders=(JSONObject)jsonConf.get("SubjectFolders");
+		if(jsonConf.containsKey("SubjectFolders")) jsonfoldersabs=(JSONObject)jsonConf.get("SubjectFolders");
+		if(jsonConf.containsKey("RelativeSubjectFolders")) jsonfoldersrel=(JSONObject)jsonConf.get("RelativeSubjectFolders");
 		
 		String subjectUniqueName=getSubjectUniqueName(subject);
 		
-		if(!jsonfolders.containsKey(subjectUniqueName)) return null;
+		String outpath=null;
 		
-		return (String) jsonfolders.get(subjectUniqueName);
+		if(jsonfoldersrel!=null) if(jsonfoldersrel.containsKey(subjectUniqueName)) outpath=ClassicRoutines.getAbsolutePath((String) jsonfoldersrel.get(subjectUniqueName), ClassicRoutines.getJarPathFolder());	// First relative
+		if(jsonfoldersabs!=null) if(jsonfoldersabs.containsKey(subjectUniqueName) && outpath==null) outpath=(String) jsonfoldersabs.get(subjectUniqueName);	// If not absolute
+		
+		return outpath;
 		
 	}
 	
 	protected static void setSubjectPath(String subject, String path){
 		
-		// If subject folders key doesn't exist, it is created
-		if(!jsonConf.containsKey("SubjectFolders")) jsonConf.put("SubjectFolders", new JSONObject());
+		boolean portable=ClassicRoutines.isPortable();
 		
-		JSONObject jsonfolders=(JSONObject) jsonConf.get("SubjectFolders");
+		// If subject folders key doesn't exist, it is created
+		if(!jsonConf.containsKey("SubjectFolders")) jsonConf.put("SubjectFolders", new JSONObject());					// Not portable
+		if(!jsonConf.containsKey("RelativeSubjectFolders")) jsonConf.put("RelativeSubjectFolders", new JSONObject());	// Portable
+		
+		JSONObject jsonfoldersabs=(JSONObject) jsonConf.get("SubjectFolders");
+		JSONObject jsonfoldersrel=(JSONObject) jsonConf.get("RelativeSubjectFolders");
 		
 		String subjectUniqueName=getSubjectUniqueName(subject);
 		
 		// If the subject folder is registered, it is deleted so as to add it again
-		if(jsonfolders.containsKey(subjectUniqueName)) jsonfolders.remove(subjectUniqueName);
+		if(jsonfoldersabs.containsKey(subjectUniqueName)) jsonfoldersabs.remove(subjectUniqueName);
+		if(jsonfoldersrel.containsKey(subjectUniqueName)) jsonfoldersrel.remove(subjectUniqueName);
 		
-		jsonfolders.put(subjectUniqueName, path);
+		String relpath=ClassicRoutines.getRelativePath(path, ClassicRoutines.getJarPathFolder());
+		
+		if(path.equals(relpath) || !portable){
+			// Save it as absolute if equal or not portable
+			jsonfoldersabs.put(subjectUniqueName, path);
+		} else{
+			// Save it as relative
+			jsonfoldersrel.put(subjectUniqueName,relpath);
+			
+		}
 		
 		// Update the SubjectFolders section
 		if(jsonConf.containsKey("SubjectFolders")) jsonConf.remove("SubjectFolders");
-		jsonConf.put("SubjectFolders", jsonfolders);
+		jsonConf.put("SubjectFolders", jsonfoldersabs);
+		if(jsonConf.containsKey("RelativeSubjectFolders")) jsonConf.remove("RelativeSubjectFolders");
+		jsonConf.put("RelativeSubjectFolders", jsonfoldersrel);
 		
 		
 	}

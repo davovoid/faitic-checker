@@ -242,6 +242,8 @@ public class Faitic {
 	public static void downloadFile(String strurl, String post, String filename) throws Exception{
 
 		if(getCancelDownload()) return;	// Download cancelled, don't dare to continue
+
+		System.out.println(" -- Downloading file from \"" + strurl + "\" and saving to \"" + filename + "\"...");
 		
 		lastRequestedURL=strurl;
 		
@@ -402,6 +404,9 @@ public class Faitic {
 				// Correctly deleted
 				
 				tempfile.renameTo(oldfile);
+				
+				System.out.println("Success.");
+				
 				
 			}
 			
@@ -959,7 +964,154 @@ public class Faitic {
 		return list;
 		
 	}
+//	
+//	public static ArrayList<String[]> listDocumentsMoodle(String platformURL) throws Exception{
+//		
+//		/*
+//		 * 0 -> Path (incl. filename)
+//		 * 1 -> URL to file
+//		 */
+//		
+//		ArrayList<String[]> list=new ArrayList<String[]>();
+//		
+//		int untilWhenUrlToUse= platformURL.indexOf("/", platformURL.indexOf("/moodle")+1);
+//		
+//		if(untilWhenUrlToUse>=0){
+//			
+//			String urlBase = platformURL.substring(0, untilWhenUrlToUse);
+//			String urlGetMethod=platformURL.indexOf("?") >= 0 ? platformURL.substring(platformURL.indexOf("?") + 1, platformURL.length()) : "";
+//			String urlForResources= urlBase + "/mod/resource/index.php" + (urlGetMethod.length()>0 ? "?" + urlGetMethod : "");
+//			
+//			String resourcePage=requestDocument(urlForResources, "");
+//			
+//			// Resources page, get the list of lists. Yes. The list of lists. Because there are several lists :3
+//			
+//			int bodyStart=resourcePage.indexOf("<!-- END OF HEADER -->");
+//			
+//			int bodyEnd=resourcePage.indexOf("<!-- START OF FOOTER -->", bodyStart);
+//			
+//			if(bodyStart >=0 && bodyEnd > bodyStart){
+//				
+//				String whereToSearchForLists=resourcePage.substring(bodyStart, bodyEnd);
+//				
+//				//System.out.println(whereToSearchForLists);
+//				
+//				int listURLStart=whereToSearchForLists.indexOf("view.php?");
+//				int listURLEnd=whereToSearchForLists.indexOf("\"", listURLStart);
+//				
+//				while(listURLStart>=0 && listURLStart<listURLEnd){
+//					
+//					String urlList=urlBase + "/mod/resource/" + whereToSearchForLists.substring(listURLStart, listURLEnd);
+//					urlList=urlList.replace("&amp;", "&");
+//					
+//					int listNameStart=whereToSearchForLists.indexOf(">", listURLStart);
+//					int listNameEnd=whereToSearchForLists.indexOf("</a>", listNameStart);
+//					
+//					if(listNameStart<0 || listNameEnd<=listNameStart) return list;
+//					
+//					String listName=whereToSearchForLists.substring(listNameStart+1, listNameEnd);
+//					
+//					listDocumentsMoodleInternal(urlList, list, urlBase, listName);
+//					
+//					// For next loop
+//					
+//					listURLStart=whereToSearchForLists.indexOf("view.php?", listURLEnd);
+//					listURLEnd=whereToSearchForLists.indexOf("\"", listURLStart);
+//					
+//				}
+//				
+//			}
+//			
+//			//String urlToUse =  urlBase + "/document/document.php";
+//			//list=listDocumentsClarolineInternal(urlToUse,list, urlBase);	// Recursive
+//			
+//		}
+//		
+//		return list;
+//		
+//	}
+//	
+//	private static ArrayList<String[]> listDocumentsMoodleInternal(String urlToUse, ArrayList<String[]> list, String urlBase, String listName) throws Exception{
+//		
+//		//System.out.println("---Accessed---");
+//
+//		String resourcePage;
+//		
+//		try{
+//			
+//			resourcePage=requestDocument(urlToUse, "");
+//			
+//		} catch(Exception ex){
+//			
+//			return list;
+//			
+//		}
+//		
+//		if(!urlToUse.equals(lastRequestedURL)) return list;		// If the page redirected us
+//		
+//		// The list of files from this resource
+//		
+//		int bodyStart=resourcePage.indexOf("<!-- END OF HEADER -->");
+//		
+//		int bodyEnd=resourcePage.indexOf("<!-- START OF FOOTER -->", bodyStart);
+//		
+//		if(bodyStart >=0 && bodyEnd > bodyStart){
+//			
+//			String whereToSearch=resourcePage.substring(bodyStart, bodyEnd);
+//			
+//			//System.out.println(whereToSearch);
+//			
+//			// First files
+//			
+//			int URLStart=whereToSearch.indexOf(urlBase + "/file.php/");
+//			int URLEnd=whereToSearch.indexOf("\"", URLStart);
+//			
+//			while(URLStart>=0 && URLStart<URLEnd){
+//				
+//				String urlToFile=whereToSearch.substring(URLStart, URLEnd);
+//				urlToFile=urlToFile.replace("&amp;", "&");
+//				
+//				int filePathStart=urlToFile.indexOf("/", (urlBase + "/file.php/").length()+1);
+//				
+//				String filePath=urlToFile.substring(filePathStart, urlToFile.length());
+//				
+//				list.add(new String[]{URLDecoder.decode(filePath, "iso-8859-1"),urlToFile});	// Added to list
+//				
+//				// For next loop
+//				
+//				URLStart=whereToSearch.indexOf(urlBase + "/file.php/", URLEnd);
+//				URLEnd=whereToSearch.indexOf("\"",URLStart);
+//				
+//			}
+//			
+//			// Then directories
+//			
+//			URLStart=whereToSearch.indexOf("view.php?");
+//			URLEnd=whereToSearch.indexOf("\"", URLStart);
+//			
+//			while(URLStart>=0 && URLStart<URLEnd){
+//				
+//				String urlList=urlBase + "/mod/resource/" + whereToSearch.substring(URLStart, URLEnd);
+//				urlList=urlList.replace("&amp;", "&");
+//				
+//				listDocumentsMoodleInternal(urlList, list, urlBase, listName);
+//				
+//				// For next loop
+//				
+//				URLStart=whereToSearch.indexOf("view.php?", URLEnd);
+//				URLEnd=whereToSearch.indexOf("\"", URLStart);
+//				
+//			}
+//			
+//		}
+//		
+//		
+//		return list;
+//		
+//	}
+//	
 	
+
 	public static ArrayList<String[]> listDocumentsMoodle(String platformURL) throws Exception{
 		
 		/*
@@ -977,48 +1129,7 @@ public class Faitic {
 			String urlGetMethod=platformURL.indexOf("?") >= 0 ? platformURL.substring(platformURL.indexOf("?") + 1, platformURL.length()) : "";
 			String urlForResources= urlBase + "/mod/resource/index.php" + (urlGetMethod.length()>0 ? "?" + urlGetMethod : "");
 			
-			String resourcePage=requestDocument(urlForResources, "");
-			
-			// Resources page, get the list of lists. Yes. The list of lists. Because there are several lists :3
-			
-			int bodyStart=resourcePage.indexOf("<!-- END OF HEADER -->");
-			
-			int bodyEnd=resourcePage.indexOf("<!-- START OF FOOTER -->", bodyStart);
-			
-			if(bodyStart >=0 && bodyEnd > bodyStart){
-				
-				String whereToSearchForLists=resourcePage.substring(bodyStart, bodyEnd);
-				
-				//System.out.println(whereToSearchForLists);
-				
-				int listURLStart=whereToSearchForLists.indexOf("view.php?");
-				int listURLEnd=whereToSearchForLists.indexOf("\"", listURLStart);
-				
-				while(listURLStart>=0 && listURLStart<listURLEnd){
-					
-					String urlList=urlBase + "/mod/resource/" + whereToSearchForLists.substring(listURLStart, listURLEnd);
-					urlList=urlList.replace("&amp;", "&");
-					
-					int listNameStart=whereToSearchForLists.indexOf(">", listURLStart);
-					int listNameEnd=whereToSearchForLists.indexOf("</a>", listNameStart);
-					
-					if(listNameStart<0 || listNameEnd<=listNameStart) return list;
-					
-					String listName=whereToSearchForLists.substring(listNameStart+1, listNameEnd);
-					
-					listDocumentsMoodleInternal(urlList, list, urlBase, listName);
-					
-					// For next loop
-					
-					listURLStart=whereToSearchForLists.indexOf("view.php?", listURLEnd);
-					listURLEnd=whereToSearchForLists.indexOf("\"", listURLStart);
-					
-				}
-				
-			}
-			
-			//String urlToUse =  urlBase + "/document/document.php";
-			//list=listDocumentsClarolineInternal(urlToUse,list, urlBase);	// Recursive
+			listDocumentsMoodleInternal(urlForResources, list, urlBase);
 			
 		}
 		
@@ -1026,7 +1137,8 @@ public class Faitic {
 		
 	}
 	
-	private static ArrayList<String[]> listDocumentsMoodleInternal(String urlToUse, ArrayList<String[]> list, String urlBase, String listName) throws Exception{
+
+	private static ArrayList<String[]> listDocumentsMoodleInternal(String urlToUse, ArrayList<String[]> list, String urlBase) throws Exception{
 		
 		//System.out.println("---Accessed---");
 
@@ -1045,7 +1157,7 @@ public class Faitic {
 		if(!urlToUse.equals(lastRequestedURL)) return list;		// If the page redirected us
 		
 		// The list of files from this resource
-		
+
 		int bodyStart=resourcePage.indexOf("<!-- END OF HEADER -->");
 		
 		int bodyEnd=resourcePage.indexOf("<!-- START OF FOOTER -->", bodyStart);
@@ -1053,13 +1165,12 @@ public class Faitic {
 		if(bodyStart >=0 && bodyEnd > bodyStart){
 			
 			String whereToSearch=resourcePage.substring(bodyStart, bodyEnd);
-			
-			//System.out.println(whereToSearch);
-			
-			// First files
-			
+
 			int URLStart=whereToSearch.indexOf(urlBase + "/file.php/");
 			int URLEnd=whereToSearch.indexOf("\"", URLStart);
+			
+			if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+				URLEnd=whereToSearch.indexOf("\'", URLStart);
 			
 			while(URLStart>=0 && URLStart<URLEnd){
 				
@@ -1076,6 +1187,9 @@ public class Faitic {
 				
 				URLStart=whereToSearch.indexOf(urlBase + "/file.php/", URLEnd);
 				URLEnd=whereToSearch.indexOf("\"",URLStart);
+
+				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+					URLEnd=whereToSearch.indexOf("\'", URLStart);
 				
 			}
 			
@@ -1083,29 +1197,73 @@ public class Faitic {
 			
 			URLStart=whereToSearch.indexOf("view.php?");
 			URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+			if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+				URLEnd=whereToSearch.indexOf("\'", URLStart);
 			
 			while(URLStart>=0 && URLStart<URLEnd){
-				
+
 				String urlList=urlBase + "/mod/resource/" + whereToSearch.substring(URLStart, URLEnd);
 				urlList=urlList.replace("&amp;", "&");
-				
-				listDocumentsMoodleInternal(urlList, list, urlBase, listName);
-				
+
+				// We have got the url, but we don't know if it's a folder or not, let's check it
+
+				String realurl = getRedirectedURL(urlList, "");
+
+				if(realurl==null){
+
+					// Folder, recursive search
+
+					listDocumentsMoodleInternal(urlList, list, urlBase);
+
+				} else{
+
+					// Document, let's get the real name
+
+					String realname="undefined";
+
+					/*int questionMarkIndex=realurl.indexOf("?");
+					int lastDivider=realurl.substring(0, questionMarkIndex >=0 ? questionMarkIndex : realurl.length()).lastIndexOf("/");	// No error because it starts at 0
+
+					if(lastDivider>=0){
+
+						// Got a name
+
+						realname=URLDecoder.decode(realurl.substring(lastDivider+1, questionMarkIndex>=0 ? questionMarkIndex : realurl.length()),"UTF-8");
+
+					}*/
+
+					int filePathStart=realurl.indexOf("/", (urlBase + "/file.php/").length()+1);
+					
+					if(filePathStart>=0){
+						
+						String filePath=realurl.substring(filePathStart, realurl.length());
+						
+						list.add(new String[]{URLDecoder.decode(filePath, "iso-8859-1"),realurl});	// Added to list
+						
+					}
+
+
+				}
+
+
 				// For next loop
-				
+
 				URLStart=whereToSearch.indexOf("view.php?", URLEnd);
 				URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+					URLEnd=whereToSearch.indexOf("\'", URLStart);
 				
 			}
-			
+
 		}
-		
-		
+
+
 		return list;
-		
+
 	}
-	
-	
+
 
 	public static ArrayList<String[]> listDocumentsMoodle2(String platformURL) throws Exception{
 		
@@ -1163,6 +1321,9 @@ public class Faitic {
 			
 			int URLStart=whereToSearch.indexOf("view.php?");
 			int URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+			if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+				URLEnd=whereToSearch.indexOf("\'", URLStart);
 			
 			while(URLStart>=0 && URLStart<URLEnd){
 				
@@ -1219,6 +1380,9 @@ public class Faitic {
 				
 				URLStart=whereToSearch.indexOf("view.php?", URLEnd);
 				URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+					URLEnd=whereToSearch.indexOf("\'", URLStart);
 				
 			}
 			
