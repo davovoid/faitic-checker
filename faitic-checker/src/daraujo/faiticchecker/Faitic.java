@@ -884,6 +884,7 @@ public class Faitic {
 			
 		}
 		
+		cleanArtifacts(list);
 		deleteRepeatedFiles(list);
 		
 		return list;
@@ -987,6 +988,7 @@ public class Faitic {
 			
 		}
 		
+		cleanArtifacts(list);
 		deleteRepeatedFiles(list);
 		
 		return list;
@@ -1131,6 +1133,7 @@ public class Faitic {
 			
 		}
 		
+		cleanArtifacts(list);
 		deleteRepeatedFiles(list);
 		
 		return list;
@@ -1268,6 +1271,41 @@ public class Faitic {
 			
 		}
 	
+	}
+	
+	protected static void cleanArtifacts(ArrayList<String[]> list){
+		
+		for(int i=0; i<list.size(); i++){
+			
+			String[] element=list.get(i);
+			
+			// First for the name
+			String name=element[0].trim();	// Trim name
+
+			int until=name.indexOf("<");
+			until=name.indexOf(">")>=0 && name.indexOf(">")<until ? name.indexOf(">") : until;
+			
+			if(until>=0) name=name.substring(0, until);	// Delete unwanted exceeded code
+			name=name.replaceAll("[*?\"<>|]", "_");	// Correct special characters
+			
+			if(name.length()<=0) name="undefined"; // Just in case
+			
+			element[0]=name;
+			
+			// Second for the url
+			
+			String url=element[1].trim();	// Trim url
+			
+			until=url.indexOf("<") <= url.indexOf(">") ? url.indexOf("<") : url.indexOf(">");
+			
+			if(until>=0) url=url.substring(0, until);		// Delete unwanted exceeded code
+			
+			element[1]=url;
+			
+			list.set(i, element);
+			
+		}
+		
 	}
 	
 }
