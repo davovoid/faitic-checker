@@ -1,12 +1,14 @@
 # Faicheck
 
+### Web page (In Spanish) / Página web: https://davovoid.github.io/faicheck/
+
 ### English
 
 Faicheck is a Java based NON OFFICIAL application to manage the *Faitic Platform* (A tool from the *Universidad de Vigo*), This application allows to log in the Faitic account, and offers the user the possibility of listing and downloading the subject files. It also counts on an intelligent system to select several files or simply the ones that have not been downloaded yet.
 
 The application was also tested to work on Windows, Mac OS X and Linux.
 
-If you are looking for the ready-to-use program go to https://github.com/davovoid/faitic-checker/releases and download the latest *Jar* available so as to get the latest version. You will require *Java* to execute the program.
+If you are looking for the ready-to-use program go to https://github.com/davovoid/faitic-checker/releases and download the latest *Jar* available so as to get the latest version (The Faicheck web page is only available in Spanish at the moment). You will require *Java* to execute the program.
 
 ### Spanish
 
@@ -14,7 +16,7 @@ Faicheck es una aplicación NO OFICIAL basada en Java para gestionar la *Platafo
 
 La aplicación ha sido probada en Windows, Mac OS X y Linux.
 
-Si buscas el programa preparado para su uso entra en https://github.com/davovoid/faitic-checker/releases y descarga para la última versión el último *Jar* disponible. Necesitarás *Java* para ejecutar el programa.
+Si buscas el programa preparado para su uso entra en https://davovoid.github.io/faicheck/ y pulsa "Descargar Faicheck". Necesitarás *Java* para ejecutar el programa.
 
 # Privacy policy: what happens with my personal data?
 
