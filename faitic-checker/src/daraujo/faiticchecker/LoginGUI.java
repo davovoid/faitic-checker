@@ -737,9 +737,9 @@ public class LoginGUI {
 				FormFactory.GLUE_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.GLUE_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
-				FormFactory.UNRELATED_GAP_ROWSPEC,
 				FormFactory.MIN_ROWSPEC,
+				FormFactory.UNRELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
 				FormFactory.GLUE_ROWSPEC,}));
 		
 		
@@ -766,7 +766,7 @@ public class LoginGUI {
 				
 			}
 		});
-		panel_3.add(cCheckForUpdates, "1, 2");
+		panel_3.add(cCheckForUpdates, "1, 4");
 		cCheckForUpdates.setOpaque(false);
 		
 		btnCreatePortable = new JCustomButton(textdata.getKey("btnconverttoportable"));
@@ -812,7 +812,7 @@ public class LoginGUI {
 				
 			}
 		});
-		panel_3.add(btnCreatePortable, "1, 4");
+		panel_3.add(btnCreatePortable, "1, 2");
 		
 		JPanel panel = new JPanel();
 		panelSettings.add(panel, "4, 2");
