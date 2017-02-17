@@ -156,7 +156,7 @@ public class FirstStart extends JDialog {
 		
 	}
 	
-	private static void createsettingspath(boolean appdata){
+	protected static void createsettingspath(boolean appdata){
 		
 		String path;
 		

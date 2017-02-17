@@ -931,7 +931,7 @@ public class Faitic {
 					
 					String pathForFile=urlGot.substring((urlBase + "/document/goto/index.php/").length(), urlGot.lastIndexOf("?") >=0 ? urlGot.lastIndexOf("?") : urlGot.length());
 					
-					list.add(new String[]{ URLDecoder.decode(pathForFile, "iso-8859-1") , urlGot });
+					list.add(new String[]{ URLDecoder.decode("/" + pathForFile, "iso-8859-1") , urlGot });
 					
 				}
 				

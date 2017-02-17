@@ -104,15 +104,15 @@ public class SubjectsGUI {
 	
 	private final static Image imgFaicheck=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaicheck.png")).getImage();
 	
-	private static JButton btnDescargarMarcados;
-	private JButton btnMarcarNuevos;
-	private JButton btnMarcarTodo;
-	private JButton btnMarcarNada;
+	private static JCustomButton btnDescargarMarcados;
+	private JCustomButton btnMarcarNuevos;
+	private JCustomButton btnMarcarTodo;
+	private JCustomButton btnMarcarNada;
 	
 	private static JLabel[] lblSubjects;
 	private static JCheckBox[] cArchivos;
-	private static JLabel[] lArchivos;
-	private static JButton[] btnAbrirArchivos;
+	private static JLabel[] lArchivos, lParentPaths;
+	private static JLabel[] btnAbrirArchivos;
 	
 	private static int selectedSubject=-1, prevSelectedSubject=-1;
 	private static ArrayList<String[]> subjectList;
@@ -421,11 +421,11 @@ public class SubjectsGUI {
 									if(subjectType!=faitic.UNKNOWN)
 										lblProperties.setText(textdata.getKey("subjectsummary",lblProperties.getText(), fileList.size() + "", fileList.size()!=1 ? "s" : ""));
 
-									String[] fileListNames=new String[fileList.size()];
+									/*String[] fileListNames=new String[fileList.size()];
 
 									for(int i=0; i<fileList.size(); i++){
 										fileListNames[i]=fileList.get(i)[0];
-									}
+									}*/
 
 									// Show subject path
 									
@@ -440,7 +440,7 @@ public class SubjectsGUI {
 									}
 									
 									// List files now, do after getting the subject path, UI
-									fillFilesFromSubject(fileListNames);
+									fillFilesFromSubject();
 
 								} else{
 									
@@ -449,7 +449,9 @@ public class SubjectsGUI {
 									lblSubjectName.setText(textdata.getKey("erroropeningsubjecttitle"));
 									lblProperties.setText(textdata.getKey("erroropeningsubjectsummary"));
 									
-									fillFilesFromSubject(new String[]{});
+									fileList=new ArrayList<String[]>();
+									
+									fillFilesFromSubject();
 									
 								}
 
@@ -483,44 +485,80 @@ public class SubjectsGUI {
 		
 	}
 	
-	private static void fillFilesFromSubject(String[] fileListString){
+	private static void fillFilesFromSubject(){
 		
 		panelToDownload.removeAll();
 		panelToDownload.updateUI();
 		
-		RowSpec[] fRowSpec=new RowSpec[fileListString.length*2+3];
+		RowSpec[] fRowSpec=new RowSpec[fileList.size()*4+1];
 		
 		for(int i=0; i<fRowSpec.length; i++){
 			
-			fRowSpec[i]= i==0 || i==fRowSpec.length-1 ? FormFactory.UNRELATED_GAP_ROWSPEC : i % 2 == 0 ? FormFactory.RELATED_GAP_ROWSPEC : FormFactory.PREF_ROWSPEC;
+			fRowSpec[i]= i==0 || i==fRowSpec.length-1 ? FormFactory.UNRELATED_GAP_ROWSPEC : i % 4 == 0 ? FormFactory.PARAGRAPH_GAP_ROWSPEC : i % 2 == 0 ? FormFactory.LINE_GAP_ROWSPEC : FormFactory.PREF_ROWSPEC;
 		}
 		
 		panelToDownload.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
+				FormFactory.MIN_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
+				FormFactory.UNRELATED_GAP_COLSPEC,},
 			fRowSpec));
 		
-		JLabel lbldescargar = new JLabel(textdata.getKey("filelistmarked"));
-		panelToDownload.add(lbldescargar, "2, 2");
+		cArchivos=new JCheckBox[fileList.size()];
+		lArchivos=new JLabel[fileList.size()];
+		lParentPaths=new JLabel[fileList.size()];
+		btnAbrirArchivos=new JLabel[fileList.size()];
 		
-		JLabel lblArchivo = new JLabel(textdata.getKey("filelistfilename"));
-		panelToDownload.add(lblArchivo, "4, 2");
-		
-		cArchivos=new JCheckBox[fileListString.length];
-		lArchivos=new JLabel[fileListString.length];
-		btnAbrirArchivos=new JButton[fileListString.length];
-		
-		for(int i=0; i<fileListString.length; i++){
+		for(int i=0; i<fileList.size(); i++){
 			
-			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileListString[i]);
+			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i)[0]);
 			
-			cArchivos[i]=new JCheckBox("");
+			cArchivos[i]=new JCheckBox(""){
+
+				@Override
+				public void paintComponent(Graphics g){
+
+					//super.paintComponent(g);
+					
+					Color borderColor=isSelected() ? new Color(0,110,198,255) : new Color(200,200,200,255);
+					
+					int maxside=super.getWidth()<super.getHeight() ? super.getWidth() : super.getHeight();
+					int marginleft=super.getWidth()<super.getHeight() ? 0 : (super.getWidth()-maxside)/2;
+					int margintop=super.getWidth()<super.getHeight() ? (super.getHeight()-maxside)/2 : 0;
+
+					Graphics2D g2=(Graphics2D) g;
+					
+				    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+				    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+				    g2.setColor(borderColor);
+				    
+					g2.fillRoundRect(marginleft+8, margintop+8, maxside-16+1, maxside-16+1, 3, 3);
+					
+					if(isSelected()){
+						
+						g2.setStroke(new BasicStroke(3));
+						g2.setColor(Color.white);
+						
+						g2.drawLine(marginleft + 12, margintop+maxside/2, marginleft + maxside/2-1 , margintop+maxside-14);
+						g2.drawLine(marginleft + maxside/2 -1, margintop+maxside-14, marginleft + maxside - 12, margintop + 14);
+						
+					} else{
+						
+						g2.setColor(Color.white);
+						g2.fillRect(marginleft+10, margintop+10, maxside-20+1, maxside-20+1);
+						
+					}
+					
+				}
+
+			};
 			cArchivos[i].setOpaque(false);
+			cArchivos[i].setMinimumSize(new Dimension(40,40));
 			cArchivos[i].setHorizontalAlignment(SwingConstants.CENTER);
 			cArchivos[i].setSelected(!isAlreadyDownloaded); // Not selected if downloaded
 			
@@ -536,11 +574,17 @@ public class SubjectsGUI {
 				
 			});
 			
-			panelToDownload.add(cArchivos[i], "2, " + (int)(i*2+4));
+			panelToDownload.add(cArchivos[i], "2, " + (int)(i*4+2) + ", 1, 3");
 			
-			lArchivos[i]=new JLabel(fileListString[i]);
-			lArchivos[i].setFont(new Font("Monospaced", Font.PLAIN, 12));
-			lArchivos[i].addMouseListener(new MouseListener(){
+			String completePath=fileList.get(i)[0];
+			int divisionpos=completePath.lastIndexOf("/");
+			String filename=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(divisionpos+1, completePath.length()) : completePath;
+			String parentname=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(0, divisionpos+1) : "";
+			
+			lArchivos[i]=new JLabel(filename);
+			lArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			lArchivos[i].setFont(new Font("Dialog", Font.BOLD, 12));
+			lArchivos[i].addMouseListener(new MouseAdapter(){
 
 				@Override
 				public void mouseClicked(MouseEvent arg0) {
@@ -555,49 +599,149 @@ public class SubjectsGUI {
 					
 					if(index>=0){
 						
-						// Detected the element clicked
+						// Detected the element clicked, open the file if it exists
 						
-						cArchivos[index].setSelected(!cArchivos[index].isSelected());
+
+						if(subjectPath!=null){
+							
+							// Subject path selected
+
+							String fileRelPath=fileList.get(index)[0];
+							
+							if(fileIsAlreadyDownloaded(subjectPath,fileRelPath)){
+								
+								// Already downloaded. Open it
+								
+								try {
+									
+									Desktop.getDesktop().open(new File(fileDestination(subjectPath,fileRelPath)));
+									
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+							}
+						}
+						
+						
+						
 						
 					}
 					
 					
 				}
 
-				@Override
-				public void mouseEntered(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void mouseExited(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void mousePressed(MouseEvent arg0) {
-					// TODO Auto-generated method stub
-					
-				}
-
-				@Override
-				public void mouseReleased(MouseEvent e) {
-					// TODO Auto-generated method stub
-					
-				}
-				
 			});
 			
-			panelToDownload.add(lArchivos[i], "4, " + (int)(i*2+4));
+			panelToDownload.add(lArchivos[i], "4, " + (int)(i*4+2));
 			
-			btnAbrirArchivos[i]=new JButton(isAlreadyDownloaded ? textdata.getKey("filelistopen") : textdata.getKey("filelistdownload"));
-			
-			btnAbrirArchivos[i].addActionListener(new ActionListener(){
+			// Label for URL
+
+			lParentPaths[i]=new JLabel(parentname);
+			lParentPaths[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			lParentPaths[i].setFont(new Font("Dialog", Font.PLAIN, 10));
+			lParentPaths[i].addMouseListener(new MouseAdapter(){
 
 				@Override
-				public void actionPerformed(ActionEvent arg0) {
+				public void mouseClicked(MouseEvent arg0) {
+
+					int index=-1;
+					
+					for(int i=0; i<lParentPaths.length; i++){
+						
+						if(lParentPaths[i].equals(arg0.getComponent())) index=i;
+						
+					}
+
+					if(index>=0){
+						
+						// Detected the element clicked, open the file if it exists
+						
+
+						if(subjectPath!=null){
+							
+							// Subject path selected
+
+							String completePath=fileList.get(index)[0];
+							int divisionpos=completePath.lastIndexOf("/");
+							String parentname=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(0, divisionpos+1) : "";
+							
+							if(fileIsAlreadyDownloaded(subjectPath,parentname)){
+								
+								// Already created. Open it
+								
+								try {
+									
+									Desktop.getDesktop().open(new File(fileDestination(subjectPath,parentname)));
+									
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+							}
+						}
+						
+						
+						
+						
+					}
+					
+					
+				}
+
+			});
+			
+			panelToDownload.add(lParentPaths[i], "4, " + (int)(i*4+4));
+			
+			// Download and open button
+			
+			btnAbrirArchivos[i]=new JLabel("  " + (isAlreadyDownloaded ? textdata.getKey("filelistdelete") : textdata.getKey("filelistdownload")) + "  "){
+
+				@Override
+				public void paintComponent(Graphics g){
+
+					//super.paintComponent(g);
+					
+					Color borderColor= getText().contains(textdata.getKey("filelistdelete")) ? new Color(180,180,180,255) : new Color(0,110,198,255);
+					
+					int maxwidth=super.getWidth();
+					int maxheight=super.getHeight()-4;
+					int marginleft=(super.getWidth()-maxwidth)/2;
+					int margintop=(super.getHeight()-maxheight)/2;
+
+					Graphics2D g2=(Graphics2D) g;
+					
+				    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+				    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+				    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+				    g2.setColor(borderColor);
+				    
+					g2.fillRoundRect(marginleft, margintop, maxwidth, maxheight, 6, 6);
+					/*
+					g2.setColor(borderColor.brighter());
+					g2.setStroke(new BasicStroke(2));
+					g2.drawRoundRect(marginleft, margintop, maxwidth-1, maxheight-1, 6, 6);
+					
+					g2.setColor(borderColor.darker());
+					g2.setStroke(new BasicStroke(1));
+					g2.drawRoundRect(marginleft, margintop, maxwidth-1, maxheight-1, 6, 6);
+					*/
+					super.paintComponent(g);
+					
+				}
+
+			};
+			btnAbrirArchivos[i].setForeground(Color.white);
+			btnAbrirArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			btnAbrirArchivos[i].setHorizontalAlignment(SwingConstants.CENTER);
+			
+			btnAbrirArchivos[i].addMouseListener(new MouseAdapter(){
+
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
 					// TODO Auto-generated method stub
 					
 					// Detect the file index
@@ -660,16 +804,16 @@ public class SubjectsGUI {
 							
 							if(fileIsAlreadyDownloaded(subjectPath,fileRelPath)){
 								
-								// Already downloaded. Open it
+								// Already downloaded. Delete it
 								
-								try {
-									
-									Desktop.getDesktop().open(new File(fileDestination(subjectPath,fileRelPath)));
-									
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+								File fileToDelete=new File(fileDestination(subjectPath,fileRelPath));
+								
+								System.out.println("Deleting file \"" + fileToDelete.getAbsolutePath() + "\"...");
+								
+								if(fileToDelete.delete()) System.out.println("Success.");
+								else System.out.println("Deletion error.");
+								
+								setDownloadButtonsText();
 								
 							} else{
 								
@@ -689,7 +833,7 @@ public class SubjectsGUI {
 				
 			});
 			
-			panelToDownload.add(btnAbrirArchivos[i], "6, " + (int)(i*2+4));
+			panelToDownload.add(btnAbrirArchivos[i], "6, " + (int)(i*4+2) + ", 1, 3");
 			
 		}
 		
@@ -739,7 +883,7 @@ public class SubjectsGUI {
 			
 			String fileRelPath=fileList.get(i)[0];
 			
-			btnAbrirArchivos[i].setText(fileIsAlreadyDownloaded(subjectPath, fileRelPath) ? textdata.getKey("filelistopen") : textdata.getKey("filelistdownload"));
+			btnAbrirArchivos[i].setText("  " + (fileIsAlreadyDownloaded(subjectPath, fileRelPath) ? textdata.getKey("filelistdelete") : textdata.getKey("filelistdownload")) + "  ");
 			
 		}
 		
@@ -1359,7 +1503,37 @@ public class SubjectsGUI {
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		scrollPane.setBorder(null);
 		
-		panelToDownload = new JPanel();
+		panelToDownload = new JPanel()/*{
+			
+			@Override
+			public void paintComponent(Graphics g){
+				
+				super.paintComponent(g);
+				
+				if(lURLs==null || lArchivos==null) return;
+				
+				for(int i=1; i<lURLs.length; i++){
+					
+					int min = lURLs[i-1].getY() + lURLs[i-1].getHeight();
+					int max = lArchivos[i].getY();
+					
+					g.setColor(new Color(70,70,70,30));
+					g.drawLine(0, (max+min)/2+1, super.getWidth(), (max+min)/2+1);
+					g.setColor(new Color(150,150,150,250));
+					g.drawLine(0, (max+min)/2-3, super.getWidth(), (max+min)/2-3);
+					
+				}
+				
+				g.setColor(new Color(70,70,70,30));
+				g.drawLine(0, 0, super.getWidth(), 0);
+				g.drawLine(0, super.getHeight()-1, super.getWidth(), super.getHeight()-1);
+				g.setColor(new Color(150,150,150,250));
+				g.drawLine(0, super.getHeight()-2, super.getWidth(), super.getHeight()-2);
+				
+				
+			}
+			
+		}*/;
 		panelToDownload.setOpaque(false);
 		scrollPane.setViewportView(panelToDownload);
 		panelToDownload.setLayout(new FormLayout(new ColumnSpec[] {
@@ -1432,10 +1606,10 @@ public class SubjectsGUI {
 				FormFactory.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
+				FormFactory.MIN_ROWSPEC,
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
-		btnDescargarMarcados = new JButton(textdata.getKey("btndownloadmarked",""));
+		btnDescargarMarcados = new JCustomButton(textdata.getKey("btndownloadmarked",""));
 		btnDescargarMarcados.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -1537,7 +1711,7 @@ public class SubjectsGUI {
 		});
 		panelOptions.add(btnDescargarMarcados, "2, 2");
 		
-		btnMarcarNuevos = new JButton(textdata.getKey("btnmarknew"));
+		btnMarcarNuevos = new JCustomButton(textdata.getKey("btnmarknew"));
 		btnMarcarNuevos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -1563,7 +1737,7 @@ public class SubjectsGUI {
 		});
 		panelOptions.add(btnMarcarNuevos, "4, 2");
 		
-		btnMarcarTodo = new JButton(textdata.getKey("btnmarkall"));
+		btnMarcarTodo = new JCustomButton(textdata.getKey("btnmarkall"));
 		btnMarcarTodo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -1586,7 +1760,7 @@ public class SubjectsGUI {
 		});
 		panelOptions.add(btnMarcarTodo, "6, 2");
 		
-		btnMarcarNada = new JButton(textdata.getKey("btnmarknone"));
+		btnMarcarNada = new JCustomButton(textdata.getKey("btnmarknone"));
 		btnMarcarNada.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 

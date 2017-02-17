@@ -120,11 +120,12 @@ public class LoginGUI {
 	private static JPanel panelStatus;
 	private static JLabel lblLoginStatus;
 	
-	private static JCheckBox cRememberUsename, cRememberPassword;
+	private static JCheckBox cRememberUsername, cRememberPassword;
 	
-	private static JButton btnLogin;
+	private static JCustomButton btnLogin;
 	
 	private static String username;
+	private static char[] tmpPassword;
 
 	private static ActionListener enterPressed = new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
@@ -144,6 +145,7 @@ public class LoginGUI {
 	private JCheckBox cCheckForUpdates;
 	private JPanel panel_1;
 	private JPanel panel_4;
+	private JCustomButton btnCreatePortable;
 	
 	protected static String getJarPath(){
 
@@ -328,101 +330,151 @@ public class LoginGUI {
 		panelStatus.setVisible(true);
 		
 	}
-	
-	private static void fcnLogin(){
 
-		try {
-			
-			username=txtUsuario.getText();
-			
-			mainDocument=faitic.faiticLogin(username,String.valueOf(pwdPassword.getPassword()));
-
-			if(mainDocument!=null){
-				
-				// Success
-				
-				panelStatus.setBackground(Color.green.darker());
-				lblLoginStatus.setText(textdata.getKey("loginsuccessful"));
-				
-				// Save user name and password, if required. Password will be encoded
-				if(settings.jsonConf.containsKey("Username")) settings.jsonConf.remove("Username");
-				if(settings.jsonConf.containsKey("EncodedPassword")) settings.jsonConf.remove("EncodedPassword");
-				
-				if(cRememberUsename.isSelected()){
-					
-					settings.jsonConf.put("Username", username);
-					
-					if(cRememberPassword.isSelected()){
-						
-						try{
-							
-							settings.jsonConf.put("EncodedPassword", Encrypter.encrpytAES(String.valueOf(pwdPassword.getPassword()),username));
-							
-						} catch(Exception ex){
-							
-							ex.printStackTrace();
-							
-						}
-						
-					}
-				
-				}
-				
-				// Reset password textbox
-				pwdPassword.setText("");
-				
-				
-				// Open subjects menu
-						try {
-							
-							SubjectsGUI window = new SubjectsGUI(textdata);
-							
-							window.mainDocument=mainDocument;
-							window.faitic=faitic;
-
-							// End with settings and create it for the subjects GUI
-							
-							settings.saveSettings();
-							
-							//loginFrame.setVisible(false);
-							
-							loginFrame.dispose();
-							
-							window.settings=new Settings("user-" + username + ".conf");
-							
-							window.subjectsFrame.setVisible(true);
-							
-							
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-
-			} else{
-				
-				// Unsuccessful
-				
-
-				panelStatus.setBackground(Color.RED);
-				lblLoginStatus.setText(textdata.getKey("loginunsuccessful"));
-				
-				
-			}
-			
-		} catch (Exception e1) {
-
-			e1.printStackTrace();
-			
-
-			panelStatus.setBackground(Color.RED);
-			lblLoginStatus.setText(textdata.getKey("loginerror"));
-			
-			
-		}
+	private static void setInterfaceEnabled(boolean enabled){
 		
-		panelStatus.setVisible(true);
+		txtUsuario.setEnabled(enabled);
+		pwdPassword.setEnabled(enabled);
+		
+		btnLogin.setEnabled(enabled);
+		
+		cRememberUsername.setEnabled(enabled);
+		cRememberPassword.setEnabled(cRememberUsername.isSelected() && enabled);
+		
 		
 	}
 	
+	private static void fcnLogin(){
+
+		username=txtUsuario.getText();
+		tmpPassword=pwdPassword.getPassword();
+
+		setInterfaceEnabled(false);
+		btnLogin.setText(textdata.getKey("btnloginnow"));
+		
+		SwingWorker trabajador=new SwingWorker(){
+
+			@Override
+			protected Object doInBackground() throws Exception {
+
+				try{
+					// Log in
+
+					mainDocument=faitic.faiticLogin(username,String.valueOf(tmpPassword));
+
+					// Cleaning the pass
+
+					for(int i=0; i<tmpPassword.length; i++){
+
+						tmpPassword[i]=0;
+
+					}
+
+					tmpPassword=new char[0];
+
+				} catch (Exception e1) {
+
+					e1.printStackTrace();
+
+					// Error. Null for login error
+
+					mainDocument=null;
+
+
+				}
+
+
+				return null;
+			}
+
+			@Override
+			protected void done(){
+
+
+				if(mainDocument!=null){
+
+					// Success
+
+					panelStatus.setBackground(Color.green.darker());
+					lblLoginStatus.setText(textdata.getKey("loginsuccessful"));
+
+					// Save user name and password, if required. Password will be encoded
+					if(settings.jsonConf.containsKey("Username")) settings.jsonConf.remove("Username");
+					if(settings.jsonConf.containsKey("EncodedPassword")) settings.jsonConf.remove("EncodedPassword");
+
+					if(cRememberUsername.isSelected()){
+
+						settings.jsonConf.put("Username", username);
+
+						if(cRememberPassword.isSelected()){
+
+							try{
+
+								settings.jsonConf.put("EncodedPassword", Encrypter.encrpytAES(String.valueOf(pwdPassword.getPassword()),username));
+
+							} catch(Exception ex){
+
+								ex.printStackTrace();
+
+							}
+
+						}
+
+					}
+
+					// Reset password textbox
+					pwdPassword.setText("");
+
+
+					// Open subjects menu
+					try {
+
+						SubjectsGUI window = new SubjectsGUI(textdata);
+
+						window.mainDocument=mainDocument;
+						window.faitic=faitic;
+
+						// End with settings and create it for the subjects GUI
+
+						settings.saveSettings();
+
+						//loginFrame.setVisible(false);
+
+						loginFrame.dispose();
+
+						window.settings=new Settings("user-" + username + ".conf");
+
+						window.subjectsFrame.setVisible(true);
+
+
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+
+				} else{
+
+					// Unsuccessful
+
+
+					panelStatus.setBackground(Color.RED);
+					lblLoginStatus.setText(textdata.getKey("loginunsuccessful"));
+
+
+				}
+
+				setInterfaceEnabled(true);
+				panelStatus.setVisible(true);
+				btnLogin.setText(textdata.getKey("btnlogin"));
+				
+			}
+
+		};
+		
+		trabajador.execute();
+
+
+	}
+
 	
 	/**
 	 * Create the application.
@@ -511,7 +563,7 @@ public class LoginGUI {
 					username=(String) settings.jsonConf.get("Username");
 					
 					txtUsuario.setText(username);
-					cRememberUsename.setSelected(true);
+					cRememberUsername.setSelected(true);
 					
 					if(settings.jsonConf.containsKey("EncodedPassword")){
 						
@@ -549,7 +601,7 @@ public class LoginGUI {
 					
 					// No user nor password remembered
 					
-					cRememberUsename.setSelected(false);
+					cRememberUsername.setSelected(false);
 					cRememberPassword.setSelected(false);
 					
 					txtUsuario.requestFocus();
@@ -563,6 +615,9 @@ public class LoginGUI {
 				
 				// Show config folder
 				lblConfigurationFolder.setText(textdata.getKey("configfolder", ClassicRoutines.getUserDataPath(true)));
+				
+				// Portable button
+				btnCreatePortable.setVisible(!ClassicRoutines.isPortable());
 				
 				// Faicheck updater. Should be done as the last thing
 				System.out.println("My JAR file: " + getJarPath());
@@ -679,14 +734,17 @@ public class LoginGUI {
 		panel_3.setOpaque(false);
 		panelSettings.add(panel_3, "2, 2, fill, fill");
 		panel_3.setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.PREF_COLSPEC,
 				FormFactory.GLUE_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.GLUE_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
+				FormFactory.UNRELATED_GAP_ROWSPEC,
+				FormFactory.MIN_ROWSPEC,
 				FormFactory.GLUE_ROWSPEC,}));
 		
+		
 		cCheckForUpdates = new JCheckBox(textdata.getKey("checkforupdatesatstartup"));
+		cCheckForUpdates.setHorizontalAlignment(SwingConstants.CENTER);
 		cCheckForUpdates.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				
@@ -708,8 +766,53 @@ public class LoginGUI {
 				
 			}
 		});
-		panel_3.add(cCheckForUpdates, "2, 2");
+		panel_3.add(cCheckForUpdates, "1, 2");
 		cCheckForUpdates.setOpaque(false);
+		
+		btnCreatePortable = new JCustomButton(textdata.getKey("btnconverttoportable"));
+		btnCreatePortable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				settings.saveSettings();	// Save current configuration
+
+				String relativepath=ClassicRoutines.getUserDataPath(true, true);
+				
+				if(!new File(relativepath).exists()){
+					
+					// It doesn't exist, let's create the relative folder
+					
+					ClassicRoutines.createNeededFolders(ClassicRoutines.cpath(relativepath + "/"));
+					
+				}
+
+				if(isTheJarPathAFile()){
+
+					ProcessBuilder proc=new ProcessBuilder();
+
+					ArrayList<String> listaComandos=new ArrayList<String>();
+					listaComandos.add("java");
+					listaComandos.add("-jar");
+					listaComandos.add(getJarPath());	// Open the jar again
+
+					proc.command(listaComandos);
+					try {
+
+						proc.start();
+
+					} catch (IOException e) {
+
+						e.printStackTrace();
+
+					}
+
+				}
+
+				
+				System.exit(0);
+				
+			}
+		});
+		panel_3.add(btnCreatePortable, "1, 4");
 		
 		JPanel panel = new JPanel();
 		panelSettings.add(panel, "4, 2");
@@ -862,6 +965,7 @@ public class LoginGUI {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				panelSettings.setVisible(!panelSettings.isVisible());
+				//panelLogin.setVisible(!panelSettings.isVisible());
 			}
 		});
 		panel_4.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -938,27 +1042,24 @@ public class LoginGUI {
 		pwdPassword.setMinimumSize(new Dimension(4, 25));
 		panelLogin.add(pwdPassword, "4, 4, fill, default");
 		
-		cRememberUsename = new JCheckBox(textdata.getKey("rememberusername"));
-		cRememberUsename.addItemListener(new ItemListener() {
+		cRememberUsername = new JCheckBox(textdata.getKey("rememberusername"));
+		cRememberUsername.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent arg0) {
 				
 				cRememberPassword.setEnabled(arg0.getStateChange()==arg0.SELECTED);
 				
 			}
 		});
-		cRememberUsename.setOpaque(false);
-		panelLogin.add(cRememberUsename, "4, 6");
+		cRememberUsername.setOpaque(false);
+		panelLogin.add(cRememberUsername, "4, 6");
 		
 		cRememberPassword = new JCheckBox(textdata.getKey("rememberpassword"));
 		cRememberPassword.setEnabled(false);
 		cRememberPassword.setOpaque(false);
 		panelLogin.add(cRememberPassword, "4, 8");
 		
-		JPanel panel_2 = new JPanel();
-		panel_2.setOpaque(false);
-		panelLogin.add(panel_2, "2, 10, 3, 1, fill, fill");
-		
-		btnLogin = new JButton(textdata.getKey("btnlogin"));
+		btnLogin = new JCustomButton(textdata.getKey("btnlogin"));
+		panelLogin.add(btnLogin, "2, 10, 3, 1");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
@@ -966,7 +1067,6 @@ public class LoginGUI {
 				
 			}
 		});
-		panel_2.add(btnLogin);
 		
 		panelUpdater = new JPanel(){
 
@@ -1154,7 +1254,7 @@ public class LoginGUI {
 		lblConfigurationFolder = new JLabel("Configuration folder:");
 		lblConfigurationFolder.setForeground(Color.GRAY);
 		lblConfigurationFolder.setHorizontalAlignment(SwingConstants.CENTER);
-		panelWithEverything.add(lblConfigurationFolder, "1, 9, 3, 1");
+		panelWithEverything.add(lblConfigurationFolder, "2, 9");
 		
 		JLabel lblAbout = new JLabel(textdata.getKey("appbriefdescription"));
 		panelWithEverything.add(lblAbout, "2, 11");
