@@ -609,7 +609,7 @@ public class Faitic {
 		int errorToLoginIndex=responseToLogin.indexOf("<dd class=\"error message\">");
 		
 		// If there was an error
-		if(errorToLoginIndex > 0){
+		if(errorToLoginIndex >= 0){
 		
 			int firstLiError=responseToLogin.indexOf("<li>",errorToLoginIndex);
 			int lastLiError=responseToLogin.indexOf("</li>",errorToLoginIndex);
@@ -623,9 +623,10 @@ public class Faitic {
 			
 		}
 		
-		// No error, pass the document
+		// No error, go to the document we want (Languages change the destination)
 		
-		return responseToLogin;
+		//return responseToLogin;
+		return requestDocument(urlSubjects,"");
 		
 		
 	}

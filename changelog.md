@@ -1,3 +1,14 @@
+# v.0.0.5a -> v0.0.5b:
+
+### English
+
+ * Fixed bug where if you had selected a language in Faitic the app wouldn't show you your subjects.
+ 
+### Español
+
+ * Arreglado error en el que si seleccionaste un idioma en Faitic la aplicación no te mostraría ninguna asignatura.
+
+
 # v.0.0.4a -> v0.0.5a:
 
 ### English
