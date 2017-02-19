@@ -928,7 +928,7 @@ public class Faitic {
 				
 				if(endOfOcurrence>ocurrence){
 					
-					String urlGot=urlBase + "/document/" + documentToAnalyse.substring(ocurrence, endOfOcurrence).replace("&amp;", "&");
+					String urlGot=urlBase + "/document/" + documentToAnalyse.substring(ocurrence, endOfOcurrence).replace("&amp;", "&").replace(" ", "%20");
 					
 					String pathForFile=urlGot.substring((urlBase + "/document/goto/index.php/").length(), urlGot.lastIndexOf("?") >=0 ? urlGot.lastIndexOf("?") : urlGot.length());
 					
@@ -951,7 +951,7 @@ public class Faitic {
 				
 				if(endOfOcurrence>ocurrence){
 
-					String urlGot=urlBase + documentToAnalyse.substring(ocurrence, endOfOcurrence).replace("&amp;", "&");
+					String urlGot=urlBase + documentToAnalyse.substring(ocurrence, endOfOcurrence).replace("&amp;", "&").replace(" ", "%20");
 					
 					listDocumentsClarolineInternal(urlGot, list, urlBase);
 					
@@ -1063,35 +1063,44 @@ public class Faitic {
 			while(URLStart>=0 && URLStart<URLEnd){
 
 				String urlList=urlBase + "/mod/resource/" + whereToSearch.substring(URLStart, URLEnd);
-				urlList=urlList.replace("&amp;", "&");
+				urlList=urlList.replace("&amp;", "&").replace(" ", "%20");
 
 				// We have got the url, but we don't know if it's a folder or not, let's check it
 
-				String realurl = getRedirectedURL(urlList, "");
+				try{
 
-				if(realurl==null){
+					String realurl = getRedirectedURL(urlList, "");
 
-					// Folder, recursive search
+					if(realurl==null){
 
-					listDocumentsMoodleInternal(urlList, list, urlBase);
+						// Folder, recursive search
 
-				} else{
+						listDocumentsMoodleInternal(urlList, list, urlBase);
 
-					// Document, let's get the real name
+					} else{
 
-					String realname="undefined";
+						// Document, let's get the real name
 
-					int filePathStart=realurl.indexOf("/", (urlBase + "/file.php/").length()+1);
-					
-					if(filePathStart>=0){
-						
-						String filePath=realurl.substring(filePathStart, realurl.length());
-						
-						list.add(new String[]{URLDecoder.decode(filePath, "iso-8859-1"),realurl});	// Added to list
-						
+						String realname="undefined";
+
+						int filePathStart=realurl.indexOf("/", (urlBase + "/file.php/").length()+1);
+
+						if(filePathStart>=0){
+
+							String filePath=realurl.substring(filePathStart, realurl.length());
+
+							list.add(new String[]{URLDecoder.decode(filePath, "iso-8859-1"),realurl});	// Added to list
+
+						}
+
+
 					}
 
 
+				} catch(Exception ex){
+					
+					ex.printStackTrace();
+					
 				}
 
 
@@ -1201,29 +1210,35 @@ public class Faitic {
 				} else{
 					
 					// Document, let's get the real name
-					
-					String realurl = getRedirectedURL(urlList, "");
-					String realname=filename;	// By now
-					
-					if(realurl!=null){
-						
-						// Redirected, get the real name
-						
-						int questionMarkIndex=realurl.indexOf("?");
-						int lastDivider=realurl.substring(0, questionMarkIndex >=0 ? questionMarkIndex : realurl.length()).lastIndexOf("/");	// No error because it starts at 0
-						
-						if(lastDivider>=0){
-							
-							// Got a name
-							
-							realname=URLDecoder.decode(realurl.substring(lastDivider+1, questionMarkIndex>=0 ? questionMarkIndex : realurl.length()),"UTF-8");
-							
+
+					try{
+
+						String realurl = getRedirectedURL(urlList, "");
+						String realname=filename;	// By now
+
+						if(realurl!=null){
+
+							// Redirected, get the real name
+
+							int questionMarkIndex=realurl.indexOf("?");
+							int lastDivider=realurl.substring(0, questionMarkIndex >=0 ? questionMarkIndex : realurl.length()).lastIndexOf("/");	// No error because it starts at 0
+
+							if(lastDivider>=0){
+
+								// Got a name
+
+								realname=URLDecoder.decode(realurl.substring(lastDivider+1, questionMarkIndex>=0 ? questionMarkIndex : realurl.length()),"UTF-8");
+
+							}
+
+
 						}
-						
-						
+
+						list.add(new String[]{folder + "/" + realname, urlList});
+
+					} catch(Exception ex){
+						ex.printStackTrace();
 					}
-					
-					list.add(new String[]{folder + "/" + realname, urlList});
 
 				}
 				
