@@ -25,12 +25,17 @@ import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 
+import javax.activation.FileTypeMap;
+import javax.activation.MimetypesFileTypeMap;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -70,6 +75,7 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
+import java.util.zip.CRC32;
 import java.awt.SystemColor;
 
 import javax.swing.JPopupMenu;
@@ -78,8 +84,10 @@ import javax.swing.JMenuItem;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.awt.Toolkit;
 
 import javax.swing.JSplitPane;
@@ -208,6 +216,67 @@ public class SubjectsGUI {
 	
 	// The rest
 
+	protected static Color getColorIdentifierForFile(String extension){
+
+		byte[] extarray=extension.toLowerCase().getBytes(StandardCharsets.UTF_8);
+		
+		CRC32 crc32=new CRC32();
+		crc32.update(extarray);
+		
+		long crc32output=crc32.getValue();
+		
+		int mat=(int)(crc32output & 0xff);
+		
+		//System.out.println(mat);
+		
+		Color outColor=Color.getHSBColor(mat/256.0f, 1.0f, 0.5f);
+		
+		return outColor;
+		
+	}
+
+	protected static BufferedImage getImgIdentifierForFile(File file, int height){
+		
+		// Get extension
+		String filename=file.getName();
+		String extension=filename.lastIndexOf(".")>=0 && filename.lastIndexOf(".")<filename.length()-1 ? filename.substring(filename.lastIndexOf(".")+1, filename.length()) : filename;
+		
+		BufferedImage imgout=new BufferedImage(32, height, BufferedImage.TYPE_INT_ARGB);
+		
+		// Get font width with certain font size
+		
+		int fontheight=height-2;
+		Font textfont=new Font("Dialog", Font.PLAIN, fontheight);
+		String outText=extension;
+		
+		FontMetrics measurer=imgout.getGraphics().getFontMetrics(textfont);
+		int fontwidth=measurer.stringWidth(outText);
+		int fontAscent=measurer.getAscent();
+		
+		imgout=new BufferedImage(fontwidth+8, height, BufferedImage.TYPE_INT_ARGB);
+		
+		// Draw it
+		
+		Graphics2D g2=imgout.createGraphics();
+
+	    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		g2.setColor(getColorIdentifierForFile(extension));
+		g2.setStroke(new BasicStroke(1));
+		
+		g2.fillRoundRect(0, 0, fontwidth+8, height, 3, 3);
+		
+		g2.setFont(textfont);
+		g2.setColor(Color.white);
+		g2.drawString(outText, 4, fontAscent);
+		
+		return imgout;
+		
+	}
+	
+	
 	private static int mustbebetween(int value, int min, int max){
 		
 		return mustbebetween(value, min, max, -1);
@@ -584,6 +653,7 @@ public class SubjectsGUI {
 			lArchivos[i]=new JLabel(filename);
 			lArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			lArchivos[i].setFont(new Font("Dialog", Font.BOLD, 12));
+			lArchivos[i].setIcon(new ImageIcon(getImgIdentifierForFile(new File(fileDestination(subjectPath, fileList.get(i)[0])),12)));
 			lArchivos[i].addMouseListener(new MouseAdapter(){
 
 				@Override

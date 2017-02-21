@@ -1,3 +1,15 @@
+# v.0.0.5b -> v0.0.5c:
+
+### English
+
+ * Bug corrections.
+ * Extension icons (With colours) for the different file extensions.
+ 
+### Español
+
+ * Corrección de errores.
+ * Iconos de extensión (Con colores) para las diferentes extensiones de archivo.
+
 # v.0.0.5a -> v0.0.5b:
 
 ### English
