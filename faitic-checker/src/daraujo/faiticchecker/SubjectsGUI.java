@@ -241,21 +241,23 @@ public class SubjectsGUI {
 		String filename=file.getName();
 		String extension=filename.lastIndexOf(".")>=0 && filename.lastIndexOf(".")<filename.length()-1 ? filename.substring(filename.lastIndexOf(".")+1, filename.length()) : filename;
 		
+		// The picture's first declaration
 		BufferedImage imgout=new BufferedImage(32, height, BufferedImage.TYPE_INT_ARGB);
 		
-		// Get font width with certain font size
+		// Get font width with certain font size and configure the text
 		
 		int fontheight=height-2;
 		Font textfont=new Font("Dialog", Font.PLAIN, fontheight);
-		String outText=extension;
+		String outText=extension.toUpperCase();
 		
 		FontMetrics measurer=imgout.getGraphics().getFontMetrics(textfont);
 		int fontwidth=measurer.stringWidth(outText);
 		int fontAscent=measurer.getAscent();
 		
+		// New declaration of the picture, with the new size
 		imgout=new BufferedImage(fontwidth+8, height, BufferedImage.TYPE_INT_ARGB);
 		
-		// Draw it
+		// Draw everything
 		
 		Graphics2D g2=imgout.createGraphics();
 
@@ -267,6 +269,8 @@ public class SubjectsGUI {
 		g2.setStroke(new BasicStroke(1));
 		
 		g2.fillRoundRect(0, 0, fontwidth+8, height, 3, 3);
+		
+		// Now the text
 		
 		g2.setFont(textfont);
 		g2.setColor(Color.white);
