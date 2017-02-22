@@ -82,7 +82,7 @@ public class FirstStart extends JDialog {
 	
 	private static JPanel pSpanish, pEnglish, pGalician;
 
-	private static JButton btnNext, btnCancel;
+	private static JCustomButton btnNext, btnCancel;
 	private static JTextPane txtWelcomeDesc, txtAppdataDesc, txtRelativeDesc;
 	private static JRadioButton rSaveAppdata, rSaveRelative;
 	private static JLabel lblWelcome;
@@ -235,7 +235,7 @@ public class FirstStart extends JDialog {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.GLUE_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
+				FormFactory.MIN_ROWSPEC,
 				RowSpec.decode("30dlu"),}));
 		
 		JPanel panelLogo = new JPanel(){
@@ -459,7 +459,7 @@ public class FirstStart extends JDialog {
 		rgroup.add(rSaveAppdata);
 		rgroup.add(rSaveRelative);
 		
-		btnCancel = new JButton("Cancelar");
+		btnCancel = new JCustomButton("Cancelar");
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
@@ -469,7 +469,7 @@ public class FirstStart extends JDialog {
 		});
 		panelEverything.add(btnCancel, "4, 11");
 		
-		btnNext = new JButton("Siguiente >");
+		btnNext = new JCustomButton("Siguiente >");
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				

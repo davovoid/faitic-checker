@@ -3,11 +3,13 @@
 ### English
 
  * Bug corrections.
+ * First start buttons improved.
  * Extension icons (With colours) for the different file extensions.
  
 ### Español
 
  * Corrección de errores.
+ * Botones del primer arranque mejorados.
  * Iconos de extensión (Con colores) para las diferentes extensiones de archivo.
 
 # v.0.0.5a -> v0.0.5b:
