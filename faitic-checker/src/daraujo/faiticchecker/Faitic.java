@@ -695,9 +695,9 @@ public class Faitic {
 	}
 	
 	
-	public static ArrayList<String[]> faiticSubjects(String documentToCheck){	// 0 url 1 name
+	public static ArrayList<Subject> faiticSubjects(String documentToCheck){	// 0 url 1 name
 		
-		ArrayList<String[]> subjectList=new ArrayList<String[]>();
+		ArrayList<Subject> subjectList=new ArrayList<Subject>();
 		
 		// Login was unsuccessful
 		if(documentToCheck==null) return subjectList;
@@ -716,12 +716,11 @@ public class Faitic {
 			int hrefFirstTagCloserIndex=documentToCheck.indexOf(">",hrefURLCloserIndex);
 			int hrefSecondTagOpenerIndex=documentToCheck.indexOf("<", hrefFirstTagCloserIndex);
 			
-			String[] subject=new String[2];
 			
-			subject[0]=documentToCheck.substring(hrefIndex+"<a href=\"".length(), hrefURLCloserIndex);
-			subject[1]=documentToCheck.substring(hrefFirstTagCloserIndex+1, hrefSecondTagOpenerIndex).trim();
+			String subjectURL=documentToCheck.substring(hrefIndex+"<a href=\"".length(), hrefURLCloserIndex);
+			String subjectName=documentToCheck.substring(hrefFirstTagCloserIndex+1, hrefSecondTagOpenerIndex).trim();
 			
-			subjectList.add(subject);
+			subjectList.add(new Subject(subjectURL, subjectName));
 			
 			subjectIndex=documentToCheck.indexOf("<span class=\"asignatura\"",subjectIndex+1);
 			
@@ -731,7 +730,7 @@ public class Faitic {
 		
 	}
 	
-	public static String[] goToSubject(String url) throws Exception{	// 0 is the url and 1 is the document itself
+	public static DocumentFromURL goToSubject(String url) throws Exception{	// 0 is the url and 1 is the document itself
 		
 		String documentMain=requestDocument(url,"");
 		
@@ -796,7 +795,7 @@ public class Faitic {
 			
 		}
 		
-		return new String[]{urlForAction,requestDocument(urlForAction,output.toString())};
+		return new DocumentFromURL(urlForAction,requestDocument(urlForAction,output.toString()));
 		
 		
 	}
@@ -866,14 +865,14 @@ public class Faitic {
 		
 	}
 	
-	public static ArrayList<String[]> listDocumentsClaroline(String platformURL) throws Exception{
+	public static ArrayList<FileFromURL> listDocumentsClaroline(String platformURL) throws Exception{
 		
 		/*
 		 * 0 -> Path (incl. filename)
 		 * 1 -> URL to file
 		 */
 		
-		ArrayList<String[]> list=new ArrayList<String[]>();
+		ArrayList<FileFromURL> list=new ArrayList<FileFromURL>();
 		
 		int untilWhenUrlToUse= platformURL.indexOf("/", platformURL.indexOf("/claroline")+1);
 		
@@ -892,7 +891,7 @@ public class Faitic {
 		
 	}
 	
-	private static void listDocumentsClarolineInternal(String urlToAnalyse, ArrayList<String[]> list, String urlBase) throws Exception{
+	private static void listDocumentsClarolineInternal(String urlToAnalyse, ArrayList<FileFromURL> list, String urlBase) throws Exception{
 
 		String document;
 		
@@ -932,7 +931,7 @@ public class Faitic {
 					
 					String pathForFile=urlGot.substring((urlBase + "/document/goto/index.php/").length(), urlGot.lastIndexOf("?") >=0 ? urlGot.lastIndexOf("?") : urlGot.length());
 					
-					list.add(new String[]{ URLDecoder.decode("/" + pathForFile, "iso-8859-1") , urlGot });
+					list.add(new FileFromURL(urlGot, URLDecoder.decode("/" + pathForFile, "iso-8859-1")));
 					
 				}
 				
@@ -968,14 +967,14 @@ public class Faitic {
 	}
 
 
-	public static ArrayList<String[]> listDocumentsMoodle(String platformURL) throws Exception{
+	public static ArrayList<FileFromURL> listDocumentsMoodle(String platformURL) throws Exception{
 		
 		/*
 		 * 0 -> Path (incl. filename)
 		 * 1 -> URL to file
 		 */
 		
-		ArrayList<String[]> list=new ArrayList<String[]>();
+		ArrayList<FileFromURL> list=new ArrayList<FileFromURL>();
 		
 		int untilWhenUrlToUse= platformURL.indexOf("/", platformURL.indexOf("/moodle")+1);
 		
@@ -997,7 +996,7 @@ public class Faitic {
 	}
 	
 
-	private static void listDocumentsMoodleInternal(String urlToUse, ArrayList<String[]> list, String urlBase) throws Exception{
+	private static void listDocumentsMoodleInternal(String urlToUse, ArrayList<FileFromURL> list, String urlBase) throws Exception{
 		
 		//System.out.println("---Accessed---");
 
@@ -1040,7 +1039,7 @@ public class Faitic {
 				
 				String filePath=urlToFile.substring(filePathStart, urlToFile.length());
 				
-				list.add(new String[]{URLDecoder.decode(filePath, "iso-8859-1"),urlToFile});	// Added to list
+				list.add(new FileFromURL(urlToFile,URLDecoder.decode(filePath, "iso-8859-1")));	// Added to list
 				
 				// For next loop
 				
@@ -1089,7 +1088,7 @@ public class Faitic {
 
 							String filePath=realurl.substring(filePathStart, realurl.length());
 
-							list.add(new String[]{URLDecoder.decode(filePath, "iso-8859-1"),realurl});	// Added to list
+							list.add(new FileFromURL(realurl,URLDecoder.decode(filePath, "iso-8859-1")));	// Added to list
 
 						}
 
@@ -1122,14 +1121,14 @@ public class Faitic {
 	}
 
 
-	public static ArrayList<String[]> listDocumentsMoodle2(String platformURL) throws Exception{
+	public static ArrayList<FileFromURL> listDocumentsMoodle2(String platformURL) throws Exception{
 		
 		/*
 		 * 0 -> Path (incl. filename)
 		 * 1 -> URL to file
 		 */
 		
-		ArrayList<String[]> list=new ArrayList<String[]>();
+		ArrayList<FileFromURL> list=new ArrayList<FileFromURL>();
 		
 		int untilWhenUrlToUse= platformURL.indexOf("/", platformURL.indexOf("/moodle")+1);
 		
@@ -1151,7 +1150,7 @@ public class Faitic {
 	}
 	
 
-	private static void listDocumentsMoodle2Internal(String urlToUse, ArrayList<String[]> list, String urlBase, String folder) throws Exception{
+	private static void listDocumentsMoodle2Internal(String urlToUse, ArrayList<FileFromURL> list, String urlBase, String folder) throws Exception{
 		
 		//System.out.println("---Accessed---");
 
@@ -1234,7 +1233,7 @@ public class Faitic {
 
 						}
 
-						list.add(new String[]{folder + "/" + realname, urlList});
+						list.add(new FileFromURL(urlList,folder + "/" + realname));
 
 					} catch(Exception ex){
 						ex.printStackTrace();
@@ -1256,7 +1255,7 @@ public class Faitic {
 		
 	}
 
-	protected static void deleteRepeatedFiles(ArrayList<String[]> list){	// Deletes files with same url
+	protected static void deleteRepeatedFiles(ArrayList<FileFromURL> list){	// Deletes files with same url
 		
 		// Make a copy of list
 		
@@ -1264,14 +1263,14 @@ public class Faitic {
 		
 		while(pos<list.size()){	// From 0 to size
 			
-			String[] element=list.get(pos);	// To compare
+			FileFromURL element=list.get(pos);	// To compare
 			
 			int i=pos+1;
 			
 			while(i<list.size()){	// From pos+1 to size
 				
 				// 1 is url
-				if(element[1].equals(list.get(i)[1])){
+				if(element.getURL().equals(list.get(i).getURL())){
 					
 					list.remove(i);	// Delete element
 					i--;			// The i index must be reduced
@@ -1289,14 +1288,14 @@ public class Faitic {
 	
 	}
 	
-	protected static void cleanArtifacts(ArrayList<String[]> list){
+	protected static void cleanArtifacts(ArrayList<FileFromURL> list){
 		
 		for(int i=0; i<list.size(); i++){
 			
-			String[] element=list.get(i);
+			FileFromURL element=list.get(i);
 			
 			// First for the name
-			String name=element[0].trim();	// Trim name
+			String name=element.getFileDestination().trim();	// Trim path
 
 			int until=name.indexOf("<");
 			until=name.indexOf(">")>=0 && name.indexOf(">")<until ? name.indexOf(">") : until;
@@ -1306,19 +1305,15 @@ public class Faitic {
 			
 			if(name.length()<=0) name="undefined"; // Just in case
 			
-			element[0]=name;
-			
 			// Second for the url
 			
-			String url=element[1].trim();	// Trim url
+			String url=element.getURL().trim();	// Trim url
 			
 			until=url.indexOf("<") <= url.indexOf(">") ? url.indexOf("<") : url.indexOf(">");
 			
 			if(until>=0) url=url.substring(0, until);		// Delete unwanted exceeded code
 			
-			element[1]=url;
-			
-			list.set(i, element);
+			list.set(i, new FileFromURL(url, name));
 			
 		}
 		

@@ -90,7 +90,7 @@ public class LoginGUI {
 	protected static Locale language;
 	protected static TextData textdata=new TextData(new Locale("es"));
 	
-	private static JPanel panelLogin;
+	private static JCustomPanel panelLogin;
 	private static JPanel pSpanish, pEnglish, pGalician;
 
 	protected static Faitic faitic;
@@ -636,8 +636,6 @@ public class LoginGUI {
 		
 		JPanel panelWithEverything = new JPanel(){
 			
-
-			
 			@Override
 			public void paintComponent(Graphics g){
 				
@@ -975,35 +973,9 @@ public class LoginGUI {
 		panel_1.add(panel_4, "2, 2, fill, fill");
 		
 		
-		panelLogin = new JPanel(){
-
-			@Override
-			public void paintComponent(Graphics g){
-
-				Color borderColor=new Color(140,140,140,255);
-				
-				for(int i=0; i<8; i++){
-					
-					g.setColor(new Color(200,200,200,200*(i+1)/8));
-					
-					if(i%3==0){
-						g.drawLine(i/3, i/3, super.getWidth()-i, i/3);	// top
-						g.drawLine(i/3, i/3+1, i/3, super.getHeight()-i-1);	// left
-					}
-
-					g.drawLine(super.getWidth()-i, i/3+1, super.getWidth()-i, super.getHeight()-i-1);	// Right
-					g.drawLine(i/3, super.getHeight()-i, super.getWidth()-i, super.getHeight()-i);	// Bottom
-					
-				}
-
-				g.setColor(borderColor);
-				g.drawRect(3, 3, super.getWidth()-11, super.getHeight()-11);
-				g.drawRect(3, 3, super.getWidth()-12, super.getHeight()-12);
-				
-			}
-
-		};
+		panelLogin = new JCustomPanel();
 		panelLogin.setOpaque(false);
+		panelLogin.setBackground(new Color(140,140,140,255));
 		panelLogin.setMinimumSize(new Dimension(460, 280));
 		panelWithEverything.add(panelLogin, "2, 3, fill, fill");
 		panelLogin.setLayout(new FormLayout(new ColumnSpec[] {
@@ -1011,7 +983,7 @@ public class LoginGUI {
 				FormFactory.MIN_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				ColumnSpec.decode("default:grow"),
-				ColumnSpec.decode("56px"),},
+				ColumnSpec.decode("51px"),},
 			new RowSpec[] {
 				RowSpec.decode("default:grow"),
 				FormFactory.MIN_ROWSPEC,
@@ -1068,73 +1040,11 @@ public class LoginGUI {
 			}
 		});
 		
-		panelUpdater = new JPanel(){
-
-			@Override
-			public void paintComponent(Graphics g){
-
-				//super.paintComponent(g);
-				
-				Color borderColor=super.getBackground();
-				
-
-				for(int i=0; i<8; i++){
-					
-					g.setColor(new Color(200,200,200,200*(i+1)/8));
-					
-					if(i%3==0){
-						g.drawLine(i/3, 7+i/3, super.getWidth()-i, 7+i/3);	// top
-						g.drawLine(i/3, 7+i/3+1, i/3, super.getHeight()-i-1);	// left
-					}
-
-					g.drawLine(super.getWidth()-i, 7+i/3+1, super.getWidth()-i, super.getHeight()-i-1);	// Right
-					g.drawLine(i/3, super.getHeight()-i, super.getWidth()-i, super.getHeight()-i);	// Bottom
-					
-				}
-
-				g.setColor(borderColor);
-				g.drawRect(3, 10, super.getWidth()-11, super.getHeight()-11-7);
-				g.drawRect(3, 10, super.getWidth()-12, super.getHeight()-12-7);
-				
-				
-			}
-
-		};
+		panelUpdater = new JCustomPanel();
 		panelUpdater.setBackground(Color.LIGHT_GRAY);
 		panelUpdater.setVisible(false);
 		
-		panelStatus = new JPanel(){
-
-			@Override
-			public void paintComponent(Graphics g){
-
-				//super.paintComponent(g);
-				
-				Color borderColor=super.getBackground();
-				
-
-				for(int i=0; i<8; i++){
-					
-					g.setColor(new Color(200,200,200,200*(i+1)/8));
-					
-					if(i%3==0){
-						g.drawLine(i/3, 7+i/3, super.getWidth()-i, 7+i/3);	// top
-						g.drawLine(i/3, 7+i/3+1, i/3, super.getHeight()-i-1);	// left
-					}
-
-					g.drawLine(super.getWidth()-i, 7+i/3+1, super.getWidth()-i, super.getHeight()-i-1);	// Right
-					g.drawLine(i/3, super.getHeight()-i, super.getWidth()-i, super.getHeight()-i);	// Bottom
-					
-				}
-
-				g.setColor(borderColor);
-				g.drawRect(3, 10, super.getWidth()-11, super.getHeight()-11-7);
-				g.drawRect(3, 10, super.getWidth()-12, super.getHeight()-12-7);
-				
-				
-			}
-
-		};
+		panelStatus = new JCustomPanel();
 		panelStatus.setVisible(false);
 		//panelStatus.setBackground(Color.RED);
 		panelStatus.setOpaque(false);
@@ -1153,7 +1063,7 @@ public class LoginGUI {
 				FormFactory.PREF_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,
-				ColumnSpec.decode("12dlu"),},
+				ColumnSpec.decode("10dlu"),},
 			new RowSpec[] {
 				RowSpec.decode("12dlu"),
 				FormFactory.PREF_ROWSPEC,

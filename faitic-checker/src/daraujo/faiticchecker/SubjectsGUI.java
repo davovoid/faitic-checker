@@ -123,11 +123,11 @@ public class SubjectsGUI {
 	private static JLabel[] btnAbrirArchivos;
 	
 	private static int selectedSubject=-1, prevSelectedSubject=-1;
-	private static ArrayList<String[]> subjectList;
-	private static String[] subject;
+	private static ArrayList<Subject> subjectList;
+	private static DocumentFromURL subject;
 	private static int subjectType;
 	private static String subjectURL;
-	private static ArrayList<String[]> fileList;
+	private static ArrayList<FileFromURL> fileList;
 	private static String subjectPath;
 	
 	private static File jDirChooserCurrentDir;
@@ -384,16 +384,16 @@ public class SubjectsGUI {
 										// Important not to override values used by logout BEFORE logging out
 										
 										writeLoadingText(textdata.getKey("loadingclosingprevioussubject"));
-										faitic.logoutSubject(subjectURL, subject[1], subjectType);
+										faitic.logoutSubject(subjectURL, subject.getDocument(), subjectType);
 										
 									}
 									
 									writeLoadingText(textdata.getKey("loadingopeningsubject"));
 									
-									subject=faitic.goToSubject(subjectList.get(selectedSubject)[0]);
-									subjectType=faitic.subjectPlatformType(subject[0]);
-									subjectURL=subject[0];
-									String subjectName=subjectList.get(selectedSubject)[1];
+									subject=faitic.goToSubject(subjectList.get(selectedSubject).getURL());
+									subjectType=faitic.subjectPlatformType(subject.getURL());
+									subjectURL=subject.getURL();
+									String subjectName=subjectList.get(selectedSubject).getName();
 									
 									writeLoadingText(textdata.getKey("loadinglistingfiles"));
 									
@@ -414,7 +414,7 @@ public class SubjectsGUI {
 										
 										//Unknown
 										if(fileList!=null) fileList.clear();
-										else fileList=new ArrayList<String[]>();
+										else fileList=new ArrayList<FileFromURL>();
 										
 									}
 
@@ -454,7 +454,7 @@ public class SubjectsGUI {
 									// And no files
 									
 									if(fileList!=null) fileList.clear();
-									else fileList=new ArrayList<String[]>();
+									else fileList=new ArrayList<FileFromURL>();
 									
 								}
 
@@ -470,7 +470,7 @@ public class SubjectsGUI {
 									//Only if a subject is correctly selected
 
 									// Preparing the menu, UI
-									lblSubjectName.setText(subjectList.get(selectedSubject)[1]);
+									lblSubjectName.setText(subjectList.get(selectedSubject).getName());
 
 									if(subjectType == faitic.CLAROLINE){
 
@@ -522,7 +522,7 @@ public class SubjectsGUI {
 									lblSubjectName.setText(textdata.getKey("erroropeningsubjecttitle"));
 									lblProperties.setText(textdata.getKey("erroropeningsubjectsummary"));
 									
-									fileList=new ArrayList<String[]>();
+									fileList=new ArrayList<FileFromURL>();
 									
 									fillFilesFromSubject();
 									
@@ -587,7 +587,7 @@ public class SubjectsGUI {
 		
 		for(int i=0; i<fileList.size(); i++){
 			
-			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i)[0]);
+			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i).getFileDestination());
 			
 			cArchivos[i]=new JCheckBox(""){
 
@@ -649,7 +649,7 @@ public class SubjectsGUI {
 			
 			panelToDownload.add(cArchivos[i], "2, " + (int)(i*4+2) + ", 1, 3");
 			
-			String completePath=fileList.get(i)[0];
+			String completePath=fileList.get(i).getFileDestination();
 			int divisionpos=completePath.lastIndexOf("/");
 			String filename=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(divisionpos+1, completePath.length()) : completePath;
 			String parentname=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(0, divisionpos+1) : "";
@@ -657,7 +657,7 @@ public class SubjectsGUI {
 			lArchivos[i]=new JLabel(filename);
 			lArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			lArchivos[i].setFont(new Font("Dialog", Font.BOLD, 12));
-			lArchivos[i].setIcon(new ImageIcon(getImgIdentifierForFile(new File(fileDestination(subjectPath, fileList.get(i)[0])),12)));
+			lArchivos[i].setIcon(new ImageIcon(getImgIdentifierForFile(new File(fileDestination(subjectPath, fileList.get(i).getFileDestination())),12)));
 			lArchivos[i].addMouseListener(new MouseAdapter(){
 
 				@Override
@@ -680,7 +680,7 @@ public class SubjectsGUI {
 							
 							// Subject path selected
 
-							String fileRelPath=fileList.get(index)[0];
+							String fileRelPath=fileList.get(index).getFileDestination();
 							
 							if(fileIsAlreadyDownloaded(subjectPath,fileRelPath)){
 								
@@ -737,7 +737,7 @@ public class SubjectsGUI {
 							
 							// Subject path selected
 
-							String completePath=fileList.get(index)[0];
+							String completePath=fileList.get(index).getFileDestination();
 							int divisionpos=completePath.lastIndexOf("/");
 							String parentname=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(0, divisionpos+1) : "";
 							
@@ -833,7 +833,7 @@ public class SubjectsGUI {
 							
 							// No subject path selected, it will be a save as
 							
-							String fileName=new File(ClassicRoutines.cpath(fileList.get(myFileIndex)[0])).getName();
+							String fileName=new File(ClassicRoutines.cpath(fileList.get(myFileIndex).getFileDestination())).getName();
 							
 							JFileChooser fileSaver=new JFileChooser();
 							fileSaver.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -854,7 +854,7 @@ public class SubjectsGUI {
 								
 								// Download the file
 								
-								String fileURL=fileList.get(myFileIndex)[1];
+								String fileURL=fileList.get(myFileIndex).getURL();
 								
 								try {
 									
@@ -874,7 +874,7 @@ public class SubjectsGUI {
 							
 							// Subject path selected
 
-							String fileRelPath=fileList.get(myFileIndex)[0];
+							String fileRelPath=fileList.get(myFileIndex).getFileDestination();
 							
 							if(fileIsAlreadyDownloaded(subjectPath,fileRelPath)){
 								
@@ -941,7 +941,7 @@ public class SubjectsGUI {
 		
 		for(int i=0; i<fileList.size(); i++){
 			
-			String fileRelPath=fileList.get(i)[0];
+			String fileRelPath=fileList.get(i).getFileDestination();
 			
 			cArchivos[i].setSelected(!fileIsAlreadyDownloaded(subjectPath, fileRelPath));
 			
@@ -955,7 +955,7 @@ public class SubjectsGUI {
 		
 		for(int i=0; i<fileList.size(); i++){
 			
-			String fileRelPath=fileList.get(i)[0];
+			String fileRelPath=fileList.get(i).getFileDestination();
 			
 			btnAbrirArchivos[i].setText("  " + (fileIsAlreadyDownloaded(subjectPath, fileRelPath) ? textdata.getKey("filelistdelete") : textdata.getKey("filelistdownload")) + "  ");
 			
@@ -967,8 +967,8 @@ public class SubjectsGUI {
 
 		// To be downloaded
 		
-		String fileRelPath=fileList.get(i)[0];
-		String whereToDownloadTheFile=fileList.get(i)[1];
+		String fileRelPath=fileList.get(i).getFileDestination();
+		String whereToDownloadTheFile=fileList.get(i).getURL();
 		
 		String strFileDestination=ClassicRoutines.createNeededFolders(fileDestination(subjectPath, fileRelPath));
 		
@@ -985,7 +985,7 @@ public class SubjectsGUI {
 	
 	private static void selectSubjectFolder(){
 
-		String subjectName=subjectList.get(selectedSubject)[1];
+		String subjectName=subjectList.get(selectedSubject).getName();
 		
 		JFileChooser folderSelector=new JFileChooser();
 		folderSelector.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -1025,7 +1025,7 @@ public class SubjectsGUI {
 	
 	private static void askToSelectSubjectFolder(){
 
-		String subjectName=subjectList.get(selectedSubject)[1];
+		String subjectName=subjectList.get(selectedSubject).getName();
 		
 		int questionResult = JOptionPane.showConfirmDialog(subjectsFrame,textdata.getKey("subjectwithoutfoldererror", subjectName),
 				textdata.getKey("subjectwithoutfoldererrortitle"), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
@@ -1067,7 +1067,7 @@ public class SubjectsGUI {
 		
 		for(int i=0; i<subjects.length; i++){
 			
-			subjects[i]=subjectList.get(i)[1];
+			subjects[i]=subjectList.get(i).getName();
 			
 		}
 		
@@ -1111,7 +1111,7 @@ public class SubjectsGUI {
 							settings.saveSettings();
 							
 							if(selectedSubject>=0 && subjectURL!=null && subject!=null)
-								faitic.logoutSubject(subjectURL, subject[1], subjectType);
+								faitic.logoutSubject(subjectURL, subject.getDocument(), subjectType);
 							
 							
 							faitic.faiticLogout(mainDocument);
