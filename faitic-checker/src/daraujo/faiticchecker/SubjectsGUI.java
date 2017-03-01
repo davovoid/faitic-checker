@@ -91,12 +91,18 @@ import java.nio.charset.StandardCharsets;
 import java.awt.Toolkit;
 
 import javax.swing.JSplitPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import javax.swing.ScrollPaneConstants;
+import javax.swing.JTextField;
+
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class SubjectsGUI {
 
@@ -150,6 +156,8 @@ public class SubjectsGUI {
 	private static JLabel lblOpenFolder;
 	
 	private static boolean descargando=false;
+	private static JPanel panelSearch;
+	private JTextField txtSearch;
 	
 	/**
 	 * Application functions
@@ -558,16 +566,55 @@ public class SubjectsGUI {
 		
 	}
 	
-	private static void fillFilesFromSubject(){
+	private static boolean searchInText(String text, String search){
+		
+		for(String word : search.toLowerCase().split(" ")){
+			
+			if(!text.toLowerCase().contains(word)){
+				
+				return false;
+				
+			}
+			
+		}
+		
+		return true;
+		
+	}
+	
+	private static void fillFilesFromSubject(){ fillFilesFromSubject(""); }
+	
+	private static void fillFilesFromSubject(String search){
 		
 		panelToDownload.removeAll();
 		panelToDownload.updateUI();
 		
-		RowSpec[] fRowSpec=new RowSpec[fileList.size()*4+1];
+		// Check if search box is relevant
+		
+		panelSearch.setVisible(fileList.size()>0);
+		
+		// Check matches
+		
+		int matchcounter=0;
+
+		boolean[] matcheswithtext=new boolean[fileList.size()];
+		
+		for(int i=0; i<fileList.size(); i++){
+			
+			matcheswithtext[i]=searchInText(fileList.get(i).getFileDestination(),search);
+			
+			if(matcheswithtext[i]) matchcounter++;
+			
+		}
+		
+		// Now with counter let's size the table
+		
+		RowSpec[] fRowSpec=new RowSpec[matchcounter*4+1];
 		
 		for(int i=0; i<fRowSpec.length; i++){
 			
 			fRowSpec[i]= i==0 || i==fRowSpec.length-1 ? FormFactory.UNRELATED_GAP_ROWSPEC : i % 4 == 0 ? FormFactory.PARAGRAPH_GAP_ROWSPEC : i % 2 == 0 ? FormFactory.LINE_GAP_ROWSPEC : FormFactory.PREF_ROWSPEC;
+		
 		}
 		
 		panelToDownload.setLayout(new FormLayout(new ColumnSpec[] {
@@ -585,9 +632,12 @@ public class SubjectsGUI {
 		lParentPaths=new JLabel[fileList.size()];
 		btnAbrirArchivos=new JLabel[fileList.size()];
 		
+		int iDisc=0;	// For putting the info in the GUI table
+		
 		for(int i=0; i<fileList.size(); i++){
 			
 			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i).getFileDestination());
+			boolean matchfound=matcheswithtext[i];
 			
 			cArchivos[i]=new JCheckBox(""){
 
@@ -647,7 +697,7 @@ public class SubjectsGUI {
 				
 			});
 			
-			panelToDownload.add(cArchivos[i], "2, " + (int)(i*4+2) + ", 1, 3");
+			if(matchfound)panelToDownload.add(cArchivos[i], "2, " + (int)(iDisc*4+2) + ", 1, 3");
 			
 			String completePath=fileList.get(i).getFileDestination();
 			int divisionpos=completePath.lastIndexOf("/");
@@ -708,7 +758,7 @@ public class SubjectsGUI {
 
 			});
 			
-			panelToDownload.add(lArchivos[i], "4, " + (int)(i*4+2));
+			if(matchfound)panelToDownload.add(lArchivos[i], "4, " + (int)(iDisc*4+2));
 			
 			// Label for URL
 
@@ -767,7 +817,7 @@ public class SubjectsGUI {
 
 			});
 			
-			panelToDownload.add(lParentPaths[i], "4, " + (int)(i*4+4));
+			if(matchfound)panelToDownload.add(lParentPaths[i], "4, " + (int)(iDisc*4+4));
 			
 			// Download and open button
 			
@@ -907,11 +957,14 @@ public class SubjectsGUI {
 				
 			});
 			
-			panelToDownload.add(btnAbrirArchivos[i], "6, " + (int)(i*4+2) + ", 1, 3");
+			if(matchfound)panelToDownload.add(btnAbrirArchivos[i], "6, " + (int)(iDisc*4+2) + ", 1, 3");
+			if(matchfound)iDisc++;
 			
 		}
 		
 		updateDownloadMarkedText();	// Download marked button text set
+		
+		// Done
 		
 		panelToDownload.repaint();
 		
@@ -1568,10 +1621,117 @@ public class SubjectsGUI {
 		panelSubject = new JPanel();
 		splitPane.setRightComponent(panelSubject);
 		panelSubject.setOpaque(false);
-		panelSubject.setLayout(new BorderLayout(0, 0));
+		panelSubject.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.GLUE_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.GLUE_ROWSPEC,}));
+		
+		panelSearch = new JPanel(){
+			
+			@Override
+			public void paintComponent(Graphics g){
+				
+				Color borderColor=new Color(200,200,200,255);
+				Color borderColor2=new Color(170,170,170,255);
+			    Color borderColorShadow=new Color(50,50,50,15);
+			    
+			    int margintop=5;
+			    int marginleft=20;
+			    
+				g.setColor(borderColor);
+				g.drawLine(0, super.getHeight()-1, super.getWidth(), super.getHeight()-1);
+				
+
+				Graphics2D g2=(Graphics2D) g;
+				
+			    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			    g2.setColor(borderColorShadow);
+			    
+			    for(int i=0; i<5; i++){
+			    	
+			    	g.fillRoundRect(i+marginleft, i+margintop, super.getWidth()-4*i/3-2*marginleft, super.getHeight()-4*i/3-2*margintop, 5+6-i, 5+6-i);
+			    	
+			    }
+			    
+			    g.setColor(Color.white);
+			    g.fillRoundRect(2+marginleft, 2+margintop, super.getWidth()-6-2*marginleft, super.getHeight()-6-2*margintop, 5, 5);
+			    
+			    g.setColor(borderColor2);
+			    g.drawRoundRect(2+marginleft, 2+margintop, super.getWidth()-6-2*marginleft, super.getHeight()-6-2*margintop, 5, 5);
+				
+				
+			}
+			
+		};
+		panelSearch.setVisible(false);
+		panelSearch.setOpaque(false);
+		panelSubject.add(panelSearch, "1, 1, fill, fill");
+		panelSearch.setLayout(new FormLayout(new ColumnSpec[] {
+				ColumnSpec.decode("15dlu"),
+				FormFactory.GLUE_COLSPEC,
+				ColumnSpec.decode("15dlu"),},
+			new RowSpec[] {
+				FormFactory.PARAGRAPH_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
+		
+		txtSearch = new JTextField(){
+			
+			@Override
+			public void paintComponent(Graphics g){
+				
+				super.paintComponent(g);
+				
+				if(getText().length()<=0){
+					
+					g.setColor(new Color(200,200,200,255));
+					g.setFont(getFont());
+					
+					g.drawString("Search...", 0, getFontMetrics(getFont()).getAscent());
+					
+				}
+				
+			}
+			
+		};
+		txtSearch.setBackground(Color.WHITE);
+		txtSearch.setBorder(null);
+		txtSearch.setFont(new Font("Dialog", Font.PLAIN, 20));
+		txtSearch.getDocument().addDocumentListener(new DocumentListener(){
+
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+				textChanged();
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				textChanged();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				textChanged();
+			}
+			
+			public void textChanged(){
+				
+				if(subject!=null && !isLoading) fillFilesFromSubject(txtSearch.getText());
+
+			}
+			
+			
+		});
+
+		panelSearch.add(txtSearch, "2, 2, fill, default");
+		txtSearch.setColumns(10);
 		
 		scrollPane = new JScrollPane();
-		panelSubject.add(scrollPane, BorderLayout.CENTER);
+		panelSubject.add(scrollPane, "1, 2, fill, fill");
 		scrollPane.setOpaque(false);
 		scrollPane.getViewport().setOpaque(false);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
