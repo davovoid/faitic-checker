@@ -158,6 +158,7 @@ public class SubjectsGUI {
 	private static boolean descargando=false;
 	private static JPanel panelSearch;
 	private JTextField txtSearch;
+	private static JPanel btnSearch;
 	
 	/**
 	 * Application functions
@@ -207,6 +208,8 @@ public class SubjectsGUI {
 		itemSelectSubjectFolder.setVisible(false);
 		lblOpenFolder.setVisible(false);
 
+		btnSearch.setVisible(false);
+		panelSearch.setVisible(false);
 
 	}
 	
@@ -220,6 +223,9 @@ public class SubjectsGUI {
 		for(Component comp : panelOptions.getComponents()){
 			comp.setEnabled(true);
 		}
+		
+		if(subject!=null) if(fileList.size()>0) btnSearch.setVisible(true);
+		
 	}
 	
 	// The rest
@@ -588,10 +594,6 @@ public class SubjectsGUI {
 		
 		panelToDownload.removeAll();
 		panelToDownload.updateUI();
-		
-		// Check if search box is relevant
-		
-		panelSearch.setVisible(fileList.size()>0);
 		
 		// Check matches
 		
@@ -1418,7 +1420,7 @@ public class SubjectsGUI {
 				FormFactory.UNRELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.GLUE_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
+				RowSpec.decode("pref:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
@@ -1431,34 +1433,61 @@ public class SubjectsGUI {
 		panelLogos.add(panelLogoSpace, "1, 1, 1, 7, fill, fill");
 		
 		lblSubjectName = new JLabel(textdata.getKey("selectsubject"));
-		panelLogos.add(lblSubjectName, "3, 2, 6, 1");
+		panelLogos.add(lblSubjectName, "3, 2, 4, 1");
 		lblSubjectName.setFont(new Font("Dialog", Font.PLAIN, 23));
+		
+		btnSearch = new JPanel(){
+			
+			@Override
+			public void paintComponent(Graphics g){
+				
+				Graphics2D g2=(Graphics2D) g;
+				
+			    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			    g2.setColor(new Color(0,110,198,255));
+			    g2.setStroke(new BasicStroke(3));
+			    
+			    g2.drawOval(getWidth()-getHeight()/2-5, 5, getHeight()/2, getHeight()/2);
+			    g2.drawLine((int)(getWidth()-getHeight()/2-5+getHeight()/4-getHeight()/4*Math.sqrt(2)/2), (int)(5+getHeight()/4+getHeight()/4*Math.sqrt(2)/2), 
+			    		(int)(getWidth()-getHeight()/2-5+getHeight()/4-getHeight()/4*Math.sqrt(2)/2-getHeight()/4), (int)(5+getHeight()/4+getHeight()/4*Math.sqrt(2)/2+getHeight()/4));
+				
+			}
+			
+		};
+		btnSearch.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnSearch.setVisible(false);
+		btnSearch.setOpaque(false);
+		btnSearch.addMouseListener(new MouseAdapter(){
+			
+			@Override
+			public void mouseClicked(MouseEvent arg0){
+				
+				if(arg0.getComponent().isEnabled()){
+					
+					panelSearch.setVisible(!panelSearch.isVisible());
+					
+					if(panelSearch.isVisible()){
+						
+						txtSearch.requestFocus();
+						
+					}
+					
+				}
+
+			}
+			
+		});
+		panelLogos.add(btnSearch, "8, 2, fill, fill");
 		
 		lblProperties = new JLabel("");
 		panelLogos.add(lblProperties, "4, 4, 5, 1");
 		
-		itemSelectSubjectFolder = new JLabel(textdata.getKey("btnchoosesubjectfolder"));
-		itemSelectSubjectFolder.setForeground(new Color(0,110,198,255));
-		itemSelectSubjectFolder.setVisible(false);
-		itemSelectSubjectFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		itemSelectSubjectFolder.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				if(arg0.getComponent().isEnabled()){
-
-					selectSubjectFolder();
-					selectNotDownloadedFiles();
-					
-				}
-				
-			}
-		});
-		
 		lblSubjectFolder = new JLabel("");
 		lblSubjectFolder.setHorizontalAlignment(SwingConstants.LEFT);
 		panelLogos.add(lblSubjectFolder, "4, 6");
-		panelLogos.add(itemSelectSubjectFolder, "6, 6");
 		
 		lblOpenFolder = new JLabel(textdata.getKey("btnopensubjectfolder"));
 		lblOpenFolder.setForeground(new Color(0,110,198,255));
@@ -1493,7 +1522,26 @@ public class SubjectsGUI {
 			}
 		});
 		
-		panelLogos.add(lblOpenFolder, "8, 6");
+		panelLogos.add(lblOpenFolder, "6, 6");
+		
+		itemSelectSubjectFolder = new JLabel(textdata.getKey("btnchoosesubjectfolder"));
+		itemSelectSubjectFolder.setForeground(new Color(0,110,198,255));
+		itemSelectSubjectFolder.setVisible(false);
+		itemSelectSubjectFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		itemSelectSubjectFolder.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(arg0.getComponent().isEnabled()){
+
+					selectSubjectFolder();
+					selectNotDownloadedFiles();
+					
+				}
+				
+			}
+		});
+		panelLogos.add(itemSelectSubjectFolder, "8, 6");
 		
 		panelLoading = new JPanel(){
 			
@@ -1691,7 +1739,7 @@ public class SubjectsGUI {
 					g.setColor(new Color(200,200,200,255));
 					g.setFont(getFont());
 					
-					g.drawString("Search...", 0, getFontMetrics(getFont()).getAscent());
+					g.drawString(textdata.getKey("lblSearch"), 0, getFontMetrics(getFont()).getAscent());
 					
 				}
 				
@@ -1700,7 +1748,7 @@ public class SubjectsGUI {
 		};
 		txtSearch.setBackground(Color.WHITE);
 		txtSearch.setBorder(null);
-		txtSearch.setFont(new Font("Dialog", Font.PLAIN, 20));
+		txtSearch.setFont(new Font("Dialog", Font.PLAIN, 18));
 		txtSearch.getDocument().addDocumentListener(new DocumentListener(){
 
 			@Override
@@ -1720,7 +1768,42 @@ public class SubjectsGUI {
 			
 			public void textChanged(){
 				
-				if(subject!=null && !isLoading) fillFilesFromSubject(txtSearch.getText());
+				if(subject!=null && !isLoading){
+					
+					// Previous selection
+					
+					boolean[] prevSelected=new boolean[cArchivos.length];
+					for(int i=0; i<prevSelected.length; i++){
+						
+						if(cArchivos[i]!=null){
+							
+							prevSelected[i]=cArchivos[i].isSelected();
+							
+						} else{
+							
+							prevSelected[i]=false;
+							
+						}
+						
+					}
+					
+					// Fill subjects
+					
+					fillFilesFromSubject(txtSearch.getText());
+					
+					// Recover the selection
+					
+					for(int i=0; i<prevSelected.length; i++){
+						
+						if(cArchivos[i]!=null){
+							
+							cArchivos[i].setSelected(prevSelected[i]);
+							
+						}
+						
+					}
+					
+				}
 
 			}
 			
