@@ -113,6 +113,8 @@ public class SubjectsGUI {
 	protected static Faitic faitic;
 	protected static String mainDocument;
 	protected static Settings settings;
+	protected static String username;
+	protected static boolean online;
 	
 	private static JPanel panelLogos, panelSubjects, panelSubject, panelOptions, panelEverything;
 	
@@ -221,7 +223,7 @@ public class SubjectsGUI {
 		panelLoading.setVisible(false);
 		scrollPane.setVisible(true);
 		for(Component comp : panelOptions.getComponents()){
-			comp.setEnabled(true);
+			comp.setEnabled(online);
 		}
 		
 		if(subject!=null) if(fileList.size()>0) btnSearch.setVisible(true);
@@ -393,7 +395,7 @@ public class SubjectsGUI {
 								try{
 									
 
-									if(prevSelectedSubject>=0 && subjectURL!=null && subject!=null) {
+									if(prevSelectedSubject>=0 && subjectURL!=null && subject!=null && online) {
 										
 										// Important not to override values used by logout BEFORE logging out
 										
@@ -404,34 +406,50 @@ public class SubjectsGUI {
 									
 									writeLoadingText(textdata.getKey("loadingopeningsubject"));
 									
-									subject=faitic.goToSubject(subjectList.get(selectedSubject).getURL());
-									subjectType=faitic.subjectPlatformType(subject.getURL());
-									subjectURL=subject.getURL();
 									String subjectName=subjectList.get(selectedSubject).getName();
 									
-									writeLoadingText(textdata.getKey("loadinglistingfiles"));
-									
-									if(subjectType == faitic.CLAROLINE){
+									if(online){
 										
-										fileList = faitic.listDocumentsClaroline(subjectURL);
-										
-									}
-									else if(subjectType == faitic.MOODLE){
-											
-										fileList = faitic.listDocumentsMoodle(faitic.lastRequestedURL);
+										// Online mode
 
-									}else if(subjectType == faitic.MOODLE2){
-										
-									fileList = faitic.listDocumentsMoodle2(faitic.lastRequestedURL);
+										subject=faitic.goToSubject(subjectList.get(selectedSubject).getURL());
+										subjectType=faitic.subjectPlatformType(subject.getURL());
+										subjectURL=subject.getURL();
+
+										writeLoadingText(textdata.getKey("loadinglistingfiles"));
+
+										if(subjectType == Faitic.CLAROLINE){
+
+											fileList = faitic.listDocumentsClaroline(subjectURL);
+
+										}
+										else if(subjectType == Faitic.MOODLE){
+
+											fileList = faitic.listDocumentsMoodle(faitic.lastRequestedURL);
+
+										}else if(subjectType == Faitic.MOODLE2){
+
+											fileList = faitic.listDocumentsMoodle2(faitic.lastRequestedURL);
+
+										} else{
+
+											//Unknown
+											if(fileList!=null) fileList.clear();
+											else fileList=new ArrayList<FileFromURL>();
+
+										}
+
+										if(fileList!=null) OfflineFaitic.setOfflineFileList(username, subjectList.get(selectedSubject).getName(), fileList);
 
 									} else{
 										
-										//Unknown
-										if(fileList!=null) fileList.clear();
-										else fileList=new ArrayList<FileFromURL>();
+										// Offline mode
+										
+										subjectType=Faitic.UNKNOWN;
+										fileList=OfflineFaitic.getOfflineFileList(username, subjectName);
 										
 									}
-
+									
 									// Get subject path
 									subjectPath=settings.getSubjectPath(subjectName);
 									
@@ -486,16 +504,16 @@ public class SubjectsGUI {
 									// Preparing the menu, UI
 									lblSubjectName.setText(subjectList.get(selectedSubject).getName());
 
-									if(subjectType == faitic.CLAROLINE){
+									if(subjectType == Faitic.CLAROLINE){
 
 										lblProperties.setText(textdata.getKey("nameclaroline"));
 
 									}
-									else if(subjectType == faitic.MOODLE){
+									else if(subjectType == Faitic.MOODLE){
 
 										lblProperties.setText(textdata.getKey("namemoodle"));
 
-									}else if(subjectType == faitic.MOODLE2){
+									}else if(subjectType == Faitic.MOODLE2){
 
 										lblProperties.setText(textdata.getKey("namemoodle2"));
 
@@ -505,7 +523,7 @@ public class SubjectsGUI {
 
 									}
 
-									if(subjectType!=faitic.UNKNOWN)
+									if(subjectType!=Faitic.UNKNOWN || !online)
 										lblProperties.setText(textdata.getKey("subjectsummary",lblProperties.getText(), fileList.size() + "", fileList.size()!=1 ? "s" : ""));
 
 									/*String[] fileListNames=new String[fileList.size()];
@@ -683,6 +701,7 @@ public class SubjectsGUI {
 
 			};
 			cArchivos[i].setOpaque(false);
+			cArchivos[i].setVisible(online);
 			cArchivos[i].setMinimumSize(new Dimension(40,40));
 			cArchivos[i].setHorizontalAlignment(SwingConstants.CENTER);
 			cArchivos[i].setSelected(!isAlreadyDownloaded); // Not selected if downloaded
@@ -860,6 +879,7 @@ public class SubjectsGUI {
 				}
 
 			};
+			btnAbrirArchivos[i].setVisible(online || isAlreadyDownloaded);
 			btnAbrirArchivos[i].setForeground(Color.white);
 			btnAbrirArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			btnAbrirArchivos[i].setHorizontalAlignment(SwingConstants.CENTER);
@@ -1012,7 +1032,10 @@ public class SubjectsGUI {
 			
 			String fileRelPath=fileList.get(i).getFileDestination();
 			
-			btnAbrirArchivos[i].setText("  " + (fileIsAlreadyDownloaded(subjectPath, fileRelPath) ? textdata.getKey("filelistdelete") : textdata.getKey("filelistdownload")) + "  ");
+			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileRelPath);
+			
+			btnAbrirArchivos[i].setText("  " + (isAlreadyDownloaded ? textdata.getKey("filelistdelete") : textdata.getKey("filelistdownload")) + "  ");
+			btnAbrirArchivos[i].setVisible(online || isAlreadyDownloaded);
 			
 		}
 		
@@ -1116,7 +1139,9 @@ public class SubjectsGUI {
 	
 	private static void doAtActivation(){
 		
-		subjectList=faitic.faiticSubjects(mainDocument);
+		subjectList=online ? faitic.faiticSubjects(mainDocument) : OfflineFaitic.getOfflineSubjectList(username);
+		
+		if(online) OfflineFaitic.setOfflineSubjectList(username, subjectList);
 		
 		String[] subjects=new String[subjectList.size()];
 		
@@ -1127,6 +1152,10 @@ public class SubjectsGUI {
 		}
 		
 		fillSubjects(subjects);
+		
+		activateInterface();
+		
+		if(!online) subjectsFrame.setTitle(textdata.getKey("subjectsframetitleoffline"));
 		
 		//fillFilesFromSubject(new String[]{"Archivo falso 1", "Esto no es falso :3"});
 		
@@ -1165,11 +1194,11 @@ public class SubjectsGUI {
 
 							settings.saveSettings();
 							
-							if(selectedSubject>=0 && subjectURL!=null && subject!=null)
+							if(selectedSubject>=0 && subjectURL!=null && subject!=null && online)
 								faitic.logoutSubject(subjectURL, subject.getDocument(), subjectType);
 							
 							
-							faitic.faiticLogout(mainDocument);
+							if(online) faitic.faiticLogout(mainDocument);
 
 						} catch (Exception e) {
 							// TODO Auto-generated catch block

@@ -44,6 +44,8 @@ import com.jgoodies.forms.factories.FormFactory;
 
 import javax.swing.JLabel;
 import javax.swing.border.LineBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import java.awt.Dimension;
 
@@ -146,6 +148,7 @@ public class LoginGUI {
 	private JPanel panel_1;
 	private JPanel panel_4;
 	private JCustomButton btnCreatePortable;
+	private static JButton btnOfflineMode;
 	
 	protected static String getJarPath(){
 
@@ -337,6 +340,7 @@ public class LoginGUI {
 		pwdPassword.setEnabled(enabled);
 		
 		btnLogin.setEnabled(enabled);
+		btnOfflineMode.setEnabled(enabled);
 		
 		cRememberUsername.setEnabled(enabled);
 		cRememberPassword.setEnabled(cRememberUsername.isSelected() && enabled);
@@ -345,12 +349,22 @@ public class LoginGUI {
 	}
 	
 	private static void fcnLogin(){
+		
+		fcnLogin(true);
+		
+	}
+	
+	private static void fcnLogin(final boolean online){
 
 		username=txtUsuario.getText();
 		tmpPassword=pwdPassword.getPassword();
 
 		setInterfaceEnabled(false);
-		btnLogin.setText(textdata.getKey("btnloginnow"));
+		
+		if(online)
+			btnLogin.setText(textdata.getKey("btnloginnow"));
+		else
+			btnOfflineMode.setText(textdata.getKey("btnofflinemodenow"));
 		
 		SwingWorker trabajador=new SwingWorker(){
 
@@ -360,7 +374,7 @@ public class LoginGUI {
 				try{
 					// Log in
 
-					mainDocument=faitic.faiticLogin(username,String.valueOf(tmpPassword));
+					mainDocument=online ? faitic.faiticLogin(username,String.valueOf(tmpPassword)) : "";	// If offline, then ""
 
 					// Cleaning the pass
 
@@ -391,30 +405,34 @@ public class LoginGUI {
 			protected void done(){
 
 
-				if(mainDocument!=null){
+				if(mainDocument!=null){	// Offline assigns "" to mainDocument !!
 
 					// Success
 
 					panelStatus.setBackground(Color.green.darker());
 					lblLoginStatus.setText(textdata.getKey("loginsuccessful"));
 
-					// Save user name and password, if required. Password will be encoded
-					if(settings.jsonConf.containsKey("Username")) settings.jsonConf.remove("Username");
-					if(settings.jsonConf.containsKey("EncodedPassword")) settings.jsonConf.remove("EncodedPassword");
+					if(online){	// Save data only if online
 
-					if(cRememberUsername.isSelected()){
+						// Save user name and password, if required. Password will be encoded
+						if(settings.jsonConf.containsKey("Username")) settings.jsonConf.remove("Username");
+						if(settings.jsonConf.containsKey("EncodedPassword")) settings.jsonConf.remove("EncodedPassword");
 
-						settings.jsonConf.put("Username", username);
+						if(cRememberUsername.isSelected()){
 
-						if(cRememberPassword.isSelected()){
+							settings.jsonConf.put("Username", username);
 
-							try{
+							if(cRememberPassword.isSelected()){
 
-								settings.jsonConf.put("EncodedPassword", Encrypter.encrpytAES(String.valueOf(pwdPassword.getPassword()),username));
+								try{
 
-							} catch(Exception ex){
+									settings.jsonConf.put("EncodedPassword", Encrypter.encrpytAES(String.valueOf(pwdPassword.getPassword()),username));
 
-								ex.printStackTrace();
+								} catch(Exception ex){
+
+									ex.printStackTrace();
+
+								}
 
 							}
 
@@ -432,7 +450,9 @@ public class LoginGUI {
 						SubjectsGUI window = new SubjectsGUI(textdata);
 
 						window.mainDocument=mainDocument;
-						window.faitic=faitic;
+						window.faitic=online ? faitic : null;
+						window.username=username;
+						window.online=online;
 
 						// End with settings and create it for the subjects GUI
 
@@ -995,6 +1015,8 @@ public class LoginGUI {
 				FormFactory.MIN_ROWSPEC,
 				FormFactory.UNRELATED_GAP_ROWSPEC,
 				FormFactory.MIN_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.MIN_ROWSPEC,
 				RowSpec.decode("default:grow"),}));
 		
 		JLabel lblUsuario = new JLabel(textdata.getKey("lblusername"));
@@ -1002,6 +1024,36 @@ public class LoginGUI {
 		
 		txtUsuario = new JTextField();
 		txtUsuario.addActionListener(enterPressed);
+		txtUsuario.getDocument().addDocumentListener(new DocumentListener(){
+
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {
+
+				textChanged();
+				
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent arg0) {
+
+				textChanged();
+				
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent arg0) {
+
+				textChanged();
+				
+			}
+			
+			private void textChanged(){
+				
+				btnOfflineMode.setVisible(OfflineFaitic.offlineExists(txtUsuario.getText()));
+				
+			}
+			
+		});
 		txtUsuario.setMinimumSize(new Dimension(4, 25));
 		panelLogin.add(txtUsuario, "4, 2, fill, default");
 		txtUsuario.setColumns(10);
@@ -1039,6 +1091,17 @@ public class LoginGUI {
 				
 			}
 		});
+		
+		btnOfflineMode = new JCustomButton(textdata.getKey("btnofflinemode"));
+		btnOfflineMode.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				fcnLogin(false);
+				
+			}
+		});
+		btnOfflineMode.setVisible(false);
+		panelLogin.add(btnOfflineMode, "2, 12, 3, 1");
 		
 		panelUpdater = new JCustomPanel();
 		panelUpdater.setBackground(Color.LIGHT_GRAY);

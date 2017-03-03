@@ -82,7 +82,7 @@ public class Settings {
 		
 	}
 	
-	private static String getSubjectUniqueName(String subject){
+	public static String getSubjectUniqueName(String subject){
 		
 		final String acceptedCharacters="1234567890qwertyuiopasdfghjklzxcvbnm ";
 		
