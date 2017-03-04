@@ -3,13 +3,13 @@
 ### English
 
  * Search bar for subject files.
- * Offline mode for checking already consulted file and subject lists from a certain user.
+ * Offline mode for checking already consulted files and subjects lists from a certain user (It is possible to deactivate it on settings).
  * Bug corrections, as well as design and code improvements.
 
 ### Español
 
  * Barra de búsqueda para archivos de una asignatura.
- * Modo desconectado para comprobar listas ya consultadas de asignaturas y de archivos, para un usuario dado.
+ * Modo desconectado para comprobar listas ya consultadas de asignaturas y de archivos, para un usuario dado (Desactivable en ajustes).
  * Corrección de errores, así como mejoras en diseño y código.
 
 # v.0.0.5b -> v0.0.5c:

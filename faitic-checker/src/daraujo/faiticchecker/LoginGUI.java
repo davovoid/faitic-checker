@@ -128,6 +128,8 @@ public class LoginGUI {
 	
 	private static String username;
 	private static char[] tmpPassword;
+	
+	private static boolean offlinesaving=true;
 
 	private static ActionListener enterPressed = new ActionListener() {
 		public void actionPerformed(ActionEvent arg0) {
@@ -149,6 +151,7 @@ public class LoginGUI {
 	private JPanel panel_4;
 	private JCustomButton btnCreatePortable;
 	private static JButton btnOfflineMode;
+	private JCheckBox cOfflineSaving;
 	
 	protected static String getJarPath(){
 
@@ -453,6 +456,7 @@ public class LoginGUI {
 						window.faitic=online ? faitic : null;
 						window.username=username;
 						window.online=online;
+						window.offlinesaving=offlinesaving;
 
 						// End with settings and create it for the subjects GUI
 
@@ -639,6 +643,11 @@ public class LoginGUI {
 				// Portable button
 				btnCreatePortable.setVisible(!ClassicRoutines.isPortable());
 				
+				// Is offline saving activated or not
+				
+				if(settings.jsonConf.containsKey("offlinesavingdeactivated")) offlinesaving=false;
+				cOfflineSaving.setSelected(offlinesaving);
+				
 				// Faicheck updater. Should be done as the last thing
 				System.out.println("My JAR file: " + getJarPath());
 				
@@ -734,58 +743,25 @@ public class LoginGUI {
 			
 		};
 		panelSettings.setVisible(false);
+		panelWithEverything.add(panelSettings, "1, 1, 3, 1");
 		panelSettings.setOpaque(false);
-		panelWithEverything.add(panelSettings, "1, 1, 3, 1, fill, fill");
 		panelSettings.setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("12dlu"),
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				ColumnSpec.decode("30dlu"),
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				ColumnSpec.decode("12dlu"),},
+				FormFactory.MIN_COLSPEC,
+				FormFactory.MIN_COLSPEC,
+				FormFactory.MIN_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,
-				RowSpec.decode("pref:grow"),
-				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
-		
-		
-		panel_3 = new JPanel();
-		panel_3.setOpaque(false);
-		panelSettings.add(panel_3, "2, 2, fill, fill");
-		panel_3.setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.GLUE_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.GLUE_ROWSPEC,
 				FormFactory.MIN_ROWSPEC,
 				FormFactory.UNRELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,}));
-		
-		
-		cCheckForUpdates = new JCheckBox(textdata.getKey("checkforupdatesatstartup"));
-		cCheckForUpdates.setHorizontalAlignment(SwingConstants.CENTER);
-		cCheckForUpdates.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent arg0) {
-				
-				if(arg0.getStateChange()==arg0.SELECTED){
-					
-					// Check for updates automatically on start-up
-					
-					if(settings.jsonConf.containsKey("noupdatecheck")) settings.jsonConf.remove("noupdatecheck");
-					
-				} else{
-					
-					// Don't check for updates automatically
-					
-					if(!settings.jsonConf.containsKey("noupdatecheck")) settings.jsonConf.put("noupdatecheck","");
-					
-				}
-				
-				System.out.println("Check for updates: " + (arg0.getStateChange()==arg0.SELECTED ? "ON" : "OFF"));
-				
-			}
-		});
-		panel_3.add(cCheckForUpdates, "1, 4");
-		cCheckForUpdates.setOpaque(false);
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
 		btnCreatePortable = new JCustomButton(textdata.getKey("btnconverttoportable"));
 		btnCreatePortable.addActionListener(new ActionListener() {
@@ -830,13 +806,31 @@ public class LoginGUI {
 				
 			}
 		});
-		panel_3.add(btnCreatePortable, "1, 2");
+		panelSettings.add(btnCreatePortable, "2, 2, 2, 1");
 		
-		JPanel panel = new JPanel();
-		panelSettings.add(panel, "4, 2");
-		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
-		flowLayout.setAlignment(FlowLayout.RIGHT);
-		panel.setOpaque(false);
+		
+		cCheckForUpdates = new JCheckBox(textdata.getKey("checkforupdatesatstartup"));
+		cCheckForUpdates.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				
+				if(arg0.getStateChange()==arg0.SELECTED){
+					
+					// Check for updates automatically on start-up
+					
+					if(settings.jsonConf.containsKey("noupdatecheck")) settings.jsonConf.remove("noupdatecheck");
+					
+				} else{
+					
+					// Don't check for updates automatically
+					
+					if(!settings.jsonConf.containsKey("noupdatecheck")) settings.jsonConf.put("noupdatecheck","");
+					
+				}
+				
+				System.out.println("Check for updates: " + (arg0.getStateChange()==arg0.SELECTED ? "ON" : "OFF"));
+				
+			}
+		});
 		
 		pSpanish = new JPanel(){
 			
@@ -859,6 +853,7 @@ public class LoginGUI {
 			}
 			
 		};
+		panelSettings.add(pSpanish, "5, 2");
 		pSpanish.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -872,7 +867,6 @@ public class LoginGUI {
 		pSpanish.setOpaque(false);
 		pSpanish.setPreferredSize(new Dimension(40, 40));
 		pSpanish.setMinimumSize(new Dimension(40, 40));
-		panel.add(pSpanish);
 		
 		pGalician = new JPanel(){
 			
@@ -895,6 +889,7 @@ public class LoginGUI {
 			}
 			
 		};
+		panelSettings.add(pGalician, "6, 2");
 		pGalician.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -909,7 +904,6 @@ public class LoginGUI {
 		pGalician.setPreferredSize(new Dimension(40, 40));
 		pGalician.setOpaque(false);
 		pGalician.setMinimumSize(new Dimension(40, 40));
-		panel.add(pGalician);
 		
 		pEnglish = new JPanel(){
 			
@@ -932,6 +926,7 @@ public class LoginGUI {
 			}
 			
 		};
+		panelSettings.add(pEnglish, "7, 2");
 		pEnglish.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -946,7 +941,31 @@ public class LoginGUI {
 		pEnglish.setPreferredSize(new Dimension(40, 40));
 		pEnglish.setMinimumSize(new Dimension(40, 40));
 		pEnglish.setOpaque(false);
-		panel.add(pEnglish);
+		panelSettings.add(cCheckForUpdates, "3, 4");
+		cCheckForUpdates.setOpaque(false);
+		
+		cOfflineSaving = new JCheckBox(textdata.getKey("checkofflinesaving"));
+		cOfflineSaving.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent arg0) {
+				
+				if(arg0.getStateChange()==arg0.SELECTED && settings.jsonConf.containsKey("offlinesavingdeactivated")){
+					
+					// If the offline mode is active and the deactivation setting is there
+					
+					settings.jsonConf.remove("offlinesavingdeactivated");
+					
+				} else if(arg0.getStateChange()==arg0.DESELECTED && !settings.jsonConf.containsKey("offlinesavingdeactivated")){
+					
+					settings.jsonConf.put("offlinesavingdeactivated","");
+					
+				}
+				
+				offlinesaving=arg0.getStateChange()==arg0.SELECTED;
+				
+			}
+		});
+		cOfflineSaving.setOpaque(false);
+		panelSettings.add(cOfflineSaving, "3, 6");
 		
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
@@ -983,7 +1002,7 @@ public class LoginGUI {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				panelSettings.setVisible(!panelSettings.isVisible());
-				//panelLogin.setVisible(!panelSettings.isVisible());
+				panelLogin.setVisible(!panelSettings.isVisible());
 			}
 		});
 		panel_4.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

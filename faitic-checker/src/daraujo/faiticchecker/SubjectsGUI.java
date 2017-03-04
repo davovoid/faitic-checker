@@ -114,7 +114,8 @@ public class SubjectsGUI {
 	protected static String mainDocument;
 	protected static Settings settings;
 	protected static String username;
-	protected static boolean online;
+	protected static boolean online=true;
+	protected static boolean offlinesaving=true;
 	
 	private static JPanel panelLogos, panelSubjects, panelSubject, panelOptions, panelEverything;
 	
@@ -226,7 +227,7 @@ public class SubjectsGUI {
 			comp.setEnabled(online);
 		}
 		
-		if(subject!=null) if(fileList.size()>0) btnSearch.setVisible(true);
+		if(fileList!=null) if(fileList.size()>0) btnSearch.setVisible(true);
 		
 	}
 	
@@ -439,7 +440,7 @@ public class SubjectsGUI {
 
 										}
 
-										if(fileList!=null) OfflineFaitic.setOfflineFileList(username, subjectList.get(selectedSubject).getName(), fileList);
+										if(fileList!=null && offlinesaving) OfflineFaitic.setOfflineFileList(username, subjectList.get(selectedSubject).getName(), fileList);
 
 									} else{
 										
@@ -1141,7 +1142,7 @@ public class SubjectsGUI {
 		
 		subjectList=online ? faitic.faiticSubjects(mainDocument) : OfflineFaitic.getOfflineSubjectList(username);
 		
-		if(online) OfflineFaitic.setOfflineSubjectList(username, subjectList);
+		if(online && offlinesaving) OfflineFaitic.setOfflineSubjectList(username, subjectList);
 		
 		String[] subjects=new String[subjectList.size()];
 		
@@ -1153,7 +1154,9 @@ public class SubjectsGUI {
 		
 		fillSubjects(subjects);
 		
-		activateInterface();
+		//activateInterface();
+		
+		panelOptions.setVisible(online);
 		
 		if(!online) subjectsFrame.setTitle(textdata.getKey("subjectsframetitleoffline"));
 		
@@ -1427,8 +1430,8 @@ public class SubjectsGUI {
 				
 				// Divider
 				
-				g.setColor(new Color(200,200,200,255));
-				g.drawLine(logowidth, 0, logowidth, super.getHeight()-2);
+				//g.setColor(new Color(200,200,200,255));
+				//g.drawLine(logowidth, 0, logowidth, super.getHeight()-2);
 
 				
 			}
@@ -1645,6 +1648,7 @@ public class SubjectsGUI {
 			}
 			
 		};
+		panelLoading.setMinimumSize(new Dimension(10, 40));
 		panelLoading.setVisible(false);
 		
 		splitPane = new JSplitPane();
@@ -1797,7 +1801,7 @@ public class SubjectsGUI {
 			
 			public void textChanged(){
 				
-				if(subject!=null && !isLoading){
+				if(fileList!=null && !isLoading){
 					
 					// Previous selection
 					
