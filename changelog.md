@@ -1,3 +1,13 @@
+# v.0.1.0 -> v.0.1.1:
+
+### English
+
+ * Now you can download the pictures uploaded to the Claroline platform.
+
+### Español
+
+ * Ahora se pueden descargar las imágenes subidas a la plataforma Claroline.
+
 # v.0.0.5c -> v0.1.0:
 
 ### English

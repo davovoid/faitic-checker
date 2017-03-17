@@ -960,9 +960,83 @@ public class Faitic {
 				
 			}
 			
+
+			// Now for linked pictures
+			
+			ocurrence=documentToAnalyse.indexOf("/document/document.php?docView=image");
+			
+			while(ocurrence>=0){
+				
+				int endOfOcurrence=documentToAnalyse.indexOf("\"", ocurrence+1);
+				
+				if(endOfOcurrence>ocurrence){
+
+					String urlGot=urlBase + documentToAnalyse.substring(ocurrence, endOfOcurrence).replace("&amp;", "&").replace(" ", "%20");
+					
+					try{
+
+						String document2=requestDocument(urlGot, "");
+						
+						listDocumentsClarolineInternalImage(document2, list, urlBase);
+						
+					} catch(Exception ex){
+						
+						ex.printStackTrace();
+						
+					}
+					
+					
+				}
+				
+				ocurrence=documentToAnalyse.indexOf("/document/document.php?docView=image", ocurrence+1);
+				
+			}
+			
+			
 		}
 		
 		
+		
+	}
+	
+	public static void listDocumentsClarolineInternalImage(String document, ArrayList<FileFromURL> list, String urlBase) throws Exception{
+		
+		int endOfBody=document.lastIndexOf("End of Claroline Body");
+		
+		if(endOfBody>=0){
+			
+			int startOfEmpty=document.lastIndexOf("<!-- empty -->", endOfBody);
+			
+			if(startOfEmpty>=0 && endOfBody>startOfEmpty){
+				
+				// There is the place in which we should find the text
+				
+				String documentToAnalyse=document.substring(startOfEmpty, endOfBody);
+				
+				int ocurrence=documentToAnalyse.indexOf("goto/index.php");
+				
+				while(ocurrence>=0){
+					
+					int endOfOcurrence=documentToAnalyse.indexOf("\"", ocurrence+1);
+					
+					if(endOfOcurrence>ocurrence){
+						
+						String urlGot=urlBase + "/document/" + documentToAnalyse.substring(ocurrence, endOfOcurrence).replace("&amp;", "&").replace(" ", "%20");
+						
+						String pathForFile=urlGot.substring((urlBase + "/document/goto/index.php/").length(), urlGot.lastIndexOf("?") >=0 ? urlGot.lastIndexOf("?") : urlGot.length());
+						
+						list.add(new FileFromURL(urlGot, URLDecoder.decode("/" + pathForFile, "iso-8859-1")));
+						
+					}
+					
+					ocurrence=documentToAnalyse.indexOf("goto/index.php", ocurrence+1);
+					
+				}
+				
+				
+			}
+			
+		}
 		
 	}
 
