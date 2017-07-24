@@ -3,10 +3,12 @@
 ### English
 
  * Now you can download the pictures uploaded to the Claroline platform.
+ * Update channel selection.
 
 ### Español
 
  * Ahora se pueden descargar las imágenes subidas a la plataforma Claroline.
+ * Selección de canal de actualización.
 
 # v.0.0.5c -> v0.1.0:
 
