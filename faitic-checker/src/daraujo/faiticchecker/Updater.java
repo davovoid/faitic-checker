@@ -40,11 +40,13 @@ import org.json.simple.parser.JSONParser;
 
 public class Updater {
 
-	private static final String UPDATEURL="https://davovoid.github.io/update-v1.json";
+	private static String UPDATEURL;
 	
 	protected static String sha256, downloadname, currentversion, urlmoreinfo, downloadurl, description;
 	
-	public Updater(){
+	public Updater(String channel){
+		
+		UPDATEURL= "https://davovoid.github.io/update-" + channel + ".json";
 		
 	}
 	

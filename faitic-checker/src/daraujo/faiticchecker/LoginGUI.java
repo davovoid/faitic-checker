@@ -129,6 +129,9 @@ public class LoginGUI {
 	private static String username;
 	private static char[] tmpPassword;
 	
+	private static String updateChannel="v1";
+	private static final String updateChannelDefault="v1";
+	
 	private static boolean offlinesaving=true;
 
 	private static ActionListener enterPressed = new ActionListener() {
@@ -152,6 +155,10 @@ public class LoginGUI {
 	private JCustomButton btnCreatePortable;
 	private static JButton btnOfflineMode;
 	private JCheckBox cOfflineSaving;
+	private JLabel lblCanalDeActualizaciones;
+	private static JTextField txtUpdateChannel;
+	private JButton btnGuardar;
+	private JButton btnPredeterminado;
 	
 	protected static String getJarPath(){
 
@@ -191,7 +198,7 @@ public class LoginGUI {
 
 				try {
 					
-					updater=new Updater();
+					updater=new Updater(updateChannel);
 					updater.fillUpdateInfo(getLanguage());
 					
 				} catch (Exception e) {
@@ -653,6 +660,12 @@ public class LoginGUI {
 				
 				cCheckForUpdates.setSelected(!settings.jsonConf.containsKey("noupdatecheck"));
 				
+				// Update channel
+				if(settings.jsonConf.containsKey("updatechannel"))updateChannel=(String) settings.jsonConf.get("updatechannel");
+				txtUpdateChannel.setText(updateChannel);
+				
+				// After preparing all that it is needed, check for updates if allowed
+				
 				if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
 				
 			}
@@ -748,7 +761,11 @@ public class LoginGUI {
 		panelSettings.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.UNRELATED_GAP_COLSPEC,
 				ColumnSpec.decode("30dlu"),
+				FormFactory.PREF_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.BUTTON_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,
 				FormFactory.MIN_COLSPEC,
 				FormFactory.MIN_COLSPEC,
@@ -760,6 +777,8 @@ public class LoginGUI {
 				FormFactory.UNRELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.UNRELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
@@ -806,7 +825,7 @@ public class LoginGUI {
 				
 			}
 		});
-		panelSettings.add(btnCreatePortable, "2, 2, 2, 1");
+		panelSettings.add(btnCreatePortable, "2, 2, 6, 1");
 		
 		
 		cCheckForUpdates = new JCheckBox(textdata.getKey("checkforupdatesatstartup"));
@@ -853,7 +872,7 @@ public class LoginGUI {
 			}
 			
 		};
-		panelSettings.add(pSpanish, "5, 2");
+		panelSettings.add(pSpanish, "9, 2");
 		pSpanish.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -889,7 +908,7 @@ public class LoginGUI {
 			}
 			
 		};
-		panelSettings.add(pGalician, "6, 2");
+		panelSettings.add(pGalician, "10, 2");
 		pGalician.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -926,7 +945,7 @@ public class LoginGUI {
 			}
 			
 		};
-		panelSettings.add(pEnglish, "7, 2");
+		panelSettings.add(pEnglish, "11, 2");
 		pEnglish.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -941,7 +960,7 @@ public class LoginGUI {
 		pEnglish.setPreferredSize(new Dimension(40, 40));
 		pEnglish.setMinimumSize(new Dimension(40, 40));
 		pEnglish.setOpaque(false);
-		panelSettings.add(cCheckForUpdates, "3, 4");
+		panelSettings.add(cCheckForUpdates, "3, 4, 5, 1");
 		cCheckForUpdates.setOpaque(false);
 		
 		cOfflineSaving = new JCheckBox(textdata.getKey("checkofflinesaving"));
@@ -965,7 +984,44 @@ public class LoginGUI {
 			}
 		});
 		cOfflineSaving.setOpaque(false);
-		panelSettings.add(cOfflineSaving, "3, 6");
+		panelSettings.add(cOfflineSaving, "3, 6, 5, 1");
+		
+		lblCanalDeActualizaciones = new JLabel(textdata.getKey("updatechannelsettingslabel"));
+		panelSettings.add(lblCanalDeActualizaciones, "3, 8, right, default");
+		
+		txtUpdateChannel = new JTextField();
+		txtUpdateChannel.setFont(new Font("Dialog", Font.PLAIN, 14));
+		panelSettings.add(txtUpdateChannel, "5, 8, fill, default");
+		txtUpdateChannel.setColumns(10);
+		
+		btnGuardar = new JCustomButton(textdata.getKey("updatechannelsettingsupdate"));
+		btnGuardar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				updateChannel=txtUpdateChannel.getText();
+				
+				if(settings.jsonConf.containsKey("updatechannel")) settings.jsonConf.remove("updatechannel");
+				settings.jsonConf.put("updatechannel", updateChannel);
+				
+				if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
+				
+			}
+		});
+		panelSettings.add(btnGuardar, "7, 8");
+		
+		btnPredeterminado = new JCustomButton(textdata.getKey("updatechannelsettingsdelete"));
+		btnPredeterminado.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				updateChannel=updateChannelDefault;
+				if(settings.jsonConf.containsKey("updatechannel")) settings.jsonConf.remove("updatechannel");
+				txtUpdateChannel.setText(updateChannel);
+				
+				if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
+				
+			}
+		});
+		panelSettings.add(btnPredeterminado, "9, 8, 3, 1");
 		
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
