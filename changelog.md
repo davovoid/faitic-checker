@@ -4,11 +4,13 @@
 
  * Now you can download the pictures uploaded to the Claroline platform.
  * Update channel selection.
+ * FIXED: update system not updating in Windows.
 
 ### Español
 
  * Ahora se pueden descargar las imágenes subidas a la plataforma Claroline.
  * Selección de canal de actualización.
+ * ARREGLADO: sistema de actualizaciones no actualiza en Windows.
 
 # v.0.0.5c -> v0.1.0:
 
