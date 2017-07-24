@@ -29,8 +29,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Timer;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -64,72 +66,88 @@ public class MainClass {
 				String to=args[i+2];	// Previous
 				i+=2;
 				
+				// BUG FIX: check from and to
+				
+				if(from.charAt(0)=='\\' && from.charAt(2)==':' && from.charAt(3)=='\\') from=from.substring(1, from.length());
+
+				if(to.charAt(0)=='\\' && to.charAt(2)==':' && to.charAt(3)=='\\') to=to.substring(1, to.length());
+				
+				// END BUG FIX
+				
 				System.out.println(" - Copying file " + from + " to " + to);
+				//JOptionPane.showMessageDialog(null, " - Copying file " + from + " to " + to);
 				
-				// Check if the file can be written
-				int iteraciones=10;
-				boolean isWritable=false;
+				// File replacement
 				
-				try {
-
-					while(!new File(to).canWrite() && iteraciones>0){
-
-						System.out.println(" ERROR: no write permission to the destination. Waiting 1 second...");
-						
-						Timer timer=new Timer();
-
-						timer.wait(1000);	// Wait for the next try
-
-						iteraciones--;
-
-					}
-
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				int iterations=0;
+				boolean replaced=false;
 				
-				if(new File(to).canWrite()){
-					
-					// Writable, copy the file
+				while(!replaced && iterations++ <= 10){ // While not replaced and there are iterations available
 					
 					try {
 						
-						Files.copy(new File(from).toPath(), new File(to).toPath(), StandardCopyOption.REPLACE_EXISTING);
+						Files.copy(new File(from).toPath(), new File(to).toPath(), StandardCopyOption.REPLACE_EXISTING); // Can fail
+						replaced=true; // Successfully replaced
 						
-						System.out.println(" File copied.");
-
-						String toexecute=to;
+					} catch (IOException e1) { // Not replaced
 						
-						System.out.println(" - Executing " + toexecute);
-						
-						ProcessBuilder procUpdater=new ProcessBuilder();
-						
-						ArrayList<String> listaComandos=new ArrayList<String>();
-						listaComandos.add("java");
-						listaComandos.add("-jar");
-						listaComandos.add(toexecute);
-						listaComandos.add("--deleteupdate");
-						listaComandos.add(from);
-						procUpdater.command(listaComandos);
+						e1.printStackTrace();
 						
 						try {
 							
-							procUpdater.start();
+							TimeUnit.SECONDS.sleep(1);
 							
-							return;
+						} catch (InterruptedException e) {
 							
-						} catch (IOException e) {
-
 							e.printStackTrace();
+							
+							JOptionPane.showMessageDialog(null, "Iteration " + iterations + " out of 10: file coudn't be replaced." + (iterations <= 10 ? " File will be tried to be replaced again." : ""));
+							
 							
 						}
 						
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
 
+					}
+					
+
+					
 				}
+				
+				if(replaced){ // Replaced. It can be continued
+					
+					System.out.println(" File copied.");
+					
+					String toexecute=to;
+					
+					System.out.println(" - Executing " + toexecute);
+					
+					//JOptionPane.showMessageDialog(null, " - Executing " + toexecute);
+							
+					ProcessBuilder procUpdater=new ProcessBuilder();
+					
+					ArrayList<String> listaComandos=new ArrayList<String>();
+					listaComandos.add("java");
+					listaComandos.add("-jar");
+					listaComandos.add(toexecute);
+					listaComandos.add("--deleteupdate");
+					listaComandos.add(from);
+					procUpdater.command(listaComandos);
+					
+					try {
+						
+						procUpdater.start();
+						
+						return; // To stop execution
+						
+					} catch (IOException e) {
+
+						e.printStackTrace();
+						
+					}
+					
+					
+				}
+				
 				
 			} else if(arg.toLowerCase().equals("--deleteupdate")){
 				
@@ -139,36 +157,37 @@ public class MainClass {
 				detectupdateenabled=false;
 				
 				System.out.println(" - Deleting update from " + todelete);
+				//JOptionPane.showMessageDialog(null, " - Deleting update from " + todelete);
 				
-				// Check if the file can be written
-				int iteraciones=10;
-				boolean isWritable=false;
+				// File deletion
 				
-				try {
+				int iterations=0;
+				boolean deleted=false;
+				
+				while(new File(todelete).exists() && !deleted && iterations++ <= 10){ // While not deleted and there are iterations available
 
-					while(!new File(todelete).canWrite() && iteraciones>0){
-
-						System.out.println(" ERROR: no write permission to the destination. Waiting 1 second...");
+					deleted=new File(todelete).delete(); // False if not deleted
 						
-						Timer timer=new Timer();
+					if(!deleted)
+						try {
+							TimeUnit.SECONDS.sleep(1);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+							
+							JOptionPane.showMessageDialog(null, "Iteration " + iterations + " out of 10: file coudn't be deleted." + (iterations <= 10 ? " File will be tried to be deleted again." : ""));
 
-						timer.wait(1000);	// Wait for the next try
-
-						iteraciones--;
-
-					}
-
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+						}
+					
+					
 				}
 				
-				if(new File(todelete).canWrite()){
-					
-					if(new File(todelete).exists()) new File(todelete).delete();
+				if(deleted){
 					
 					System.out.println(" Done.");
-					
+					//JOptionPane.showMessageDialog(null, 
+					//		"Successfully updated.");
+
 				}
 					
 				

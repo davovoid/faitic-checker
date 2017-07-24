@@ -166,6 +166,8 @@ public class LoginGUI {
 			
 			String jarPath=ClassicRoutines.cpath(URLDecoder.decode(MainClass.class.getProtectionDomain().getCodeSource().getLocation().getPath(),"UTF-8"));
 
+			if(jarPath.charAt(0)=='\\' && jarPath.charAt(2)==':' && jarPath.charAt(3)=='\\') jarPath=jarPath.substring(1, jarPath.length());
+			
 			return jarPath;
 			
 		} catch(Exception ex){
