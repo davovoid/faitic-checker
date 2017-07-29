@@ -63,7 +63,7 @@ import java.awt.event.MouseEvent;
 
 public class About {
 
-	protected static final String VERSION="0.1.1";
+	protected static final String VERSION="0.1.2";
 	private static final String WEBPAGE="https://davovoid.github.io/faicheck/";
 
 	protected static TextData textdata;
@@ -291,6 +291,8 @@ public class About {
 		
 		scrollPane = new JScrollPane();
 		scrollPane.setBorder(null);
+		scrollPane.getVerticalScrollBar().setUI(new CustomScrollBarUI(Color.white,new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollPane.getHorizontalScrollBar().setUI(new CustomScrollBarUI(Color.white,new Color(110,110,110,255),new Color(110,110,110,50)));
 		panelWithEverything.add(scrollPane, "2, 3, fill, fill");
 		
 		txtAbout = new JTextPane(){

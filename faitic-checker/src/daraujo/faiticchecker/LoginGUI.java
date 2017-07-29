@@ -663,7 +663,17 @@ public class LoginGUI {
 				cCheckForUpdates.setSelected(!settings.jsonConf.containsKey("noupdatecheck"));
 				
 				// Update channel
-				if(settings.jsonConf.containsKey("updatechannel"))updateChannel=(String) settings.jsonConf.get("updatechannel");
+				if(settings.jsonConf.containsKey("updatechannel")){
+					
+					updateChannel=(String) settings.jsonConf.get("updatechannel");
+					btnPredeterminado.setEnabled(true);
+					
+				} else{
+					
+					btnPredeterminado.setEnabled(false);
+					
+				}
+				
 				txtUpdateChannel.setText(updateChannel);
 				
 				// After preparing all that it is needed, check for updates if allowed
@@ -1005,6 +1015,8 @@ public class LoginGUI {
 				if(settings.jsonConf.containsKey("updatechannel")) settings.jsonConf.remove("updatechannel");
 				settings.jsonConf.put("updatechannel", updateChannel);
 				
+				btnPredeterminado.setEnabled(true);
+				
 				if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
 				
 			}
@@ -1018,6 +1030,8 @@ public class LoginGUI {
 				updateChannel=updateChannelDefault;
 				if(settings.jsonConf.containsKey("updatechannel")) settings.jsonConf.remove("updatechannel");
 				txtUpdateChannel.setText(updateChannel);
+				
+				btnPredeterminado.setEnabled(false);
 				
 				if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
 				

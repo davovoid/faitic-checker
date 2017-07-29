@@ -1,3 +1,13 @@
+# v.0.1.1 -> v.0.1.2:
+
+### English
+
+ * GUI improvements.
+
+### Español
+
+ * Mejoras en la interfaz de usuario.
+
 # v.0.1.0 -> v.0.1.1:
 
 ### English

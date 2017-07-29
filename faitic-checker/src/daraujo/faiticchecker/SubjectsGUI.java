@@ -42,6 +42,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
+import javax.swing.UIManager;
 
 import java.awt.BorderLayout;
 
@@ -72,6 +73,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
@@ -1253,7 +1255,8 @@ public class SubjectsGUI {
 				super.paintComponent(g);
 				
 				// Parameters
-				Color borderColor=new Color(0,110,198,255);
+				//Color borderColor=new Color(0,110,198,255);
+				Color borderColor=new Color(110,110,110,255);
 				
 				int panellogoheight=panelLogos != null ? panelLogos.getHeight()-1 : 100;
 				int panelsubjectswidth=panelSubjects != null ? panelSubjects.getWidth()-1 : 220;
@@ -1276,10 +1279,27 @@ public class SubjectsGUI {
 						
 				// Background
 				
-				g.setColor(new Color(239,244,248,120));
+//				g.setColor(new Color(239,244,248,120));
+//				for(int i=panellogoheight; i<super.getHeight(); i++){
+//					g.drawLine(0, i, super.getWidth(), i);
+//				}
+//				
+				
 				for(int i=panellogoheight; i<super.getHeight(); i++){
+					g.setColor(new Color(195,209,220, 0+(i-panellogoheight)*120/(super.getHeight()-panellogoheight) ));
 					g.drawLine(0, i, super.getWidth(), i);
 				}
+				
+				
+//				Random random=new Random(1);
+//				
+//				for(int i=panellogoheight; i<super.getHeight(); i++){
+//					
+//					g.setColor(new Color(226,231,234,60+random.nextInt(100)));
+//					g.drawLine(0, i, super.getWidth(), i);
+//					
+//				}
+				
 
 				// Header
 				
@@ -1289,12 +1309,16 @@ public class SubjectsGUI {
 				g.setColor(new Color(200,200,200,255));
 				g.drawLine(panelsubjectswidth+1, panellogoheight, super.getWidth(), panellogoheight);
 
-				for(int i=0; i<3; i++){
+				// Shadows
+				
+				for(int i=0; i<5; i++){
 
-					g.setColor(new Color(120,120,120,150*(3-i)/3));
+					g.setColor(new Color(176,180,182,140*(5-i)/5));
 					g.drawLine(0, panellogoheight+i, panelsubjectswidth-i-1, panellogoheight+i);
 					
 				}
+				
+				
 				
 				// Subjects and options
 				
@@ -1315,10 +1339,10 @@ public class SubjectsGUI {
 				g.drawLine(panelsubjectswidth, super.getHeight()-paneloptionsheight, super.getWidth(), super.getHeight()-paneloptionsheight);
 				
 
-				for(int i=0; i<3; i++){
+				for(int i=0; i<5; i++){
 					
 					// Shadows for the subject place
-					g.setColor(new Color(120,120,120,150*(3-i)/3));
+					g.setColor(new Color(176,180,182,140*(5-i)/5));
 					
 					if(selectedSubject>=0){
 						
@@ -1347,6 +1371,7 @@ public class SubjectsGUI {
 					
 				}
 				
+				
 				// Subjects
 				
 				if(selectedSubject>=0)
@@ -1365,10 +1390,10 @@ public class SubjectsGUI {
 							
 						}
 
-						for(int i=0; i<3; i++){
+						for(int i=0; i<5; i++){
 							
 							// Shadows for the subject place
-							g.setColor(new Color(120,120,120,150*(3-i)/3));
+							g.setColor(new Color(176,180,182,140*(5-i)/5));
 							
 							before=mustbebetween(subjectypos-8-i-1, minsubjectypos, maxsubjectypos, -1);
 							after=mustbebetween(subjectypos+subjectheight+8+i+1, minsubjectypos, maxsubjectypos, -1);
@@ -1851,6 +1876,7 @@ public class SubjectsGUI {
 		scrollPane.setOpaque(false);
 		scrollPane.getViewport().setOpaque(false);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
+		scrollPane.getVerticalScrollBar().setUI(new CustomScrollBarUI(Color.white,new Color(110,110,110,255),new Color(110,110,110,50)));
 		scrollPane.setBorder(null);
 		
 		panelToDownload = new JPanel()/*{
@@ -1923,6 +1949,8 @@ public class SubjectsGUI {
 			
 		});
 		
+		scrollPane_1.getVerticalScrollBar().setUI(new CustomScrollBarUI(UIManager.getColor("Spinner.background"),new Color(110,110,110,255),UIManager.getColor("Spinner.background")));
+
 		splitPane.setLeftComponent(scrollPane_1);
 		
 		panelSubjects = new JPanel();
