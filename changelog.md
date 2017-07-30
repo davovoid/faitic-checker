@@ -3,10 +3,12 @@
 ### English
 
  * GUI improvements.
+ * Board checking and bug fixes related to Moodle 1 and 2.
 
 ### Español
 
  * Mejoras en la interfaz de usuario.
+ * Comprobación de tablón y corrección de errores relacionados con Moodle 1 y 2.
 
 # v.0.1.0 -> v.0.1.1:
 

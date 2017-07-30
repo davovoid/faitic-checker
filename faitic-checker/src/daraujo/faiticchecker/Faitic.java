@@ -808,17 +808,50 @@ public class Faitic {
 	public static int subjectPlatformType(String url){
 		
 		if(url.toLowerCase().contains("/claroline/")){
+			
+			// Claroline based, no doubts
+			
 			return CLAROLINE;
+			
+		}else if(url.toLowerCase().contains("/moodle")){
+			
+			// Moodle based, but which version?
+			
+			int platforminfostart=url.toLowerCase().indexOf("/moodle");
+			int platforminfoend=url.indexOf("/", platforminfostart+1);
+			
+			if(platforminfostart>=0 && platforminfoend>platforminfostart){
+				
+				String platforminfo=url.toLowerCase().substring(platforminfostart+1, platforminfoend);
+				
+				if(platforminfo.contains("_")){
+					
+					// Moodle 2+
+					
+					if(platforminfo.contains("moodle2_")){
+						
+						// Moodle 2
+						
+						return MOODLE2;
+						
+					}
+					
+					// Reserved for newer Moodle versions
+					
+				} else{
+					
+					// Moodle 1
+					
+					return MOODLE;
+					
+				}
+				
+			}
+				
 		}
-		else if(url.toLowerCase().contains("/moodle") && !url.toLowerCase().contains("/moodle2_")){
-			return MOODLE;
-		}
-		else if(url.toLowerCase().contains("/moodle2_")){
-			return MOODLE2;
-		}
-		else{
-			return UNKNOWN;
-		}
+		
+		// No matches
+		return UNKNOWN;
 		
 	}
 	
@@ -1058,7 +1091,14 @@ public class Faitic {
 			String urlGetMethod=platformURL.indexOf("?") >= 0 ? platformURL.substring(platformURL.indexOf("?") + 1, platformURL.length()) : "";
 			String urlForResources= urlBase + "/mod/resource/index.php" + (urlGetMethod.length()>0 ? "?" + urlGetMethod : "");
 			
-			listDocumentsMoodleInternal(urlForResources, list, urlBase);
+			// For board
+			System.out.println(" == Board checking... ==");
+			listDocumentsMoodleInternal(platformURL, list, urlBase, true);
+			
+			// For resources
+			System.out.println(" == Resources checking... ==");
+			listDocumentsMoodleInternal(urlForResources, list, urlBase, false);
+			
 			
 		}
 		
@@ -1070,7 +1110,7 @@ public class Faitic {
 	}
 	
 
-	private static void listDocumentsMoodleInternal(String urlToUse, ArrayList<FileFromURL> list, String urlBase) throws Exception{
+	private static void listDocumentsMoodleInternal(String urlToUse, ArrayList<FileFromURL> list, String urlBase, boolean onboard) throws Exception{
 		
 		//System.out.println("---Accessed---");
 
@@ -1127,7 +1167,7 @@ public class Faitic {
 			
 			// Then directories
 			
-			URLStart=whereToSearch.indexOf("view.php?");
+			URLStart=onboard ? whereToSearch.indexOf("/mod/resource/view.php?") : whereToSearch.indexOf("view.php?");
 			URLEnd=whereToSearch.indexOf("\"", URLStart);
 
 			if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
@@ -1135,7 +1175,7 @@ public class Faitic {
 			
 			while(URLStart>=0 && URLStart<URLEnd){
 
-				String urlList=urlBase + "/mod/resource/" + whereToSearch.substring(URLStart, URLEnd);
+				String urlList=urlBase + (onboard ? "" : "/mod/resource/") + whereToSearch.substring(URLStart, URLEnd);
 				urlList=urlList.replace("&amp;", "&").replace(" ", "%20");
 
 				// We have got the url, but we don't know if it's a folder or not, let's check it
@@ -1148,9 +1188,9 @@ public class Faitic {
 
 						// Folder, recursive search
 
-						listDocumentsMoodleInternal(urlList, list, urlBase);
+						listDocumentsMoodleInternal(urlList, list, urlBase, false);
 
-					} else{
+					} else if(realurl.contains(urlBase)){
 
 						// Document, let's get the real name
 
@@ -1179,10 +1219,10 @@ public class Faitic {
 
 				// For next loop
 
-				URLStart=whereToSearch.indexOf("view.php?", URLEnd);
+				URLStart=onboard ? whereToSearch.indexOf("/mod/resource/view.php?",URLEnd) : whereToSearch.indexOf("view.php?",URLEnd);
 				URLEnd=whereToSearch.indexOf("\"", URLStart);
 
-				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0) // There is a ' before the "
 					URLEnd=whereToSearch.indexOf("\'", URLStart);
 				
 			}
@@ -1212,7 +1252,14 @@ public class Faitic {
 			String urlGetMethod=platformURL.indexOf("?") >= 0 ? platformURL.substring(platformURL.indexOf("?") + 1, platformURL.length()) : "";
 			String urlForResources= urlBase + "/mod/resource/index.php" + (urlGetMethod.length()>0 ? "?" + urlGetMethod : "");
 			
-			listDocumentsMoodle2Internal(urlForResources, list, urlBase, "");
+			// Board
+			System.out.println(" == Board checking... ==");
+			listDocumentsMoodle2Internal(platformURL, list, urlBase, "", true);
+			
+			// Resources
+			System.out.println(" == Resources checking... ==");
+			listDocumentsMoodle2Internal(urlForResources, list, urlBase, "", false);
+			
 			
 		}
 		
@@ -1224,7 +1271,7 @@ public class Faitic {
 	}
 	
 
-	private static void listDocumentsMoodle2Internal(String urlToUse, ArrayList<FileFromURL> list, String urlBase, String folder) throws Exception{
+	private static void listDocumentsMoodle2Internal(String urlToUse, ArrayList<FileFromURL> list, String urlBase, String folder, boolean onboard) throws Exception{
 		
 		//System.out.println("---Accessed---");
 
@@ -1252,7 +1299,7 @@ public class Faitic {
 			
 			String whereToSearch=resourcePage.substring(bodyStart, bodyEnd);
 			
-			int URLStart=whereToSearch.indexOf("view.php?");
+			int URLStart=onboard ? whereToSearch.indexOf("/mod/resource/view.php?") : whereToSearch.indexOf("view.php?");
 			int URLEnd=whereToSearch.indexOf("\"", URLStart);
 
 			if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
@@ -1260,7 +1307,7 @@ public class Faitic {
 			
 			while(URLStart>=0 && URLStart<URLEnd){
 				
-				String urlList=urlBase + "/mod/resource/" + whereToSearch.substring(URLStart, URLEnd);
+				String urlList=urlBase + (onboard ? "" : "/mod/resource/") + whereToSearch.substring(URLStart, URLEnd);
 				urlList=urlList.replace("&amp;", "&");
 				
 				// We have got the url, but we don't know if it's a folder or not, let's check it
@@ -1278,7 +1325,7 @@ public class Faitic {
 					
 					// Folder, recursive search
 					
-					listDocumentsMoodle2Internal(urlList, list, urlBase, folder + "/" + filename);
+					listDocumentsMoodle2Internal(urlList, list, urlBase, folder + "/" + filename,false);
 					
 				} else{
 					
@@ -1317,7 +1364,7 @@ public class Faitic {
 				
 				// For next loop
 				
-				URLStart=whereToSearch.indexOf("view.php?", URLEnd);
+				URLStart=onboard ? whereToSearch.indexOf("/mod/resource/view.php?",URLEnd) : whereToSearch.indexOf("view.php?",URLEnd);
 				URLEnd=whereToSearch.indexOf("\"", URLStart);
 
 				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
@@ -1325,6 +1372,75 @@ public class Faitic {
 				
 			}
 			
+			// For folders in the board
+			
+			URLStart=whereToSearch.indexOf("/mod/folder/view.php?");
+			URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+			if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+				URLEnd=whereToSearch.indexOf("\'", URLStart);
+
+			while(URLStart>=0 && URLStart<URLEnd && onboard){
+
+				String urlList=urlBase + whereToSearch.substring(URLStart, URLEnd);
+				urlList=urlList.replace("&amp;", "&");
+
+				// We have got the url, and we know it MUST be a folder, checking the folder
+
+				listDocumentsMoodle2Internal(urlList, list, urlBase, folder, false);
+
+
+				// For next loop
+
+				URLStart=whereToSearch.indexOf("/mod/folder/view.php?",URLEnd);
+				URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+					URLEnd=whereToSearch.indexOf("\'", URLStart);
+
+			}
+			
+			// For files found
+			
+			URLStart=whereToSearch.indexOf("/pluginfile.php/");
+			URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+			if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+				URLEnd=whereToSearch.indexOf("\'", URLStart);
+
+
+			while(URLStart>=0 && URLStart<URLEnd){
+
+				String urlFile=urlBase + whereToSearch.substring(URLStart, URLEnd);
+				urlFile=urlFile.replace("&amp;", "&");
+
+				String realname="undefined";
+				
+				// Get file name
+				
+				int questionMarkIndex=urlFile.indexOf("?");
+				int lastDivider=urlFile.substring(0, questionMarkIndex >=0 ? questionMarkIndex : urlFile.length()).lastIndexOf("/");	// No error because it starts at 0
+
+				if(lastDivider>=0){
+
+					// Got a name
+
+					realname=URLDecoder.decode(urlFile.substring(lastDivider+1, questionMarkIndex>=0 ? questionMarkIndex : urlFile.length()),"UTF-8");
+
+				}
+
+				list.add(new FileFromURL(urlFile,folder + "/" + realname));
+				
+				// For next loop
+
+				URLStart=whereToSearch.indexOf("/pluginfile.php/", URLEnd);
+				URLEnd=whereToSearch.indexOf("\"", URLStart);
+
+				if(whereToSearch.indexOf("\'", URLStart)<URLEnd && whereToSearch.indexOf("\'", URLStart)>=0)
+					URLEnd=whereToSearch.indexOf("\'", URLStart);
+
+			}
+
 		}
 		
 	}

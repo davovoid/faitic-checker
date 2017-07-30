@@ -38,7 +38,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 public class MainClass {
 
-	protected static boolean verbose=false;
+	//TODO change this
+	protected static boolean verbose=true;
 	
 	protected static boolean detectupdateenabled=true;
 
