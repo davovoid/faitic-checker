@@ -232,9 +232,12 @@ public class Updater {
 					
 					thechecksummatches=checksha256fromfile(outputFile, sha256);
 					
+					System.out.println(thechecksummatches ? "Checksum matches." : "ERROR: checksum does NOT match.");
+					
 				} catch (NoSuchAlgorithmException e) {
 
-					thechecksummatches=true;	// Change ASAP					
+					thechecksummatches=true;
+					System.out.println("Failed to check file checksum. Proceed carefully.");
 					e.printStackTrace();
 					
 				} catch (IOException e) {

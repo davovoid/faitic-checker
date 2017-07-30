@@ -1010,14 +1010,20 @@ public class LoginGUI {
 		btnGuardar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				updateChannel=txtUpdateChannel.getText();
-				
-				if(settings.jsonConf.containsKey("updatechannel")) settings.jsonConf.remove("updatechannel");
-				settings.jsonConf.put("updatechannel", updateChannel);
-				
-				btnPredeterminado.setEnabled(true);
-				
-				if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
+				int response=JOptionPane.showConfirmDialog(loginFrame, textdata.getKey("updatechannelsettingswarning"), textdata.getKey("updatechannelsettingswarningtitle"), JOptionPane.YES_NO_OPTION);
+
+				if(response==JOptionPane.YES_OPTION){
+
+					updateChannel=txtUpdateChannel.getText();
+
+					if(settings.jsonConf.containsKey("updatechannel")) settings.jsonConf.remove("updatechannel");
+					settings.jsonConf.put("updatechannel", updateChannel);
+
+					btnPredeterminado.setEnabled(true);
+
+					if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
+
+				}
 				
 			}
 		});
@@ -1259,6 +1265,7 @@ public class LoginGUI {
 				if(!arg0.getComponent().isEnabled()) return;
 				
 				btnLogin.setEnabled(false);
+				btnOfflineMode.setEnabled(false);
 				
 				((JLabel) arg0.getComponent()).setText(textdata.getKey("lblupdatenowprocessing"));
 				
