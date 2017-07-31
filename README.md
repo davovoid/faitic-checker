@@ -1,6 +1,7 @@
 # Faicheck
 
 ### Web page (In Spanish) / Página web: https://davovoid.github.io/faicheck/
+### Canal de difusión en Telegram: https://t.me/faicheck
 
 ### English
 
