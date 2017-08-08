@@ -1740,7 +1740,7 @@ public class SubjectsGUI {
 				
 				Color borderColor=new Color(200,200,200,255);
 				Color borderColor2=new Color(170,170,170,255);
-			    Color borderColorShadow=new Color(50,50,50,15);
+			    Color borderColorShadow=new Color(50,50,50,5);
 			    
 			    int margintop=5;
 			    int marginleft=20;

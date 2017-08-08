@@ -727,7 +727,7 @@ public class LoginGUI {
 				int settingsendy=panelSettings!=null ? panelSettings.isVisible() ? panelSettings.getHeight() : 0 : 0;
 				
 				int logoposx=(super.getWidth()-imgwidth)/2;
-				int logoposy=(loginposy-imgheight-settingsendy)/2 + settingsendy;
+				int logoposy=(loginposy-imgheight-settingsendy)*3/4 + settingsendy;
 				
 				g2.drawImage(imgFaicheck, logoposx, logoposy, imgwidth, imgheight, null);
 				

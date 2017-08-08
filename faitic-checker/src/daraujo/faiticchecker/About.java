@@ -235,7 +235,7 @@ public class About {
 			    
 			    int iconSide=120;
 			    
-			    g2.drawImage(imgIcon, 10, (super.getHeight()-iconSide)/2, iconSide, iconSide, null);
+			    g2.drawImage(imgIcon, 15, (super.getHeight()-iconSide)/2, iconSide, iconSide, null);
 			    
 			}
 			
