@@ -3,12 +3,14 @@
 ### English
 
  * GUI improvements.
+ * Login screen with new background (Thanks ifzero).
  * Board checking and bug fixes related to Moodle 1 and 2.
  * More bug fixes.
 
 ### Español
 
  * Mejoras en la interfaz de usuario.
+ * Ventana de inicio de sesión con nuevo fondo (Gracias ifzero).
  * Comprobación de tablón y corrección de errores relacionados con Moodle 1 y 2.
  * Más corrección de errores.
 

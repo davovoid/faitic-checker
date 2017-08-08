@@ -116,6 +116,8 @@ public class LoginGUI {
 	private final static Image englishFlag=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/england.png")).getImage();
 	private final static Image flagButton=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/flagButton.png")).getImage();
 	
+	private final static Image backgroundLogin =new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/background_login.png")).getImage();
+	
 	private static JTextField txtUsuario;
 	private static JPasswordField pwdPassword;
 	
@@ -159,6 +161,7 @@ public class LoginGUI {
 	private static JTextField txtUpdateChannel;
 	private JButton btnGuardar;
 	private JButton btnPredeterminado;
+	private JPanel panel;
 	
 	protected static String getJarPath(){
 
@@ -707,13 +710,41 @@ public class LoginGUI {
 				
 				Color borderColor=new Color(0,110,198,255);
 				
+				// Background
+				
+				int backwidth=getWidth();
+				int backheight=backwidth * backgroundLogin.getHeight(null) / backgroundLogin.getWidth(null);
+				
+				g2.drawImage(backgroundLogin, 0, getHeight()-backheight, backwidth, backheight, null);
+				
+				
+				// Logo and so on
+				
 				int imgwidth=380;
 				int imgheight=imgwidth*imgFaicheck.getHeight(null)/imgFaicheck.getWidth(null);
 				
 				int loginposy=panelLogin != null ? panelLogin.getY() : 300;
 				int settingsendy=panelSettings!=null ? panelSettings.isVisible() ? panelSettings.getHeight() : 0 : 0;
 				
-				g2.drawImage(imgFaicheck, (super.getWidth()-imgwidth)/2, (loginposy-imgheight-settingsendy)/2 + settingsendy, imgwidth, imgheight, null);
+				int logoposx=(super.getWidth()-imgwidth)/2;
+				int logoposy=(loginposy-imgheight-settingsendy)/2 + settingsendy;
+				
+				g2.drawImage(imgFaicheck, logoposx, logoposy, imgwidth, imgheight, null);
+				
+				String briefdesc=textdata.getKey("appbriefdescription");
+				Font briefdescfont=new Font(Font.DIALOG,Font.BOLD,12);
+				
+				g2.setFont(briefdescfont);
+
+				int briefdescx=(getWidth()-g2.getFontMetrics().stringWidth(briefdesc))/2;
+				int briefdescy=getHeight()-g2.getFontMetrics().getMaxDescent()-6;
+				
+				g2.setColor(new Color(60,93,56,200).darker());
+				g2.fillRoundRect(briefdescx-10, briefdescy-g2.getFontMetrics().getMaxAscent()-3, g2.getFontMetrics().stringWidth(briefdesc)+20, g2.getFontMetrics().getMaxAscent() + 
+						g2.getFontMetrics().getMaxDescent()+6, 6, 6);
+				
+				g2.setColor(Color.WHITE);
+				g2.drawString(briefdesc, briefdescx, briefdescy);
 				
 			}
 			
@@ -727,17 +758,13 @@ public class LoginGUI {
 				FormFactory.GLUE_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
-				RowSpec.decode("default:grow(5)"),
+				RowSpec.decode("default:grow(4)"),
 				FormFactory.MIN_ROWSPEC,
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,
 				FormFactory.MIN_ROWSPEC,
 				FormFactory.UNRELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
-				RowSpec.decode("default:grow(3)"),
-				FormFactory.PREF_ROWSPEC,
-				FormFactory.UNRELATED_GAP_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
-				FormFactory.UNRELATED_GAP_ROWSPEC,}));
+				RowSpec.decode("default:grow(3)"),}));
 		
 		panelSettings = new JPanel(){
 			
@@ -791,6 +818,8 @@ public class LoginGUI {
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.UNRELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.PARAGRAPH_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
@@ -1044,6 +1073,42 @@ public class LoginGUI {
 			}
 		});
 		panelSettings.add(btnPredeterminado, "9, 8, 3, 1");
+		
+		lblConfigurationFolder = new JLabel("Configuration folder:");
+		panelSettings.add(lblConfigurationFolder, "3, 10, 3, 1");
+		lblConfigurationFolder.setForeground(Color.GRAY);
+		lblConfigurationFolder.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		
+		JLabel lblAcercaDe = new JLabel(textdata.getKey("btnabout"));
+		panelSettings.add(lblAcercaDe, "7, 10, 5, 1");
+		lblAcercaDe.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblAcercaDe.setForeground(new Color(0,110,198,255));
+		lblAcercaDe.setHorizontalAlignment(SwingConstants.CENTER);
+		
+		lblAcercaDe.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				try {
+					
+					About window = new About(textdata);
+					window.frameAbout.setVisible(true);
+					
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				
+				
+			}
+		});
+		
+		panel = new JPanel();
+		panel.setOpaque(false);
+		panelWithEverything.add(panel, "2, 2, fill, fill");
+		panel.setLayout(new FormLayout(new ColumnSpec[] {},
+			new RowSpec[] {}));
 		
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
@@ -1321,39 +1386,5 @@ public class LoginGUI {
 		lblUpdate.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblUpdate.setForeground(new Color(0,110,198,255));
 		panelUpdater.add(lblUpdate, "5, 6");
-		
-		lblConfigurationFolder = new JLabel("Configuration folder:");
-		lblConfigurationFolder.setForeground(Color.GRAY);
-		lblConfigurationFolder.setHorizontalAlignment(SwingConstants.CENTER);
-		panelWithEverything.add(lblConfigurationFolder, "2, 9");
-		
-		JLabel lblAbout = new JLabel(textdata.getKey("appbriefdescription"));
-		panelWithEverything.add(lblAbout, "2, 11");
-		lblAbout.setForeground(Color.GRAY);
-		lblAbout.setHorizontalAlignment(SwingConstants.CENTER);
-		
-		JLabel lblAcercaDe = new JLabel(textdata.getKey("btnabout") + "     ");
-		panelWithEverything.add(lblAcercaDe, "3, 11");
-		lblAcercaDe.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblAcercaDe.setForeground(new Color(0,110,198,255));
-		lblAcercaDe.setHorizontalAlignment(SwingConstants.RIGHT);
-		
-		lblAcercaDe.addMouseListener(new MouseAdapter() {
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				try {
-					
-					About window = new About(textdata);
-					window.frameAbout.setVisible(true);
-					
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-				
-				
-			}
-		});
 	}
 }
