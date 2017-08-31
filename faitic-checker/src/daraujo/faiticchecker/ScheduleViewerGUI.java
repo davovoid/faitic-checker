@@ -47,6 +47,8 @@ import java.awt.Font;
 import java.awt.Cursor;
 
 import javax.swing.SwingConstants;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ScheduleViewerGUI {
 
@@ -54,7 +56,99 @@ public class ScheduleViewerGUI {
 	private static JPanel panelOptions;
 	
 	protected static String username;
+	
+	private static Schedule schedule;
+	
+	private static JLabel[] titleLabels;
+	private static JLabel addScheduleLabel;
 
+	/**
+	 * SCHEDULE THINGS
+	 */
+	
+	private static void initializeScheduleList(){
+		
+		panelOptions.removeAll();
+		panelOptions.updateUI();
+		
+		String[] schedulenames=schedule.getScheduleNames();
+		
+		titleLabels=new JLabel[schedulenames.length];
+		
+		for(int i=0; i<schedulenames.length; i++){
+			
+			String schedulename=schedulenames[i];
+			
+			JLabel titleLabel = new JLabel(schedulename);
+			titleLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			titleLabel.setForeground(new Color(0,110,198,255));
+			titleLabel.setFont(new Font("Dialog", Font.BOLD, 16));
+			
+			titleLabel.addMouseListener(new MouseAdapter(){
+				
+				@Override
+				public void mouseClicked(MouseEvent arg0){
+					
+					titleLabelSelected((JLabel)arg0.getSource());
+					
+				}
+				
+			});
+			
+			panelOptions.add(titleLabel);
+			
+		}
+		
+		addScheduleLabel=new JLabel("+");
+		addScheduleLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		addScheduleLabel.setForeground(new Color(0,110,198,255));
+		addScheduleLabel.setFont(new Font("Dialog", Font.BOLD, 16));
+		
+		addScheduleLabel.addMouseListener(new MouseAdapter(){
+			
+			@Override
+			public void mouseClicked(MouseEvent arg0){
+				
+				addScheduleLabelClicked(titleLabels.length);
+				
+			}
+			
+		});
+		
+		panelOptions.add(addScheduleLabel);
+		
+		
+	}
+	
+	private static void titleLabelSelected(JLabel titleLabel){
+		
+		
+		
+	}
+	
+	private static void addScheduleLabelClicked(int scheduleIndex){
+		
+		ScheduleEditorGUI scheduleeditor=new ScheduleEditorGUI();
+		scheduleeditor.schedule=schedule;
+		scheduleeditor.username=username;
+		scheduleeditor.scheduleIndex=scheduleIndex;
+		
+		scheduleeditor.setVisible(true);
+		
+		// Schedule editor closed, refresh
+		initializeScheduleList();
+		
+	}
+	
+	
+	private static void doAtActivation(){
+		
+		schedule=new Schedule(username);
+		
+		initializeScheduleList();
+		
+	}
+	
 	/**
 	 * Create the application.
 	 */
@@ -71,6 +165,8 @@ public class ScheduleViewerGUI {
 		frmScheduleViewer.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowOpened(WindowEvent arg0) {
+
+				doAtActivation();
 				
 				frmScheduleViewer.setSize(frmScheduleViewer.getWidth()+1, frmScheduleViewer.getHeight()+1);
 
@@ -131,14 +227,20 @@ public class ScheduleViewerGUI {
 		
 		frmScheduleViewer.getContentPane().add(panelEverything, BorderLayout.CENTER);
 		panelEverything.setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.GLUE_COLSPEC,},
+				FormFactory.GLUE_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,}));
+				FormFactory.GLUE_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
 		
 		panelOptions = new JPanel();
 		panelOptions.setOpaque(false);
-		panelEverything.add(panelOptions, "1, 1, fill, fill");
+		panelEverything.add(panelOptions, "1, 1, 5, 1, fill, fill");
 		panelOptions.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 10));
 		
 		
@@ -160,7 +262,7 @@ public class ScheduleViewerGUI {
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setOpaque(false);
-		panelEverything.add(panel_1, "1, 2, fill, fill");
+		panelEverything.add(panel_1, "1, 2, 5, 1, fill, fill");
 		panel_1.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.BUTTON_COLSPEC,
@@ -174,8 +276,7 @@ public class ScheduleViewerGUI {
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,}));
+				FormFactory.GLUE_ROWSPEC,}));
 		
 		JPanel panel_2 = new JCustomPanel();
 		panel_1.add(panel_2, "3, 2, fill, fill");
@@ -207,8 +308,8 @@ public class ScheduleViewerGUI {
 		JLabel label_2 = new JLabel("9:30 - 10:00");
 		panel_6.add(label_2);
 		
-		JPanel panel_9 = new JCustomPanel();
-		panel_9.setBackground(new Color(51, 102, 153));
+		JPanel panel_9 = new JCustomPanel(true);
+		panel_9.setBackground(new Color(102, 153, 204));
 		panel_1.add(panel_9, "4, 4, 1, 2, fill, fill");
 		panel_9.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.UNRELATED_GAP_COLSPEC,
@@ -224,6 +325,7 @@ public class ScheduleViewerGUI {
 		lblSubject.setHorizontalAlignment(SwingConstants.CENTER);
 		panel_9.add(lblSubject, "2, 2");
 		
+		
 		JLabel label_4 = new JLabel("9:30 - 10:30");
 		label_4.setFont(new Font("Dialog", Font.ITALIC, 10));
 		label_4.setHorizontalAlignment(SwingConstants.CENTER);
@@ -234,5 +336,19 @@ public class ScheduleViewerGUI {
 		
 		JLabel label_3 = new JLabel("10:00 - 10:30");
 		panel_7.add(label_3);
+		
+		JLabel lblEdit = new JLabel("Edit");
+		lblEdit.setVisible(false);
+		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblEdit.setForeground(new Color(0,110,198,255));
+		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
+		panelEverything.add(lblEdit, "2, 3");
+		
+		JLabel lblDelete = new JLabel("Delete");
+		lblDelete.setVisible(false);
+		lblDelete.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblDelete.setForeground(new Color(0,110,198,255));
+		lblDelete.setFont(new Font("Dialog", Font.BOLD, 14));
+		panelEverything.add(lblDelete, "4, 3");
 	}
 }

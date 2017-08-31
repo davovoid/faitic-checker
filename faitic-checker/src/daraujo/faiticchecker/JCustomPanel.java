@@ -27,6 +27,18 @@ import javax.swing.JPanel;
 
 public class JCustomPanel extends JPanel {
 
+	private boolean iBackColor=false;
+	
+	public JCustomPanel(){
+		
+	}
+	
+	public JCustomPanel(boolean backColor){
+		
+		iBackColor=backColor;
+		
+	}
+	
 	@Override
 	public void paintComponent(Graphics g){
 
@@ -48,7 +60,7 @@ public class JCustomPanel extends JPanel {
 	    	
 	    }
 	    
-	    g.setColor(Color.white);
+	    g.setColor(iBackColor ? borderColor.brighter().brighter() : Color.white);
 	    g.fillRoundRect(2, 2, super.getWidth()-6, super.getHeight()-6, 5, 5);
 	    
 	    g.setColor(borderColor);
