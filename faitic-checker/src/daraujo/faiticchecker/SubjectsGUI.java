@@ -164,6 +164,8 @@ public class SubjectsGUI {
 	private static JPanel panelSearch;
 	private JTextField txtSearch;
 	private static JPanel btnSearch;
+	private JPanel panel;
+	private JPanel btnSchedule;
 	
 	/**
 	 * Application functions
@@ -1493,6 +1495,71 @@ public class SubjectsGUI {
 		panelLogos.add(lblSubjectName, "3, 2, 4, 1");
 		lblSubjectName.setFont(new Font("Dialog", Font.PLAIN, 23));
 		
+		panel = new JPanel();
+		panel.setOpaque(false);
+		panelLogos.add(panel, "8, 2, fill, fill");
+		panel.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.GLUE_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.GLUE_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.GLUE_ROWSPEC,}));
+		
+		btnSchedule = new JPanel(){
+			 
+			@Override
+			public void paintComponent(Graphics g){
+				
+				Graphics2D g2=(Graphics2D) g;
+				
+			    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			    g2.setColor(new Color(0,110,198,255));
+			    g2.setStroke(new BasicStroke(3));
+			    
+			    // Sheet
+			    g2.drawRoundRect(1, getHeight()/8, getWidth()-4, getHeight()*3/4,2,2);
+			    
+			    // Events
+			    g2.fillRoundRect(4, getHeight()/8+4, 5,5,2,2);
+			    g2.fillRoundRect(getWidth()/2-3, getHeight()/2-3, 5,5,2,2);
+			    g2.fillRoundRect(getWidth()-10, getHeight()/8+4, 5,5,2,2);
+			    g2.fillRoundRect(getWidth()-10, getHeight()*7/8-9, 5,5,2,2);
+			    
+			    // Details
+			    
+			    for(int i=2; i<getWidth()-5; i+=3)
+			    	g2.fillRoundRect(i, getHeight()/8-2, 3,5,2,2);
+			    
+			}
+			
+		};
+		btnSchedule.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(arg0.getComponent().isEnabled()){
+					
+					ScheduleViewerGUI scheduleviewergui=new ScheduleViewerGUI();
+					
+					scheduleviewergui.username=username;
+					scheduleviewergui.frmScheduleViewer.setVisible(true);
+					
+				}
+
+				
+			}
+		});
+		btnSchedule.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnSchedule.setPreferredSize(new Dimension(30, 30));
+		btnSchedule.setOpaque(false);
+		panel.add(btnSchedule, "2, 2, fill, fill");
+		
 		btnSearch = new JPanel(){
 			
 			@Override
@@ -1508,12 +1575,14 @@ public class SubjectsGUI {
 			    g2.setStroke(new BasicStroke(3));
 			    
 			    g2.drawOval(getWidth()-getHeight()/2-5, 5, getHeight()/2, getHeight()/2);
-			    g2.drawLine((int)(getWidth()-getHeight()/2-5+getHeight()/4-getHeight()/4*Math.sqrt(2)/2), (int)(5+getHeight()/4+getHeight()/4*Math.sqrt(2)/2), 
+			    g2.drawLine((int)(getWidth()-getHeight()/2-5+getHeight()/4-getHeight()/4*Math.sqrt(2)/2)-1, (int)(5+getHeight()/4+getHeight()/4*Math.sqrt(2)/2)+1, 
 			    		(int)(getWidth()-getHeight()/2-5+getHeight()/4-getHeight()/4*Math.sqrt(2)/2-getHeight()/4), (int)(5+getHeight()/4+getHeight()/4*Math.sqrt(2)/2+getHeight()/4));
 				
 			}
 			
 		};
+		btnSearch.setPreferredSize(new Dimension(30, 30));
+		panel.add(btnSearch, "4, 2");
 		btnSearch.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnSearch.setVisible(false);
 		btnSearch.setOpaque(false);
@@ -1537,7 +1606,6 @@ public class SubjectsGUI {
 			}
 			
 		});
-		panelLogos.add(btnSearch, "8, 2, fill, fill");
 		
 		lblProperties = new JLabel("");
 		panelLogos.add(lblProperties, "4, 4, 5, 1");
