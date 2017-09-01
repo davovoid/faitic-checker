@@ -65,6 +65,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.ListSelectionEvent;
 
 public class ScheduleEditorGUI extends JDialog {
 	
@@ -78,18 +80,26 @@ public class ScheduleEditorGUI extends JDialog {
 	private static JSpinner shstart,smstart,shend,smend;
 	private static JList listevents;
 	private static JComboBox cbday;
-	private static JCustomButton btnaddevent, btnmodifyevent;
+	private static JCustomButton btnaddevent, btnmodifyevent, btnDeleteEvent;
 	private static JPanel panelOptions, pcolor;
 	
 	private static DefaultListModel eventListModel=new DefaultListModel();
 
 	private static void listScheduleEvents(){
 		
+		int selectedindex=listevents.getSelectedIndex();
+		
 		eventListModel.clear();
 		
 		for(int i=0; i<schedule.eventList.size(); i++){
 			
 			eventListModel.addElement(schedule.eventList.get(i).getEventName());
+			
+		}
+		
+		if(selectedindex>=0 && selectedindex<eventListModel.getSize()){
+			
+			listevents.setSelectedIndex(selectedindex);
 			
 		}
 		
@@ -103,6 +113,43 @@ public class ScheduleEditorGUI extends JDialog {
 				cbday.getSelectedIndex(), pcolor.getBackground(), null);
 		
 		schedule.eventList.add(event);
+		
+	}
+	
+	private static void modifyEvent(int eventindex){
+		
+		if(eventindex<schedule.eventList.size() && eventindex>=0){
+			
+			ScheduleEvent event=schedule.eventList.get(eventindex);
+			
+			event.modify(txteventname.getText(),
+					(int)shstart.getValue()*60+(int)smstart.getValue(),
+					(int)shend.getValue()*60+(int)smend.getValue(),
+					cbday.getSelectedIndex(), pcolor.getBackground(), null);
+			
+		}
+		
+	}
+	
+	private static void fillwithevent(int eventindex){
+		
+		if(eventindex<schedule.eventList.size() && eventindex>=0){
+			
+			ScheduleEvent event=schedule.eventList.get(eventindex);
+			
+			txteventname.setText(event.getEventName());
+			
+			shstart.setValue(event.getHour(event.getMinuteStart()));
+			smstart.setValue(event.getMinute(event.getMinuteStart()));
+			
+			shend.setValue(event.getHour(event.getMinuteEnd()));
+			smend.setValue(event.getMinute(event.getMinuteEnd()));
+			
+			cbday.setSelectedIndex(event.getDay());
+			
+			pcolor.setBackground(event.getColor());
+			
+		}
 		
 	}
 	
@@ -123,7 +170,13 @@ public class ScheduleEditorGUI extends JDialog {
 					
 					txtschedulename.setText(schedulenames[scheduleIndex]);
 					
+				} else{
+					
+					txtschedulename.setText("Untitled-" + (scheduleIndex+1));
+					
 				}
+				
+				txtschedulepos.setText("" + scheduleIndex);
 				
 				schedule.readEvents(scheduleIndex);
 
@@ -144,7 +197,7 @@ public class ScheduleEditorGUI extends JDialog {
 			
 			@Override
 			public void paintComponent(Graphics g){
-
+ 
 				// Variables
 				
 				int bottombarheight=panelOptions!=null ? panelOptions.getHeight() : 40;
@@ -155,15 +208,15 @@ public class ScheduleEditorGUI extends JDialog {
 				g.fillRect(0, 0, getWidth(), getHeight());
 				
 				
-				for(int i=0; i<super.getHeight(); i++){
-					g.setColor(new Color(220,220,220, 0+i*150/super.getHeight() ));
+				for(int i=getHeight()-bottombarheight; i<super.getHeight(); i++){
+					g.setColor(new Color(220,220,220, 0+(i-(getHeight()-bottombarheight))*150/bottombarheight ));
 					g.drawLine(0, i, super.getWidth(), i);
 				}
 				
 				// Bottom bar
 				
 				g.setColor(Color.white);
-				g.fillRect(0,getHeight()-bottombarheight,getWidth(),bottombarheight);
+				g.fillRect(0,0,getWidth(),getHeight()-bottombarheight);
 				
 				g.setColor(borderColor);
 				g.drawLine(0, getHeight()-bottombarheight-1, getWidth(), getHeight()-bottombarheight-1);
@@ -171,7 +224,7 @@ public class ScheduleEditorGUI extends JDialog {
 				for(int i=0; i<8; i++){
 					
 					g.setColor(new Color(110,110,110,(8-i)*40/8));
-					g.drawLine(0, getHeight()-bottombarheight-1-i, getWidth(), getHeight()-bottombarheight-1-i);
+					g.drawLine(0, getHeight()-bottombarheight+i, getWidth(), getHeight()-bottombarheight+i);
 					
 					
 				}
@@ -346,32 +399,86 @@ public class ScheduleEditorGUI extends JDialog {
 				
 				addNewEvent();
 				listScheduleEvents();
+				listevents.setSelectedIndex(eventListModel.getSize()-1);
 				
 			}
 		});
 		panel_1.add(btnaddevent, "2, 14, 9, 1");
 		
 		btnmodifyevent = new JCustomButton("Modify selected event");
+		btnmodifyevent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				if(listevents.getSelectedIndex()>=0){
+
+					modifyEvent(listevents.getSelectedIndex());
+					listScheduleEvents();
+					
+				}
+
+			}
+		});
 		panel_1.add(btnmodifyevent, "2, 16, 9, 1");
 		
 		JPanel panel_2 = new JPanel();
-		panel_2.setBorder(new TitledBorder(null, "Current events", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_2.setBorder(null);
 		panel_2.setOpaque(false);
 		panel.add(panel_2, "6, 4, 1, 5, fill, fill");
-		panel_2.setLayout(new BorderLayout(0, 0));
+		panel_2.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.GLUE_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.UNRELATED_GAP_ROWSPEC,
+				FormFactory.GLUE_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,}));
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBorder(null);
 		scrollPane.getVerticalScrollBar().setUI(new CustomScrollBarUI(Color.white,new Color(110,110,110,255),new Color(110,110,110,50)));
 		scrollPane.getHorizontalScrollBar().setUI(new CustomScrollBarUI(Color.white,new Color(110,110,110,255),new Color(110,110,110,50)));
-		scrollPane.setOpaque(false);
-		scrollPane.getViewport().setOpaque(false);
-		panel_2.add(scrollPane, BorderLayout.CENTER);
+		
+		JLabel lblEventList = new JLabel("Event list");
+		panel_2.add(lblEventList, "1, 1");
+		panel_2.add(scrollPane, "1, 3, fill, fill");
 		
 		listevents = new JList();
+		listevents.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent arg0) {
+				
+				btnDeleteEvent.setEnabled(listevents.getSelectedIndex()>=0);
+				btnmodifyevent.setEnabled(listevents.getSelectedIndex()>=0);
+				
+				fillwithevent(listevents.getSelectedIndex());
+				
+			}
+		});
 		listevents.setModel(eventListModel);
-		listevents.setOpaque(false);
 		scrollPane.setViewportView(listevents);
+		
+		btnDeleteEvent = new JCustomButton("Delete selected event");
+		btnDeleteEvent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				if(listevents.getSelectedIndex()>=0){
+					
+					int selectedIndex=listevents.getSelectedIndex();
+					
+					schedule.eventList.remove(selectedIndex);
+
+					listScheduleEvents();
+					
+					if(selectedIndex<eventListModel.getSize()){
+						
+						listevents.setSelectedIndex(selectedIndex);
+						
+					}
+					
+				}
+				
+			}
+		});
+		btnDeleteEvent.setEnabled(false);
+		panel_2.add(btnDeleteEvent, "1, 5");
 		
 		panelOptions = new JPanel();
 		FlowLayout fl_panelOptions = (FlowLayout) panelOptions.getLayout();
@@ -382,6 +489,14 @@ public class ScheduleEditorGUI extends JDialog {
 		panel.add(panelOptions, "1, 10, 7, 1, fill, fill");
 		 
 		JButton btnSave = new JCustomButton("Save");
+		btnSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				schedule.saveSchedule(txtschedulename.getText(), scheduleIndex, scheduleIndex>=schedulenames.length); // True if out of bounds, so when new entry
+				setVisible(false);
+				
+			}
+		});
 		panelOptions.add(btnSave);
 		
 		JButton btnCancel = new JCustomButton("Cancel");

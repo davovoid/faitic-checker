@@ -70,7 +70,7 @@ public class Schedule {
 				// Checks all schedules
 				JSONArray schedules=(JSONArray) schedulejson.get("schedules");
 				
-				if(scheduleIndex>=schedules.size()) return;
+				if(scheduleIndex>=schedules.size() || scheduleIndex<0) return;
 				
 				JSONObject scheduleentry=(JSONObject) schedules.get(scheduleIndex); // Get the schedule at pos scheduleIndex
 				
@@ -93,17 +93,17 @@ public class Schedule {
 
 							if(eventjson.containsKey("eventname")) 		eventname 		= (String) 	eventjson.get("eventname");
 							if(eventjson.containsKey("assocsubject")) 	assocsubject 	= (String) 	eventjson.get("assocsubject");
-							if(eventjson.containsKey("minutestart"))	minutestart 	= (int) 	eventjson.get("minutestart");
-							if(eventjson.containsKey("minuteend"))		minuteend 		= (int) 	eventjson.get("minuteend");
-							if(eventjson.containsKey("day"))			day 			= (int) 	eventjson.get("day");
+							if(eventjson.containsKey("minutestart"))	minutestart 	= (int)(long) 	eventjson.get("minutestart");
+							if(eventjson.containsKey("minuteend"))		minuteend 		= (int)(long) 	eventjson.get("minuteend");
+							if(eventjson.containsKey("day"))			day 			= (int)(long) 	eventjson.get("day");
 
 							if(eventjson.containsKey("colorr") &&
 							   eventjson.containsKey("colorg") &&
 							   eventjson.containsKey("colorb") &&
-							   eventjson.containsKey("colora"))			color			= new Color((int) eventjson.get("colorr"),
-																									(int) eventjson.get("colorg"),
-																									(int) eventjson.get("colorb"),
-																									(int) eventjson.get("colora"));
+							   eventjson.containsKey("colora"))			color			= new Color((int)(long) eventjson.get("colorr"),
+																									(int)(long) eventjson.get("colorg"),
+																									(int)(long) eventjson.get("colorb"),
+																									(int)(long) eventjson.get("colora"));
 
 							ScheduleEvent event=new ScheduleEvent(eventname, minutestart, minuteend, day, color, assocsubject);
 
@@ -187,7 +187,7 @@ public class Schedule {
 
 	}
 
-	public static void saveEvent(String schedulename, int schedulepos, boolean newEntry){
+	public static void saveSchedule(String schedulename, int schedulepos, boolean newEntry){
 
 		// STEP 1: PREVIOUS SCHEDULES
 		
@@ -281,6 +281,79 @@ public class Schedule {
 		newschedules.add(newschedule);
 		
 		for(int i=(newEntry ? schedulepos : schedulepos+1); i<schedules.size(); i++){ // After
+
+			if(i>=0) newschedules.add(schedules.get(i));
+			
+		}
+		
+		// STEP 4: SAVE IT
+		
+		JSONObject schedulejsonout=new JSONObject();
+		schedulejsonout.put("schedules", newschedules);
+		
+		ClassicRoutines.writeFile(scheduleFile,schedulejsonout.toJSONString());
+		
+		
+	}
+	
+	
+
+	public static void removeSchedule(int schedulepos){
+
+		// STEP 1: PREVIOUS SCHEDULES
+		
+		JSONArray schedules=null;
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		String scheduleFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/schedule-" + iUsername + ".json");
+
+		if(new File(scheduleFile).exists()){ 
+
+			try {
+
+				// Read the schedule json
+				JSONObject schedulejson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(scheduleFile));
+
+				if(schedulejson.containsKey("schedules")){
+					
+					// Reads all schedules
+					schedules=(JSONArray) schedulejson.get("schedules");
+
+				}
+
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				
+			}
+
+		}
+		
+		// Are there schedules?
+		if(schedules==null){
+			
+			// No, let's clean them
+		
+			schedules=new JSONArray();
+			
+		}
+		
+		// Skip step 2. No entry to generate
+		
+		// STEP 3: MERGE THE NEW ENTRY
+		
+		JSONArray newschedules=new JSONArray();
+		
+		for(int i=0; i<schedulepos; i++){ // Before
+			
+			if(i<schedules.size() && i>=0)
+				newschedules.add(schedules.get(i));
+			
+		}
+		
+		for(int i=schedulepos+1; i<schedules.size(); i++){ // After. Discarding schedulepos
 
 			if(i>=0) newschedules.add(schedules.get(i));
 			

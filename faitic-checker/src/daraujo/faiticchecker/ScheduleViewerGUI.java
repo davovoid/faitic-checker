@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.SystemColor;
 import java.awt.Toolkit;
 import java.awt.Color;
 import java.awt.event.WindowAdapter;
@@ -47,6 +48,7 @@ import java.awt.Font;
 import java.awt.Cursor;
 
 import javax.swing.SwingConstants;
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -59,8 +61,12 @@ public class ScheduleViewerGUI {
 	
 	private static Schedule schedule;
 	
+	private static int scheduleindex=-1;
+	
 	private static JLabel[] titleLabels;
 	private static JLabel addScheduleLabel;
+	
+	private static JLabel lblEdit, lblDelete;
 
 	/**
 	 * SCHEDULE THINGS
@@ -96,6 +102,7 @@ public class ScheduleViewerGUI {
 			});
 			
 			panelOptions.add(titleLabel);
+			titleLabels[i]=titleLabel;
 			
 		}
 		
@@ -109,7 +116,7 @@ public class ScheduleViewerGUI {
 			@Override
 			public void mouseClicked(MouseEvent arg0){
 				
-				addScheduleLabelClicked(titleLabels.length);
+				activateEditor(titleLabels.length);
 				
 			}
 			
@@ -117,16 +124,31 @@ public class ScheduleViewerGUI {
 		
 		panelOptions.add(addScheduleLabel);
 		
+		if(scheduleindex<titleLabels.length) selectSchedule(scheduleindex);
 		
 	}
 	
 	private static void titleLabelSelected(JLabel titleLabel){
 		
+		int selectedLabel=-1;
 		
+		for(int i=0; i<titleLabels.length; i++){
+			
+			if(titleLabels[i].equals(titleLabel)){
+				selectedLabel=i;
+			}
+			
+		}
+		
+		if(selectedLabel>=0){
+			
+			selectSchedule(selectedLabel);
+			
+		}
 		
 	}
 	
-	private static void addScheduleLabelClicked(int scheduleIndex){
+	private static void activateEditor(int scheduleIndex){
 		
 		ScheduleEditorGUI scheduleeditor=new ScheduleEditorGUI();
 		scheduleeditor.schedule=schedule;
@@ -140,12 +162,39 @@ public class ScheduleViewerGUI {
 		
 	}
 	
+	private static void selectSchedule(int index){
+		
+		scheduleindex=index;
+		
+		for(int i=0; i<titleLabels.length; i++){
+			
+			titleLabels[i].setForeground(new Color(0,110,198,255));
+			titleLabels[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			
+		}
+		
+		if(index>=0){
+			
+			titleLabels[index].setForeground(SystemColor.windowText);
+			titleLabels[index].setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			
+		}
+
+		schedule.readEvents(index);
+		
+		lblEdit.setVisible(index>=0);
+		lblDelete.setVisible(index>=0);
+		
+	}
+	
 	
 	private static void doAtActivation(){
 		
 		schedule=new Schedule(username);
 		
 		initializeScheduleList();
+		
+		if(titleLabels.length>0) selectSchedule(0);
 		
 	}
 	
@@ -196,7 +245,7 @@ public class ScheduleViewerGUI {
 				
 				
 				for(int i=0; i<super.getHeight(); i++){
-					g.setColor(new Color(195,209,220, 0+i*210/super.getHeight() ));
+					g.setColor(new Color(195,209,220, 0+i*150/super.getHeight() ));
 					g.drawLine(0, i, super.getWidth(), i);
 				}
 				
@@ -337,14 +386,39 @@ public class ScheduleViewerGUI {
 		JLabel label_3 = new JLabel("10:00 - 10:30");
 		panel_7.add(label_3);
 		
-		JLabel lblEdit = new JLabel("Edit");
+		lblEdit = new JLabel("Edit");
+		lblEdit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					activateEditor(scheduleindex);
+					
+				}
+				
+			}
+		});
 		lblEdit.setVisible(false);
 		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblEdit.setForeground(new Color(0,110,198,255));
 		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
 		panelEverything.add(lblEdit, "2, 3");
 		
-		JLabel lblDelete = new JLabel("Delete");
+		lblDelete = new JLabel("Delete");
+		lblDelete.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					schedule.removeSchedule(scheduleindex);
+					initializeScheduleList();
+					
+				}
+				
+			}
+		});
 		lblDelete.setVisible(false);
 		lblDelete.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblDelete.setForeground(new Color(0,110,198,255));
