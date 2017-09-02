@@ -59,14 +59,14 @@ public class ScheduleEvent {
 	}
 	
 	
-	public int getHour(int minutes){
+	public static int getHour(int minutes){
 		
 		return (int) Math.floor((float)minutes/60.0);
 		
 	}
 	
 
-	public int getMinute(int minutes){
+	public static int getMinute(int minutes){
 		
 		return minutes % 60;
 		

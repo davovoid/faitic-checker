@@ -60,10 +60,10 @@ public class JCustomPanel extends JPanel {
 	    	
 	    }
 	    
-	    g.setColor(iBackColor ? borderColor.brighter().brighter() : Color.white);
+	    g.setColor(iBackColor ? borderColor : Color.white);
 	    g.fillRoundRect(2, 2, super.getWidth()-6, super.getHeight()-6, 5, 5);
 	    
-	    g.setColor(borderColor);
+	    g.setColor(iBackColor ? borderColor.darker() : borderColor);
 	    g.drawRoundRect(2, 2, super.getWidth()-6, super.getHeight()-6, 5, 5);
 		
 	}

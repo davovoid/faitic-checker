@@ -27,6 +27,7 @@ import java.awt.RenderingHints;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JScrollBar;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 
 public class CustomScrollBarUI extends BasicScrollBarUI {
@@ -44,10 +45,12 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
     @Override
     protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
     	
+    	boolean isVertical=c.getWidth()<c.getHeight();
+    	
     	g.setColor(back);
     	g.fillRect(trackBounds.x, trackBounds.y, trackBounds.width, trackBounds.height);
 
-    	int barwidth=trackBounds.width/2;
+    	int barwidth=isVertical ? trackBounds.width/2 : trackBounds.height/2;
     	
     	Graphics2D g2=(Graphics2D) g;
     	
@@ -56,14 +59,20 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
 	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	    
     	g2.setColor(forenobar);
-    	g2.fillRoundRect(trackBounds.x+barwidth/2, trackBounds.y, barwidth, trackBounds.height, barwidth,barwidth);
     	
+    	if(isVertical)
+    		g2.fillRoundRect(trackBounds.x+barwidth/2, trackBounds.y, barwidth, trackBounds.height, barwidth,barwidth);
+    	else
+    		g2.fillRoundRect(trackBounds.x, trackBounds.y+barwidth/2, trackBounds.width, barwidth, barwidth,barwidth);
+
     }
 
     @Override
     protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
+
+    	boolean isVertical=c.getWidth()<c.getHeight();
     	
-    	int barwidth=thumbBounds.width/2;
+    	int barwidth=isVertical ? thumbBounds.width/2 : thumbBounds.height/2;
     	
     	Graphics2D g2=(Graphics2D) g;
     	
@@ -72,7 +81,11 @@ public class CustomScrollBarUI extends BasicScrollBarUI {
 	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 	    
     	g2.setColor(fore);
-    	g2.fillRoundRect(thumbBounds.x+barwidth/2, thumbBounds.y, barwidth, thumbBounds.height, barwidth,barwidth);
+    	
+    	if(isVertical)
+    		g2.fillRoundRect(thumbBounds.x+barwidth/2, thumbBounds.y, barwidth, thumbBounds.height, barwidth,barwidth);
+    	else
+    		g2.fillRoundRect(thumbBounds.x, thumbBounds.y+barwidth/2, thumbBounds.width, barwidth, barwidth,barwidth);
     	
     }
     

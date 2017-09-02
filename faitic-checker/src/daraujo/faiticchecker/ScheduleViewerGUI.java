@@ -51,11 +51,14 @@ import javax.swing.SwingConstants;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+
+import javax.swing.JScrollPane;
 
 public class ScheduleViewerGUI {
 
 	protected static JFrame frmScheduleViewer;
-	private static JPanel panelOptions;
+	private static JPanel panelOptions, panelSchedule;
 	
 	protected static String username;
 	
@@ -185,6 +188,276 @@ public class ScheduleViewerGUI {
 		lblEdit.setVisible(index>=0);
 		lblDelete.setVisible(index>=0);
 		
+		if(index>=0){
+			
+			showSchedule(panelSchedule);
+			
+		} else{
+			
+			panelSchedule.removeAll();
+			panelSchedule.updateUI();
+			
+		}
+		
+	}
+	
+	private static void showSchedule(JPanel targetPanel){
+		
+		targetPanel.removeAll();
+		targetPanel.updateUI();
+		
+		// Check minimum and maximum minutes, all days are common, as well as the minimum and maximum days.
+		
+		int minimum=-1, maximum=-1;
+		int minday=-1, maxday=-1;
+		
+		for(ScheduleEvent event : schedule.eventList){
+			
+			if(minimum==-1 || event.getMinuteStart()<minimum){
+				
+				minimum=event.getMinuteStart();
+				
+			}
+			
+
+			if(maximum==-1 || event.getMinuteEnd()>maximum){
+				
+				maximum=event.getMinuteEnd();
+				
+			}
+			
+			
+			if(minday==-1 || event.getDay()<minday){
+				
+				minday=event.getDay();
+				
+			}
+			
+
+			if(maxday==-1 || event.getDay()>maxday){
+				
+				maxday=event.getDay();
+				
+			}
+			
+			
+		}
+		
+		// Now round them to half an hour (30 minutes)
+		
+		minimum-=minimum%30;
+		if(maximum%30>0) maximum+=30-(maximum%30);
+		
+		// Now get all times from all events so as to order them in an ArrayList (Incl. minimum and maximum)
+		
+		ArrayList<Integer> listminutes=new ArrayList<Integer>();
+		
+		listminutes.add(minimum);
+		listminutes.add(maximum);
+		
+		// So for each event
+		for(ScheduleEvent event : schedule.eventList){
+			
+			boolean startissmaller=true;
+			boolean endissmaller=true;
+			
+			// Check position for start (no added if equal to any element)
+			
+			for(int i=0; i<listminutes.size() && startissmaller; i++){
+				
+				if(event.getMinuteStart()==(int)listminutes.get(i)){
+					
+					startissmaller=false;
+					
+				} else if(event.getMinuteStart()<(int)listminutes.get(i)){
+
+					listminutes.add(i, event.getMinuteStart());
+					startissmaller=false;
+					
+				}
+				
+			}
+			
+			// And for end
+			
+			for(int i=0; i<listminutes.size() && endissmaller; i++){
+				
+				if(event.getMinuteEnd()==(int)listminutes.get(i)){
+					
+					endissmaller=false;
+					
+				} else if(event.getMinuteEnd()<(int)listminutes.get(i)){
+					
+					listminutes.add(i, event.getMinuteEnd());
+					endissmaller=false;
+					
+				}
+				
+			}
+			
+			// No need to check if it exceeded the list as there is the maximum
+
+		}
+		
+		// Now let's add partial minutes going 30 by 30 minutes
+		
+		int partialminute=minimum;
+		int startlookingpos=0;		// So as not to start where it is checked that it cannot be
+		
+		while(partialminute<maximum){
+			
+			boolean issmaller=true;
+			
+			for(int i=startlookingpos; i<listminutes.size() && issmaller; i++){
+				
+				if(partialminute==(int)listminutes.get(i)){
+					
+					issmaller=false;
+					startlookingpos=i;
+					
+				} else if(partialminute<(int)listminutes.get(i)){
+					
+					listminutes.add(i, partialminute);
+					
+					issmaller=false;
+					startlookingpos=i;
+					
+				}
+				
+				
+			}
+			
+			partialminute+=30; // Increment
+			
+		}
+		
+		// Now there is a minimum, a maximum, the actual minutes and the partial half hours.
+		// Also we have the minimum and maximum day required.
+		
+		// So let's arrange the panel
+		
+		// Layout
+		ColumnSpec[] columnspec=new ColumnSpec[maxday-minday+4];
+		RowSpec[] rowspec=new RowSpec[listminutes.size()+3-1]; // Two different minutes make one element
+		
+		columnspec[0]=ColumnSpec.decode("10dlu:grow");
+		columnspec[columnspec.length-1]=ColumnSpec.decode("10dlu:grow");
+		
+		for(int i=1; i<columnspec.length-1; i++)
+			columnspec[i]=FormFactory.BUTTON_COLSPEC;
+		
+		rowspec[0]=RowSpec.decode("10dlu:grow");
+		rowspec[rowspec.length-1]=RowSpec.decode("10dlu:grow");
+		
+		for(int i=1; i<rowspec.length-1; i++)
+			rowspec[i]=FormFactory.BUTTON_ROWSPEC;
+		
+		targetPanel.setLayout(new FormLayout(columnspec,rowspec));
+		
+		// Arranged layout. Now set the elements
+		
+		String[] dayofweek=new String[]{"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"};
+		
+		for(int day=minday; day<=maxday; day++){
+			
+			JPanel panelDay = new JCustomPanel();
+			targetPanel.add(panelDay, (day-minday+3) + ", 2, fill, fill");
+			
+			JLabel labelDay = new JLabel(dayofweek[day]);
+			panelDay.add(labelDay);
+
+		}
+		
+		// Now it is a little bit tricky.
+		// We need to check if the minute in listminutes is divisible between 30.
+		// If not, we will be looking for some element that is that way
+		
+		int elementspassed=1;
+		int elementstart=listminutes.get(0); // Always divisible
+
+		for(int i=1; i<listminutes.size(); i++){
+			
+			if(listminutes.get(i)%30==0){
+				
+				// Divisible
+				
+				int elementend=listminutes.get(i);
+				
+				// GUI related
+				
+				int hs=ScheduleEvent.getHour(elementstart);
+				int ms=ScheduleEvent.getMinute(elementstart);
+				int he=ScheduleEvent.getHour(elementend);
+				int me=ScheduleEvent.getMinute(elementend);
+				
+				String output= 	hs + ":" + (ms > 9 ? ms : "0" + ms) + " - " +
+								he + ":" + (me > 9 ? me : "0" + me);
+				
+				JPanel panelHour = new JCustomPanel();
+				targetPanel.add(panelHour, "2, " + (i-elementspassed + 3) + ", 1, " + elementspassed + ", fill, fill");
+
+				JLabel labelHour = new JLabel(output);
+				panelHour.add(labelHour);
+
+				// Next iteration
+				
+				elementspassed=1;
+				elementstart=elementend;
+				
+			} else{
+				
+				elementspassed++;
+				
+			}
+			
+			
+			
+		}
+		
+		// Now for every event make a panel and so on
+		
+		for(ScheduleEvent event : schedule.eventList){
+			
+			int posstart=listminutes.indexOf(event.getMinuteStart());
+			int posend=listminutes.indexOf(event.getMinuteEnd());
+			int day=event.getDay();
+			
+			JPanel panelEvent = new JCustomPanel(true);
+			panelEvent.setBackground(event.getColor());
+			targetPanel.add(panelEvent, (day + 3) + ", " + (posstart + 3) + ", 1, " + (posend-posstart) + ", fill, fill");
+			panelEvent.setLayout(new FormLayout(new ColumnSpec[] {
+					FormFactory.UNRELATED_GAP_COLSPEC,
+					FormFactory.GLUE_COLSPEC,
+					FormFactory.UNRELATED_GAP_COLSPEC,},
+				new RowSpec[] {
+					FormFactory.RELATED_GAP_ROWSPEC,
+					RowSpec.decode("pref:grow"),
+					FormFactory.PREF_ROWSPEC,
+					FormFactory.RELATED_GAP_ROWSPEC,}));
+			
+			JLabel lblSubject = new JLabel(event.getEventName());
+			lblSubject.setHorizontalAlignment(SwingConstants.CENTER);
+			panelEvent.add(lblSubject, "2, 2");
+			
+
+			int hs=ScheduleEvent.getHour(event.getMinuteStart());
+			int ms=ScheduleEvent.getMinute(event.getMinuteStart());
+			int he=ScheduleEvent.getHour(event.getMinuteEnd());
+			int me=ScheduleEvent.getMinute(event.getMinuteEnd());
+			
+			String output= 	hs + ":" + (ms > 9 ? ms : "0" + ms) + " - " +
+							he + ":" + (me > 9 ? me : "0" + me);
+			
+			JLabel lblHourSubject = new JLabel(output);
+			lblHourSubject.setFont(new Font("Dialog", Font.ITALIC, 10));
+			lblHourSubject.setHorizontalAlignment(SwingConstants.CENTER);
+			panelEvent.add(lblHourSubject, "2, 3");
+			
+			
+		}
+		
+		// And that's all!
+		
 	}
 	
 	
@@ -309,10 +582,22 @@ public class ScheduleViewerGUI {
 		label.setFont(new Font("Dialog", Font.BOLD, 16));
 		panelOptions.add(label);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setOpaque(false);
-		panelEverything.add(panel_1, "1, 2, 5, 1, fill, fill");
-		panel_1.setLayout(new FormLayout(new ColumnSpec[] {
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBorder(null);
+		scrollPane.getVerticalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollPane.getVerticalScrollBar().setOpaque(false);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(10);
+		scrollPane.getHorizontalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollPane.getHorizontalScrollBar().setOpaque(false);
+		scrollPane.getHorizontalScrollBar().setUnitIncrement(10);
+		scrollPane.setOpaque(false);
+		scrollPane.getViewport().setOpaque(false);
+		panelEverything.add(scrollPane, "1, 2, 5, 1, fill, fill");
+		
+		panelSchedule = new JPanel();
+		scrollPane.setViewportView(panelSchedule);
+		panelSchedule.setOpaque(false);
+		panelSchedule.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.BUTTON_COLSPEC,
 				FormFactory.BUTTON_COLSPEC,
@@ -320,46 +605,46 @@ public class ScheduleViewerGUI {
 				FormFactory.BUTTON_COLSPEC,
 				FormFactory.GLUE_COLSPEC,},
 			new RowSpec[] {
-				FormFactory.GLUE_ROWSPEC,
+				RowSpec.decode("10dlu:grow"),
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,}));
+				RowSpec.decode("10dlu:grow"),}));
 		
 		JPanel panel_2 = new JCustomPanel();
-		panel_1.add(panel_2, "3, 2, fill, fill");
+		panelSchedule.add(panel_2, "3, 2, fill, fill");
 		
 		JLabel lblMonday = new JLabel("Monday");
 		panel_2.add(lblMonday);
 		
 		JPanel panel_3 = new JCustomPanel();
-		panel_1.add(panel_3, "4, 2, fill, fill");
+		panelSchedule.add(panel_3, "4, 2, fill, fill");
 		
 		JLabel lblTuesday = new JLabel("Tuesday");
 		panel_3.add(lblTuesday);
 		
 		JPanel panel_4 = new JCustomPanel();
-		panel_1.add(panel_4, "5, 2, fill, fill");
+		panelSchedule.add(panel_4, "5, 2, fill, fill");
 		
 		JLabel lblWednesday = new JLabel("Wednesday");
 		panel_4.add(lblWednesday);
 		
 		JPanel panel_5 = new JCustomPanel();
-		panel_1.add(panel_5, "2, 3, fill, fill");
+		panelSchedule.add(panel_5, "2, 3, fill, fill");
 		
 		JLabel label_1 = new JLabel("9:00 - 9:30");
 		panel_5.add(label_1);
 		
 		JPanel panel_6 = new JCustomPanel();
-		panel_1.add(panel_6, "2, 4, fill, fill");
+		panelSchedule.add(panel_6, "2, 4, fill, fill");
 		
 		JLabel label_2 = new JLabel("9:30 - 10:00");
 		panel_6.add(label_2);
 		
 		JPanel panel_9 = new JCustomPanel(true);
 		panel_9.setBackground(new Color(102, 153, 204));
-		panel_1.add(panel_9, "4, 4, 1, 2, fill, fill");
+		panelSchedule.add(panel_9, "4, 4, 1, 2, fill, fill");
 		panel_9.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.UNRELATED_GAP_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
@@ -381,7 +666,7 @@ public class ScheduleViewerGUI {
 		panel_9.add(label_4, "2, 3");
 		
 		JPanel panel_7 = new JCustomPanel();
-		panel_1.add(panel_7, "2, 5, fill, fill");
+		panelSchedule.add(panel_7, "2, 5, fill, fill");
 		
 		JLabel label_3 = new JLabel("10:00 - 10:30");
 		panel_7.add(label_3);

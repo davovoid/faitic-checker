@@ -48,6 +48,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.border.TitledBorder;
 import javax.swing.DefaultListModel;
 import javax.swing.JColorChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
 import javax.swing.AbstractListModel;
@@ -106,29 +107,30 @@ public class ScheduleEditorGUI extends JDialog {
 	}
 	
 	private static void addNewEvent(){
-		
+
 		ScheduleEvent event=new ScheduleEvent(txteventname.getText(),
 				(int)shstart.getValue()*60+(int)smstart.getValue(),
 				(int)shend.getValue()*60+(int)smend.getValue(),
 				cbday.getSelectedIndex(), pcolor.getBackground(), null);
-		
+
 		schedule.eventList.add(event);
+
 		
 	}
 	
 	private static void modifyEvent(int eventindex){
-		
+
 		if(eventindex<schedule.eventList.size() && eventindex>=0){
-			
+
 			ScheduleEvent event=schedule.eventList.get(eventindex);
-			
+
 			event.modify(txteventname.getText(),
 					(int)shstart.getValue()*60+(int)smstart.getValue(),
 					(int)shend.getValue()*60+(int)smend.getValue(),
 					cbday.getSelectedIndex(), pcolor.getBackground(), null);
-			
+
 		}
-		
+
 	}
 	
 	private static void fillwithevent(int eventindex){
@@ -181,6 +183,8 @@ public class ScheduleEditorGUI extends JDialog {
 				schedule.readEvents(scheduleIndex);
 
 				listScheduleEvents();
+				
+				txteventname.requestFocus();
 				
 				setSize(getWidth()+1, getHeight()+1);
 				setSize(getWidth()-1, getHeight()-1);
@@ -338,6 +342,7 @@ public class ScheduleEditorGUI extends JDialog {
 		
 		shstart = new JSpinner();
 		shstart.setModel(new SpinnerNumberModel(0, 0, 23, 1));
+		shstart.setValue(9);
 		panel_1.add(shstart, "4, 8");
 		
 		JLabel lblH = new JLabel("h");
@@ -345,6 +350,7 @@ public class ScheduleEditorGUI extends JDialog {
 		
 		smstart = new JSpinner();
 		smstart.setModel(new SpinnerNumberModel(0, 0, 59, 1));
+		smstart.setValue(0);
 		panel_1.add(smstart, "8, 8");
 		
 		JLabel lblMin = new JLabel("min");
@@ -355,6 +361,7 @@ public class ScheduleEditorGUI extends JDialog {
 		
 		shend = new JSpinner();
 		shend.setModel(new SpinnerNumberModel(0, 0, 23, 1));
+		shend.setValue(10);
 		panel_1.add(shend, "4, 10");
 		
 		JLabel lblH_1 = new JLabel("h");
@@ -362,6 +369,7 @@ public class ScheduleEditorGUI extends JDialog {
 		
 		smend = new JSpinner();
 		smend.setModel(new SpinnerNumberModel(0, 0, 59, 1));
+		smend.setValue(0);
 		panel_1.add(smend, "8, 10");
 		
 		JLabel lblMin_1 = new JLabel("min");
@@ -396,24 +404,47 @@ public class ScheduleEditorGUI extends JDialog {
 		btnaddevent = new JCustomButton("Add as new event");
 		btnaddevent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				
-				addNewEvent();
-				listScheduleEvents();
-				listevents.setSelectedIndex(eventListModel.getSize()-1);
-				
+
+				if((int)shstart.getValue()*60+(int)smstart.getValue()>=(int)shend.getValue()*60+(int)smend.getValue()){
+
+					JOptionPane.showMessageDialog(null, "Error: start is equal or later than end.", "Error", JOptionPane.ERROR_MESSAGE);
+					
+				} else if(txteventname.getText().length()<=0){
+					
+					JOptionPane.showMessageDialog(null, "Error: no title for the event.", "Error", JOptionPane.ERROR_MESSAGE);
+					
+				}else {
+
+					addNewEvent();
+					listScheduleEvents();
+					listevents.setSelectedIndex(eventListModel.getSize()-1);
+
+				}
 			}
 		});
 		panel_1.add(btnaddevent, "2, 14, 9, 1");
 		
 		btnmodifyevent = new JCustomButton("Modify selected event");
+		btnmodifyevent.setEnabled(false);
 		btnmodifyevent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
 				if(listevents.getSelectedIndex()>=0){
 
-					modifyEvent(listevents.getSelectedIndex());
-					listScheduleEvents();
+					if((int)shstart.getValue()*60+(int)smstart.getValue()>=(int)shend.getValue()*60+(int)smend.getValue()){
+
+						JOptionPane.showMessageDialog(null, "Error: start is equal or later than end.", "Error", JOptionPane.ERROR_MESSAGE);
+						
+					} else if(txteventname.getText().length()<=0){
+						
+						JOptionPane.showMessageDialog(null, "Error: no title for the event.", "Error", JOptionPane.ERROR_MESSAGE);
+						
+					}else {
+
+						modifyEvent(listevents.getSelectedIndex());
+						listScheduleEvents();
 					
+					}
 				}
 
 			}
@@ -491,6 +522,20 @@ public class ScheduleEditorGUI extends JDialog {
 		JButton btnSave = new JCustomButton("Save");
 		btnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				
+				if(txtschedulename.getText().length()<=0){
+
+					JOptionPane.showMessageDialog(null, "Error: no title for the schedule.", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
+					
+				}
+				
+				if(schedule.eventList.size()<=0){
+
+					JOptionPane.showMessageDialog(null, "Error: no events for the schedule.", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
+					
+				}
 				
 				schedule.saveSchedule(txtschedulename.getText(), scheduleIndex, scheduleIndex>=schedulenames.length); // True if out of bounds, so when new entry
 				setVisible(false);
