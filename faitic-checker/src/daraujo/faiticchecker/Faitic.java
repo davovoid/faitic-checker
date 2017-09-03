@@ -158,20 +158,29 @@ public class Faitic {
 			logger.log(Logger.INFO, "Cookies: " + cookiesAssocStr);
 		}
 		
-		DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-		writer.write(post.getBytes(StandardCharsets.UTF_8));
-		
+		if(post.length()>0){
+			
+			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+			writer.write(post.getBytes(StandardCharsets.UTF_8));
+			
+		}
+
 		logger.log(Logger.INFO, "--- Petition sent. Reading ---");
 		
 		StringBuffer output=new StringBuffer();
 		InputStream reader;
 		
-		if(connection.getContentEncoding().equals("gzip")){
+		if(connection.getContentEncoding()!=null)
+			if(connection.getContentEncoding().equals("gzip")){
 			
-			reader=new GZIPInputStream(connection.getInputStream());
-			logger.log(Logger.INFO, " + GZIP ENCODED");
+				reader=new GZIPInputStream(connection.getInputStream());
+				logger.log(Logger.INFO, " + GZIP ENCODED");
 			
-		}
+			} else{
+
+				reader = connection.getInputStream();
+				
+			}
 		else{
 			
 			reader = connection.getInputStream();
@@ -284,10 +293,14 @@ public class Faitic {
 			connection.setRequestProperty("Cookie", cookiesAssocStr);
 			logger.log(Logger.INFO, "Cookies: " + cookiesAssocStr);
 		}
-		
-		DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-		writer.write(post.getBytes(StandardCharsets.UTF_8));
-		
+
+		if(post.length()>0){
+			
+			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+			writer.write(post.getBytes(StandardCharsets.UTF_8));
+			
+		}
+
 		logger.log(Logger.INFO, "--- Petition sent. Reading ---");
 		
 		// Check cookies and if the document redirects
@@ -475,10 +488,14 @@ public class Faitic {
 			connection.setRequestProperty("Cookie", cookiesAssocStr);
 			logger.log(Logger.INFO, "Cookies: " + cookiesAssocStr);
 		}
-		
-		DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-		writer.write(post.getBytes(StandardCharsets.UTF_8));
-		
+
+		if(post.length()>0){
+			
+			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
+			writer.write(post.getBytes(StandardCharsets.UTF_8));
+			
+		}
+
 		logger.log(Logger.INFO, "--- Petition sent. Waiting for redirecting info ---");
 		
 		int status=connection.getResponseCode();

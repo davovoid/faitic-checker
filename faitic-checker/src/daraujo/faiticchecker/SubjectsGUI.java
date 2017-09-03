@@ -1545,7 +1545,7 @@ public class SubjectsGUI {
 				
 				if(arg0.getComponent().isEnabled()){
 					
-					ScheduleViewerGUI scheduleviewergui=new ScheduleViewerGUI();
+					ScheduleViewerGUI scheduleviewergui=new ScheduleViewerGUI(textdata);
 					
 					scheduleviewergui.username=username;
 					scheduleviewergui.frmScheduleViewer.setVisible(true);

@@ -22,6 +22,7 @@ package daraujo.faiticchecker;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import java.awt.BorderLayout;
@@ -57,6 +58,8 @@ import javax.swing.JScrollPane;
 
 public class ScheduleViewerGUI {
 
+	protected static TextData textdata;
+	
 	protected static JFrame frmScheduleViewer;
 	private static JPanel panelOptions, panelSchedule;
 	
@@ -119,7 +122,11 @@ public class ScheduleViewerGUI {
 			@Override
 			public void mouseClicked(MouseEvent arg0){
 				
-				activateEditor(titleLabels.length);
+				int prevtitlelabelslength=titleLabels.length;
+				
+				activateEditor(prevtitlelabelslength);
+				
+				if(titleLabels.length>prevtitlelabelslength) selectSchedule(prevtitlelabelslength);
 				
 			}
 			
@@ -153,7 +160,7 @@ public class ScheduleViewerGUI {
 	
 	private static void activateEditor(int scheduleIndex){
 		
-		ScheduleEditorGUI scheduleeditor=new ScheduleEditorGUI();
+		ScheduleEditorGUI scheduleeditor=new ScheduleEditorGUI(textdata);
 		scheduleeditor.schedule=schedule;
 		scheduleeditor.username=username;
 		scheduleeditor.scheduleIndex=scheduleIndex;
@@ -356,7 +363,7 @@ public class ScheduleViewerGUI {
 		
 		// Arranged layout. Now set the elements
 		
-		String[] dayofweek=new String[]{"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"};
+		String[] dayofweek=textdata.getKey("daysofweek").split(",");
 		
 		for(int day=minday; day<=maxday; day++){
 			
@@ -463,18 +470,22 @@ public class ScheduleViewerGUI {
 	
 	private static void doAtActivation(){
 		
+		frmScheduleViewer.setTitle(textdata.getKey("scheduleviewertitle",username));
+		
 		schedule=new Schedule(username);
 		
 		initializeScheduleList();
 		
 		if(titleLabels.length>0) selectSchedule(0);
+		else selectSchedule(-1);
 		
 	}
 	
 	/**
 	 * Create the application.
 	 */
-	public ScheduleViewerGUI() {
+	public ScheduleViewerGUI(TextData td) {
+		textdata=td;
 		initialize();
 	}
 
@@ -498,7 +509,7 @@ public class ScheduleViewerGUI {
 			}
 		});
 		frmScheduleViewer.setIconImage(Toolkit.getDefaultToolkit().getImage(ScheduleViewerGUI.class.getResource("/daraujo/faiticchecker/icon.png")));
-		frmScheduleViewer.setTitle("Schedule viewer");
+		frmScheduleViewer.setTitle(textdata.getKey("scheduleviewertitle",""));
 		frmScheduleViewer.setBounds(100, 100, 800, 600);
 		frmScheduleViewer.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		
@@ -510,7 +521,7 @@ public class ScheduleViewerGUI {
 				// Variables
 				
 				int topbarheight=panelOptions!=null ? panelOptions.getHeight() : 40;
-				Color borderColor=new Color(110,110,110,180);
+				Color borderColor=new Color(110,110,110,200);
 				
 				// Background
 				g.setColor(Color.white);
@@ -531,7 +542,7 @@ public class ScheduleViewerGUI {
 				g.fillRect(0, 0, getWidth(), topbarheight);
 				
 				g.setColor(borderColor);
-				g.drawLine(0, topbarheight, getWidth(), topbarheight);
+				g.drawLine(0, topbarheight-1, getWidth(), topbarheight-1);
 				
 				for(int i=0; i<8; i++){
 					
@@ -550,19 +561,18 @@ public class ScheduleViewerGUI {
 		frmScheduleViewer.getContentPane().add(panelEverything, BorderLayout.CENTER);
 		panelEverything.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.GLUE_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,}));
+				FormFactory.GLUE_ROWSPEC,}));
 		
 		panelOptions = new JPanel();
 		panelOptions.setOpaque(false);
-		panelEverything.add(panelOptions, "1, 1, 5, 1, fill, fill");
+		panelEverything.add(panelOptions, "1, 1, fill, fill");
 		panelOptions.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 10));
 		
 		
@@ -592,7 +602,53 @@ public class ScheduleViewerGUI {
 		scrollPane.getHorizontalScrollBar().setUnitIncrement(10);
 		scrollPane.setOpaque(false);
 		scrollPane.getViewport().setOpaque(false);
-		panelEverything.add(scrollPane, "1, 2, 5, 1, fill, fill");
+		
+		lblEdit = new JLabel(textdata.getKey("schedulevieweredit"));
+		lblEdit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					activateEditor(scheduleindex);
+					
+				}
+				
+			}
+		});
+		lblEdit.setVisible(false);
+		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblEdit.setForeground(new Color(0,110,198,255));
+		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
+		panelEverything.add(lblEdit, "3, 1");
+		
+		lblDelete = new JLabel(textdata.getKey("scheduleviewerdelete"));
+		lblDelete.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					if(JOptionPane.showConfirmDialog(frmScheduleViewer, textdata.getKey("scheduleviewerdeleteconfirm", titleLabels[scheduleindex].getText()), 
+							textdata.getKey("scheduleviewerdeleteconfirmtitle"), JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
+
+						schedule.removeSchedule(scheduleindex);
+						initializeScheduleList();
+						
+						selectSchedule(-1);
+						
+					}
+					
+				}
+				
+			}
+		});
+		lblDelete.setVisible(false);
+		lblDelete.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblDelete.setForeground(new Color(0,110,198,255));
+		lblDelete.setFont(new Font("Dialog", Font.BOLD, 14));
+		panelEverything.add(lblDelete, "5, 1");
+		panelEverything.add(scrollPane, "1, 2, 6, 1, fill, fill");
 		
 		panelSchedule = new JPanel();
 		scrollPane.setViewportView(panelSchedule);
@@ -670,44 +726,5 @@ public class ScheduleViewerGUI {
 		
 		JLabel label_3 = new JLabel("10:00 - 10:30");
 		panel_7.add(label_3);
-		
-		lblEdit = new JLabel("Edit");
-		lblEdit.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				if(((JLabel)arg0.getSource()).isEnabled()){
-					
-					activateEditor(scheduleindex);
-					
-				}
-				
-			}
-		});
-		lblEdit.setVisible(false);
-		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblEdit.setForeground(new Color(0,110,198,255));
-		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
-		panelEverything.add(lblEdit, "2, 3");
-		
-		lblDelete = new JLabel("Delete");
-		lblDelete.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				if(((JLabel)arg0.getSource()).isEnabled()){
-					
-					schedule.removeSchedule(scheduleindex);
-					initializeScheduleList();
-					
-				}
-				
-			}
-		});
-		lblDelete.setVisible(false);
-		lblDelete.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblDelete.setForeground(new Color(0,110,198,255));
-		lblDelete.setFont(new Font("Dialog", Font.BOLD, 14));
-		panelEverything.add(lblDelete, "4, 3");
 	}
 }
