@@ -48,6 +48,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.border.TitledBorder;
 import javax.swing.DefaultListModel;
 import javax.swing.JColorChooser;
+import javax.swing.JEditorPane;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
@@ -79,7 +80,8 @@ public class ScheduleEditorGUI extends JDialog {
 	
 	private static String[] schedulenames;
 	
-	private static JTextField txtschedulename, txtschedulepos, txteventname;
+	private static JEditorPane txteventname;
+	private static JTextField txtschedulename, txtschedulepos;
 	private static JSpinner shstart,smstart,shend,smend;
 	private static JList listevents;
 	private static JComboBox cbday;
@@ -323,9 +325,10 @@ public class ScheduleEditorGUI extends JDialog {
 		JLabel lblEventName = new JLabel(textdata.getKey("editoreventname"));
 		panel_1.add(lblEventName, "2, 2, right, default");
 		
-		txteventname = new JTextField();
+		txteventname = new JEditorPane();
+		txteventname.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
 		panel_1.add(txteventname, "4, 2, 7, 1, fill, default");
-		txteventname.setColumns(10);
+		//txteventname.setColumns(10);
 		
 		JLabel lblAssocSubject = new JLabel(textdata.getKey("editorassocsubject"));
 		lblAssocSubject.setEnabled(false);

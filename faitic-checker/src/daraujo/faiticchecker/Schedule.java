@@ -370,4 +370,77 @@ public class Schedule {
 	}
 	
 
+	public static void duplicateSchedule(int schedulepos){
+
+		// STEP 1: PREVIOUS SCHEDULES
+		
+		JSONArray schedules=null;
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		String scheduleFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/schedule-" + iUsername + ".json");
+
+		if(new File(scheduleFile).exists()){ 
+
+			try {
+
+				// Read the schedule json
+				JSONObject schedulejson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(scheduleFile));
+
+				if(schedulejson.containsKey("schedules")){
+					
+					// Reads all schedules
+					schedules=(JSONArray) schedulejson.get("schedules");
+
+				}
+
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				
+			}
+
+		}
+		
+		// Are there schedules?
+		if(schedules==null){
+			
+			// No, let's clean them
+		
+			schedules=new JSONArray();
+			
+		}
+		
+		// Skip step 2. No entry to generate
+		
+		// STEP 3: MERGE THE NEW ENTRY
+		
+		JSONArray newschedules=new JSONArray();
+		
+		for(int i=0; i<=schedulepos; i++){ // Before
+			
+			if(i<schedules.size() && i>=0)
+				newschedules.add(schedules.get(i));
+			
+		}
+		
+		for(int i=schedulepos; i<schedules.size(); i++){ // After. Duplicating schedulepos
+
+			if(i>=0) newschedules.add(schedules.get(i));
+			
+		}
+		
+		// STEP 4: SAVE IT
+		
+		JSONObject schedulejsonout=new JSONObject();
+		schedulejsonout.put("schedules", newschedules);
+		
+		ClassicRoutines.writeFile(scheduleFile,schedulejsonout.toJSONString());
+		
+		
+	}
+	
+	
+
 }

@@ -24,6 +24,7 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 
 import java.awt.BorderLayout;
 import java.awt.Graphics;
@@ -55,6 +56,9 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.JScrollPane;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 public class ScheduleViewerGUI {
 
@@ -72,7 +76,7 @@ public class ScheduleViewerGUI {
 	private static JLabel[] titleLabels;
 	private static JLabel addScheduleLabel;
 	
-	private static JLabel lblEdit, lblDelete;
+	private static JLabel lblEdit, lblDelete, lblDuplicate;
 
 	/**
 	 * SCHEDULE THINGS
@@ -194,6 +198,7 @@ public class ScheduleViewerGUI {
 		
 		lblEdit.setVisible(index>=0);
 		lblDelete.setVisible(index>=0);
+		lblDuplicate.setVisible(index>=0);
 		
 		if(index>=0){
 			
@@ -351,13 +356,13 @@ public class ScheduleViewerGUI {
 		columnspec[columnspec.length-1]=ColumnSpec.decode("10dlu:grow");
 		
 		for(int i=1; i<columnspec.length-1; i++)
-			columnspec[i]=FormFactory.BUTTON_COLSPEC;
+			columnspec[i]=ColumnSpec.decode("pref:grow");
 		
 		rowspec[0]=RowSpec.decode("10dlu:grow");
 		rowspec[rowspec.length-1]=RowSpec.decode("10dlu:grow");
 		
 		for(int i=1; i<rowspec.length-1; i++)
-			rowspec[i]=FormFactory.BUTTON_ROWSPEC;
+			rowspec[i]=RowSpec.decode("pref:grow");
 		
 		targetPanel.setLayout(new FormLayout(columnspec,rowspec));
 		
@@ -368,10 +373,20 @@ public class ScheduleViewerGUI {
 		for(int day=minday; day<=maxday; day++){
 			
 			JPanel panelDay = new JCustomPanel();
+			panelDay.setLayout(new FormLayout(new ColumnSpec[] {
+					FormFactory.UNRELATED_GAP_COLSPEC,
+					ColumnSpec.decode("pref:grow"),
+					FormFactory.UNRELATED_GAP_COLSPEC,},
+				new RowSpec[] {
+					FormFactory.RELATED_GAP_ROWSPEC,
+					RowSpec.decode("pref:grow"),
+					FormFactory.RELATED_GAP_ROWSPEC,}));
+			
 			targetPanel.add(panelDay, (day-minday+3) + ", 2, fill, fill");
 			
 			JLabel labelDay = new JLabel(dayofweek[day]);
-			panelDay.add(labelDay);
+			labelDay.setHorizontalAlignment(JLabel.CENTER);
+			panelDay.add(labelDay,"2, 2, fill, fill");
 
 		}
 		
@@ -401,10 +416,20 @@ public class ScheduleViewerGUI {
 								he + ":" + (me > 9 ? me : "0" + me);
 				
 				JPanel panelHour = new JCustomPanel();
+				panelHour.setLayout(new FormLayout(new ColumnSpec[] {
+						FormFactory.UNRELATED_GAP_COLSPEC,
+						ColumnSpec.decode("pref:grow"),
+						FormFactory.UNRELATED_GAP_COLSPEC,},
+					new RowSpec[] {
+						FormFactory.RELATED_GAP_ROWSPEC,
+						RowSpec.decode("pref:grow"),
+						FormFactory.RELATED_GAP_ROWSPEC,}));
+				
 				targetPanel.add(panelHour, "2, " + (i-elementspassed + 3) + ", 1, " + elementspassed + ", fill, fill");
 
 				JLabel labelHour = new JLabel(output);
-				panelHour.add(labelHour);
+				labelHour.setHorizontalAlignment(JLabel.CENTER);
+				panelHour.add(labelHour,"2, 2, fill, fill");
 
 				// Next iteration
 				
@@ -442,10 +467,22 @@ public class ScheduleViewerGUI {
 					FormFactory.PREF_ROWSPEC,
 					FormFactory.RELATED_GAP_ROWSPEC,}));
 			
-			JLabel lblSubject = new JLabel(event.getEventName());
-			lblSubject.setHorizontalAlignment(SwingConstants.CENTER);
-			panelEvent.add(lblSubject, "2, 2");
+			//JLabel lblSubject = new JLabel(event.getEventName());
+			//lblSubject.setHorizontalAlignment(SwingConstants.CENTER);
+			//panelEvent.add(lblSubject, "2, 2");
 			
+			JTextPane lblSubject=new JTextPane();
+			lblSubject.setText(event.getEventName());
+			lblSubject.setEditable(false);
+			lblSubject.setOpaque(false);
+			lblSubject.setFont(new Font("Dialog", Font.BOLD, 12));
+			
+			StyledDocument std=lblSubject.getStyledDocument();
+			SimpleAttributeSet sas=new SimpleAttributeSet();
+			StyleConstants.setAlignment(sas, StyleConstants.ALIGN_CENTER);
+			std.setParagraphAttributes(0, std.getLength(), sas, false);
+			
+			panelEvent.add(lblSubject, "2, 2");
 
 			int hs=ScheduleEvent.getHour(event.getMinuteStart());
 			int ms=ScheduleEvent.getMinute(event.getMinuteStart());
@@ -459,6 +496,14 @@ public class ScheduleViewerGUI {
 			lblHourSubject.setFont(new Font("Dialog", Font.ITALIC, 10));
 			lblHourSubject.setHorizontalAlignment(SwingConstants.CENTER);
 			panelEvent.add(lblHourSubject, "2, 3");
+			
+
+			if(Color.RGBtoHSB(event.getColor().getRed(), event.getColor().getGreen(), event.getColor().getBlue(), null)[2]<0.5){
+				
+				lblSubject.setForeground(Color.white);
+				lblHourSubject.setForeground(Color.white);
+				
+			}
 			
 			
 		}
@@ -565,6 +610,8 @@ public class ScheduleViewerGUI {
 				FormFactory.PREF_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
@@ -603,25 +650,6 @@ public class ScheduleViewerGUI {
 		scrollPane.setOpaque(false);
 		scrollPane.getViewport().setOpaque(false);
 		
-		lblEdit = new JLabel(textdata.getKey("schedulevieweredit"));
-		lblEdit.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				if(((JLabel)arg0.getSource()).isEnabled()){
-					
-					activateEditor(scheduleindex);
-					
-				}
-				
-			}
-		});
-		lblEdit.setVisible(false);
-		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblEdit.setForeground(new Color(0,110,198,255));
-		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
-		panelEverything.add(lblEdit, "3, 1");
-		
 		lblDelete = new JLabel(textdata.getKey("scheduleviewerdelete"));
 		lblDelete.addMouseListener(new MouseAdapter() {
 			@Override
@@ -644,11 +672,53 @@ public class ScheduleViewerGUI {
 			}
 		});
 		lblDelete.setVisible(false);
+		
+		lblEdit = new JLabel(textdata.getKey("schedulevieweredit"));
+		lblEdit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					activateEditor(scheduleindex);
+					
+				}
+				
+			}
+		});
+		lblEdit.setVisible(false);
+		
+		lblDuplicate = new JLabel(textdata.getKey("scheduleviewerduplicate"));
+		lblDuplicate.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					schedule.duplicateSchedule(scheduleindex);
+					initializeScheduleList();
+					
+					selectSchedule(scheduleindex+1);
+					
+				}
+				
+			}
+		});
+		
+		lblDuplicate.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblDuplicate.setForeground(new Color(0,110,198,255));
+		lblDuplicate.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblDuplicate.setVisible(false);
+		panelEverything.add(lblDuplicate, "3, 1");
+		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblEdit.setForeground(new Color(0,110,198,255));
+		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
+		panelEverything.add(lblEdit, "5, 1");
 		lblDelete.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblDelete.setForeground(new Color(0,110,198,255));
 		lblDelete.setFont(new Font("Dialog", Font.BOLD, 14));
-		panelEverything.add(lblDelete, "5, 1");
-		panelEverything.add(scrollPane, "1, 2, 6, 1, fill, fill");
+		panelEverything.add(lblDelete, "7, 1");
+		panelEverything.add(scrollPane, "1, 2, 8, 1, fill, fill");
 		
 		panelSchedule = new JPanel();
 		scrollPane.setViewportView(panelSchedule);
