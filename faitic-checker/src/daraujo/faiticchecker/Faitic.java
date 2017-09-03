@@ -820,6 +820,7 @@ public class Faitic {
 	public static final int CLAROLINE=0;
 	public static final int MOODLE=1;
 	public static final int MOODLE2=2;
+	public static final int MOODLE3=3;
 	public static final int UNKNOWN=99;
 	
 	public static int subjectPlatformType(String url){
@@ -853,6 +854,14 @@ public class Faitic {
 						
 					}
 					
+					if(platforminfo.contains("moodle3_")){
+						
+						// Moodle 3
+						
+						return MOODLE3;
+						
+					}
+					
 					// Reserved for newer Moodle versions
 					
 				} else{
@@ -882,7 +891,7 @@ public class Faitic {
 			
 		}
 		
-		else if(platformType==MOODLE || platformType==MOODLE2){
+		else if(platformType==MOODLE || platformType==MOODLE2 || platformType==MOODLE3){
 			
 			// More complicated :( pay attention because this is about to start...
 
@@ -1353,13 +1362,32 @@ public class Faitic {
 						String realurl = getRedirectedURL(urlList, "");
 						String realname=filename;	// By now
 
-						if(realurl!=null){
+						if(realurl!=null && realurl.contains("/pluginfile.php/")){ // Only download files, and not page resources or whatever
 
 							// Redirected, get the real name
 
 							int questionMarkIndex=realurl.indexOf("?");
+							String realurlwithoutquestion=realurl.substring(0, questionMarkIndex >=0 ? questionMarkIndex : realurl.length());
 							int lastDivider=realurl.substring(0, questionMarkIndex >=0 ? questionMarkIndex : realurl.length()).lastIndexOf("/");	// No error because it starts at 0
 
+							// If there is any possibility of reaching a subfolder
+							
+							if(realurlwithoutquestion.contains("/pluginfile.php/") && realurlwithoutquestion.contains("/mod_folder/content/")){
+								
+								int modfoldercontentindex=realurlwithoutquestion.indexOf("/mod_folder/content/");
+								
+								if(realurlwithoutquestion.indexOf("/",modfoldercontentindex+("/mod_folder/content/").length())>=0){
+									
+									lastDivider=realurlwithoutquestion.indexOf("/",modfoldercontentindex+("/mod_folder/content/").length());
+									
+								}
+								
+							} else if(realurlwithoutquestion.contains("/pluginfile.php/") && realurlwithoutquestion.contains("/mod_label/intro/")){
+								
+								lastDivider=realurlwithoutquestion.indexOf("/mod_label/intro/")+("/mod_label/intro").length();
+								
+							}
+							
 							if(lastDivider>=0){
 
 								// Got a name
@@ -1369,9 +1397,9 @@ public class Faitic {
 							}
 
 
-						}
+							list.add(new FileFromURL(urlList,folder + "/" + realname));
 
-						list.add(new FileFromURL(urlList,folder + "/" + realname));
+						}
 
 					} catch(Exception ex){
 						ex.printStackTrace();
@@ -1436,8 +1464,27 @@ public class Faitic {
 				// Get file name
 				
 				int questionMarkIndex=urlFile.indexOf("?");
+				String realurlwithoutquestion=urlFile.substring(0, questionMarkIndex >=0 ? questionMarkIndex : urlFile.length());
 				int lastDivider=urlFile.substring(0, questionMarkIndex >=0 ? questionMarkIndex : urlFile.length()).lastIndexOf("/");	// No error because it starts at 0
 
+				// If there is any possibility of reaching a subfolder
+				
+				if(realurlwithoutquestion.contains("/pluginfile.php/") && realurlwithoutquestion.contains("/mod_folder/content/")){
+					
+					int modfoldercontentindex=realurlwithoutquestion.indexOf("/mod_folder/content/");
+					
+					if(realurlwithoutquestion.indexOf("/",modfoldercontentindex+("/mod_folder/content/").length())>=0){
+						
+						lastDivider=realurlwithoutquestion.indexOf("/",modfoldercontentindex+("/mod_folder/content/").length());
+						
+					}
+					
+				} else if(realurlwithoutquestion.contains("/pluginfile.php/") && realurlwithoutquestion.contains("/mod_label/intro/")){
+					
+					lastDivider=realurlwithoutquestion.indexOf("/mod_label/intro/")+("/mod_label/intro").length();
+					
+				}
+				
 				if(lastDivider>=0){
 
 					// Got a name

@@ -432,7 +432,7 @@ public class SubjectsGUI {
 
 											fileList = faitic.listDocumentsMoodle(faitic.lastRequestedURL);
 
-										}else if(subjectType == Faitic.MOODLE2){
+										}else if(subjectType == Faitic.MOODLE2 || subjectType == Faitic.MOODLE3){
 
 											fileList = faitic.listDocumentsMoodle2(faitic.lastRequestedURL);
 
@@ -521,6 +521,10 @@ public class SubjectsGUI {
 									}else if(subjectType == Faitic.MOODLE2){
 
 										lblProperties.setText(textdata.getKey("namemoodle2"));
+
+									}else if(subjectType == Faitic.MOODLE3){
+
+										lblProperties.setText(textdata.getKey("namemoodle3"));
 
 									} else{
 
