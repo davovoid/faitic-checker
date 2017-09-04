@@ -892,6 +892,9 @@ public class LoginGUI {
 			}
 		});
 		
+		cCheckForUpdates.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		cCheckForUpdates.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
+		
 		pSpanish = new JPanel(){
 			
 			@Override
@@ -1024,13 +1027,17 @@ public class LoginGUI {
 				
 			}
 		});
+
+		cOfflineSaving.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		cOfflineSaving.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
+		
 		cOfflineSaving.setOpaque(false);
 		panelSettings.add(cOfflineSaving, "3, 6, 5, 1");
 		
 		lblCanalDeActualizaciones = new JLabel(textdata.getKey("updatechannelsettingslabel"));
 		panelSettings.add(lblCanalDeActualizaciones, "3, 8, right, default");
 		
-		txtUpdateChannel = new JTextField();
+		txtUpdateChannel = new JCustomTextField("",new Color(0,110,198,255));
 		txtUpdateChannel.setFont(new Font("Dialog", Font.PLAIN, 14));
 		panelSettings.add(txtUpdateChannel, "5, 8, fill, default");
 		txtUpdateChannel.setColumns(10);

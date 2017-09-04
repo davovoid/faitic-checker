@@ -95,8 +95,8 @@ public class FirstStart extends JDialog {
 
 			if(rSaveAppdata==null || rSaveRelative==null) return;
 			
-			rSaveAppdata.setForeground(rSaveAppdata.isSelected() ? new Color(0,110,198,255) : new Color(33,33,33,255));
-			rSaveRelative.setForeground(rSaveRelative.isSelected() ? new Color(0,110,198,255) : new Color(33,33,33,255));
+			rSaveAppdata.setForeground(rSaveAppdata.isSelected() ? new Color(0,110,198,255) : new Color(169,192,210,255));
+			rSaveRelative.setForeground(rSaveRelative.isSelected() ? new Color(0,110,198,255) : new Color(169,192,210,255));
 			
 		}
 	};
@@ -464,7 +464,7 @@ public class FirstStart extends JDialog {
 		rSaveRelative.addItemListener(itemlistener);
 		rSaveRelative.setFont(new Font("Dialog", Font.BOLD, 22));
 		rSaveRelative.setBackground(Color.WHITE);
-		rSaveRelative.setForeground(new Color(33,33,33,255));
+		rSaveRelative.setForeground(new Color(169,192,210,255));
 		rSaveRelative.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
 		rSaveRelative.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
 		panelRelative.add(rSaveRelative, "2, 2");
