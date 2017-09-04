@@ -105,11 +105,11 @@ public class ScheduleEditorGUI extends JDialog {
 			
 		}
 		
-		if(selectedindex>=0 && selectedindex<eventListModel.getSize()){
+		//if(selectedindex>=0 && selectedindex<eventListModel.getSize()){
 			
-			listevents.setSelectedIndex(selectedindex);
+		//	listevents.setSelectedIndex(selectedindex);
 			
-		}
+		//}
 		
 	}
 	
@@ -448,7 +448,7 @@ public class ScheduleEditorGUI extends JDialog {
 
 					addNewEvent();
 					listScheduleEvents();
-					listevents.setSelectedIndex(-1);
+					//listevents.setSelectedIndex(-1);
 
 				}
 			}
@@ -529,11 +529,11 @@ public class ScheduleEditorGUI extends JDialog {
 
 					listScheduleEvents();
 					
-					if(selectedIndex<eventListModel.getSize()){
+					//if(selectedIndex<eventListModel.getSize()){
 						
-						listevents.setSelectedIndex(selectedIndex);
+					//	listevents.setSelectedIndex(selectedIndex);
 						
-					}
+					//}
 					
 				}
 				
