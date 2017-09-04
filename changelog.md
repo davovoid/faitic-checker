@@ -4,7 +4,7 @@
 
  * NEW SCHEDULE PLANNER, with multiple users and schedules.
  * First MOODLE 3 implementation based on previous Moodle 2 (Thanks ifzero).
- * GUI improvements.
+ * Lots of GUI improvements.
  * Login screen with new background (Thanks ifzero).
  * New Faicheck logo.
  * Board checking and bug fixes related to Moodle 1 and 2.
@@ -14,7 +14,7 @@
 
  * NUEVO PLANIFICADOR DE HORARIOS, con múltiples usuarios y horarios.
  * Primera implementación de MOODLE 3 basándose en la del Moodle 2 (Gracias ifzero).
- * Mejoras en la interfaz de usuario.
+ * Muchas mejoras en la interfaz de usuario.
  * Ventana de inicio de sesión con nuevo fondo (Gracias ifzero).
  * Nuevo logo de Faicheck.
  * Comprobación de tablón y corrección de errores relacionados con Moodle 1 y 2.

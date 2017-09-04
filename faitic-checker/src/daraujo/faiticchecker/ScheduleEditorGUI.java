@@ -22,6 +22,9 @@ package daraujo.faiticchecker;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.SystemColor;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -275,14 +278,14 @@ public class ScheduleEditorGUI extends JDialog {
 		JLabel lblScheduleName = new JLabel(textdata.getKey("editorschedulename"));
 		panel.add(lblScheduleName, "2, 4, right, default");
 		
-		txtschedulename = new JTextField();
+		txtschedulename = new JCustomTextField("",new Color(0,110,198,255));
 		panel.add(txtschedulename, "4, 4, fill, default");
 		txtschedulename.setColumns(10);
 		
 		JLabel lblSchedulePosition = new JLabel(textdata.getKey("editorscheduleposition"));
 		panel.add(lblSchedulePosition, "2, 6, right, default");
 		
-		txtschedulepos = new JTextField();
+		txtschedulepos = new JCustomTextField("",new Color(180,180,180,255));
 		txtschedulepos.setEnabled(false);
 		panel.add(txtschedulepos, "4, 6, fill, default");
 		txtschedulepos.setColumns(10);
@@ -325,8 +328,7 @@ public class ScheduleEditorGUI extends JDialog {
 		JLabel lblEventName = new JLabel(textdata.getKey("editoreventname"));
 		panel_1.add(lblEventName, "2, 2, right, default");
 		
-		txteventname = new JEditorPane();
-		txteventname.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		txteventname = new JCustomEditorPane(new Color(0,110,198,255));
 		panel_1.add(txteventname, "4, 2, 7, 1, fill, default");
 		//txteventname.setColumns(10);
 		
@@ -386,7 +388,29 @@ public class ScheduleEditorGUI extends JDialog {
 		JLabel lblEventColor = new JLabel(textdata.getKey("editoreventcolor"));
 		panel_1.add(lblEventColor, "2, 12, right, default");
 		
-		pcolor = new JPanel();
+		pcolor = new JPanel(){
+			
+			@Override
+			public void paintComponent(Graphics g){
+
+				Graphics2D g2=(Graphics2D) g;
+				
+			    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			    g2.setColor(new Color(0,110,198,255));
+				g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+				
+			    g2.setColor(Color.white);
+				g2.fillRoundRect(1, 1, getWidth()-2, getHeight()-2, 4, 4);
+				
+			    g2.setColor(getBackground());
+				g2.fillRoundRect(2, 2, getWidth()-4, getHeight()-4, 2, 2);
+				
+			}
+			
+		};
 		pcolor.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -405,7 +429,6 @@ public class ScheduleEditorGUI extends JDialog {
 			}
 		});
 		pcolor.setBackground(new Color(153, 204, 255));
-		pcolor.setBorder(new EtchedBorder(EtchedBorder.RAISED, null, null));
 		pcolor.setPreferredSize(new Dimension(10, 20));
 		panel_1.add(pcolor, "4, 12, 7, 1, fill, fill");
 		

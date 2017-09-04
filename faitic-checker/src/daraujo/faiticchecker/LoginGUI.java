@@ -109,7 +109,7 @@ public class LoginGUI {
 	
 	private final static Image imgFaicheck=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaicheck.png")).getImage();
 
-	private final static Image iconSettings=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/iconSettings.png")).getImage();
+	private final static Image iconSettings=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/settings.png")).getImage();
 	
 	private final static Image spanishFlag=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/spain.png")).getImage();
 	private final static Image galicianFlag=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/galicia.png")).getImage();
@@ -1184,7 +1184,7 @@ public class LoginGUI {
 		JLabel lblUsuario = new JLabel(textdata.getKey("lblusername"));
 		panelLogin.add(lblUsuario, "2, 2, right, default");
 		
-		txtUsuario = new JTextField();
+		txtUsuario = new JCustomTextField("",new Color(0,110,198,255));
 		txtUsuario.addActionListener(enterPressed);
 		txtUsuario.getDocument().addDocumentListener(new DocumentListener(){
 
@@ -1223,7 +1223,7 @@ public class LoginGUI {
 		JLabel lblContrasea = new JLabel(textdata.getKey("lblpassword"));
 		panelLogin.add(lblContrasea, "2, 4, right, default");
 		
-		pwdPassword = new JPasswordField();
+		pwdPassword = new JCustomPasswordField(new Color(0,110,198,255));
 		pwdPassword.addActionListener(enterPressed);
 		pwdPassword.setMinimumSize(new Dimension(4, 25));
 		panelLogin.add(pwdPassword, "4, 4, fill, default");
@@ -1237,11 +1237,15 @@ public class LoginGUI {
 			}
 		});
 		cRememberUsername.setOpaque(false);
+		cRememberUsername.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		cRememberUsername.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
 		panelLogin.add(cRememberUsername, "4, 6");
 		
 		cRememberPassword = new JCheckBox(textdata.getKey("rememberpassword"));
 		cRememberPassword.setEnabled(false);
 		cRememberPassword.setOpaque(false);
+		cRememberPassword.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		cRememberPassword.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
 		panelLogin.add(cRememberPassword, "4, 8");
 		
 		btnLogin = new JCustomButton(textdata.getKey("btnlogin"));

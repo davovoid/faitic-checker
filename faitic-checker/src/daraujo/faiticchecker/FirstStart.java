@@ -67,6 +67,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.awt.event.ItemListener;
+import java.awt.event.ItemEvent;
 
 public class FirstStart extends JDialog {
 
@@ -87,23 +89,35 @@ public class FirstStart extends JDialog {
 	private static JRadioButton rSaveAppdata, rSaveRelative;
 	private static JLabel lblWelcome;
 	
+	private static ItemListener itemlistener=new ItemListener(){
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+
+			if(rSaveAppdata==null || rSaveRelative==null) return;
+			
+			rSaveAppdata.setForeground(rSaveAppdata.isSelected() ? new Color(0,110,198,255) : new Color(33,33,33,255));
+			rSaveRelative.setForeground(rSaveRelative.isSelected() ? new Color(0,110,198,255) : new Color(33,33,33,255));
+			
+		}
+	};
+	
 	private static String appdatapath, relativepath;
 	
 	private void updateWindowText(){
 		
 		btnNext.setText(textdata.getKey("nextbutton"));
 		btnCancel.setText(textdata.getKey("cancelbutton"));
-		txtWelcomeDesc.setText("<p style=\"text-align:justify; font-family: Dialog; font-size: 17pt; margin: 0px;\">" +
+		txtWelcomeDesc.setText("<p style=\"text-align:justify; font-family: Dialog; font-size: 17pt; margin: 0px; color:#212121;\">" +
 								textdata.getKey("welcometext") + "</p>");
 		
-		txtAppdataDesc.setText("<p style=\"text-align:justify; font-family: Dialog; font-size: 17pt; margin: 0px;\">" +
+		txtAppdataDesc.setText("<p style=\"text-align:justify; font-family: Dialog; font-size: 17pt; margin: 0px; color:#757575;\">" +
 				textdata.getKey("appdatadesc", appdatapath) + "</p>");
 		
-		txtRelativeDesc.setText("<p style=\"text-align:justify; font-family: Dialog; font-size: 17pt; margin: 0px;\">" +
+		txtRelativeDesc.setText("<p style=\"text-align:justify; font-family: Dialog; font-size: 17pt; margin: 0px; color:#757575;\">" +
 				textdata.getKey("relativedesc", relativepath) + "</p>");
 		
-		rSaveAppdata.setText(textdata.getKey("appdatacheck"));
-		rSaveRelative.setText(textdata.getKey("relativecheck"));
+		rSaveAppdata.setText(" " + textdata.getKey("appdatacheck"));
+		rSaveRelative.setText(" " + textdata.getKey("relativecheck"));
 		
 		lblWelcome.setText(textdata.getKey("welcome"));
 		
@@ -416,9 +430,13 @@ public class FirstStart extends JDialog {
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
 		rSaveAppdata = new JRadioButton("Los ajustes se guardarán en este ordenador");
+		rSaveAppdata.addItemListener(itemlistener);
 		rSaveAppdata.setSelected(true);
 		rSaveAppdata.setFont(new Font("Dialog", Font.BOLD, 22));
 		rSaveAppdata.setBackground(Color.WHITE);
+		rSaveAppdata.setForeground(new Color(0,110,198,255));
+		rSaveAppdata.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		rSaveAppdata.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
 		panelAppdata.add(rSaveAppdata, "2, 2");
 		
 		txtAppdataDesc = new JTextPane();
@@ -443,8 +461,12 @@ public class FirstStart extends JDialog {
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
 		rSaveRelative = new JRadioButton("Los ajustes se guardarán junto a la aplicación");
+		rSaveRelative.addItemListener(itemlistener);
 		rSaveRelative.setFont(new Font("Dialog", Font.BOLD, 22));
 		rSaveRelative.setBackground(Color.WHITE);
+		rSaveRelative.setForeground(new Color(33,33,33,255));
+		rSaveRelative.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		rSaveRelative.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
 		panelRelative.add(rSaveRelative, "2, 2");
 		
 		txtRelativeDesc = new JTextPane();

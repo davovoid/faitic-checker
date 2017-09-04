@@ -122,6 +122,8 @@ public class SubjectsGUI {
 	private static JPanel panelLogos, panelSubjects, panelSubject, panelOptions, panelEverything;
 	
 	private final static Image imgFaicheck=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaicheck.png")).getImage();
+	private final static Image iconSchedule=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/schedule.png")).getImage();
+	private final static Image iconSearch=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/search.png")).getImage();
 	
 	private static JCustomButton btnDescargarMarcados;
 	private JCustomButton btnMarcarNuevos;
@@ -737,6 +739,7 @@ public class SubjectsGUI {
 			lArchivos[i]=new JLabel(filename);
 			lArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			lArchivos[i].setFont(new Font("Dialog", Font.BOLD, 12));
+			lArchivos[i].setForeground(new Color(33,33,33,255));
 			lArchivos[i].setIcon(new ImageIcon(getImgIdentifierForFile(new File(fileDestination(subjectPath, fileList.get(i).getFileDestination())),12)));
 			lArchivos[i].addMouseListener(new MouseAdapter(){
 
@@ -795,6 +798,7 @@ public class SubjectsGUI {
 			lParentPaths[i]=new JLabel(parentname);
 			lParentPaths[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			lParentPaths[i].setFont(new Font("Dialog", Font.PLAIN, 10));
+			lParentPaths[i].setForeground(new Color(117,117,117,255));
 			lParentPaths[i].addMouseListener(new MouseAdapter(){
 
 				@Override
@@ -1496,6 +1500,7 @@ public class SubjectsGUI {
 		panelLogos.add(panelLogoSpace, "1, 1, 1, 7, fill, fill");
 		
 		lblSubjectName = new JLabel(textdata.getKey("selectsubject"));
+		lblSubjectName.setForeground(new Color(33,33,33,255));
 		panelLogos.add(lblSubjectName, "3, 2, 4, 1");
 		lblSubjectName.setFont(new Font("Dialog", Font.PLAIN, 23));
 		
@@ -1523,22 +1528,8 @@ public class SubjectsGUI {
 			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-			    g2.setColor(new Color(0,110,198,255));
-			    g2.setStroke(new BasicStroke(3));
+			    g2.drawImage(iconSchedule, 0, 0, getWidth(), getHeight(), null);
 			    
-			    // Sheet
-			    g2.drawRoundRect(1, getHeight()/8, getWidth()-4, getHeight()*3/4,2,2);
-			    
-			    // Events
-			    g2.fillRoundRect(4, getHeight()/8+4, 5,5,2,2);
-			    g2.fillRoundRect(getWidth()/2-3, getHeight()/2-3, 5,5,2,2);
-			    g2.fillRoundRect(getWidth()-10, getHeight()/8+4, 5,5,2,2);
-			    g2.fillRoundRect(getWidth()-10, getHeight()*7/8-9, 5,5,2,2);
-			    
-			    // Details
-			    
-			    for(int i=2; i<getWidth()-5; i+=3)
-			    	g2.fillRoundRect(i, getHeight()/8-2, 3,5,2,2);
 			    
 			}
 			
@@ -1575,13 +1566,8 @@ public class SubjectsGUI {
 			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-			    g2.setColor(new Color(0,110,198,255));
-			    g2.setStroke(new BasicStroke(3));
+			    g2.drawImage(iconSearch, 0, 0, getWidth(), getHeight(), null);
 			    
-			    g2.drawOval(getWidth()-getHeight()/2-5, 5, getHeight()/2, getHeight()/2);
-			    g2.drawLine((int)(getWidth()-getHeight()/2-5+getHeight()/4-getHeight()/4*Math.sqrt(2)/2)-1, (int)(5+getHeight()/4+getHeight()/4*Math.sqrt(2)/2)+1, 
-			    		(int)(getWidth()-getHeight()/2-5+getHeight()/4-getHeight()/4*Math.sqrt(2)/2-getHeight()/4), (int)(5+getHeight()/4+getHeight()/4*Math.sqrt(2)/2+getHeight()/4));
-				
 			}
 			
 		};
@@ -1612,9 +1598,11 @@ public class SubjectsGUI {
 		});
 		
 		lblProperties = new JLabel("");
+		lblProperties.setForeground(new Color(117,117,117,255));
 		panelLogos.add(lblProperties, "4, 4, 5, 1");
 		
 		lblSubjectFolder = new JLabel("");
+		lblSubjectFolder.setForeground(new Color(117,117,117,255));
 		lblSubjectFolder.setHorizontalAlignment(SwingConstants.LEFT);
 		panelLogos.add(lblSubjectFolder, "4, 6");
 		
@@ -2000,7 +1988,7 @@ public class SubjectsGUI {
 				FormFactory.UNRELATED_GAP_ROWSPEC,}));
 		
 		lblSeleccioneUnaAsignatura = new JLabel(textdata.getKey("lblchooseasubject"));
-		lblSeleccioneUnaAsignatura.setForeground(SystemColor.textInactiveText);
+		lblSeleccioneUnaAsignatura.setForeground(new Color(117,117,117,255));
 		lblSeleccioneUnaAsignatura.setHorizontalAlignment(SwingConstants.CENTER);
 		panelToDownload.add(lblSeleccioneUnaAsignatura, "2, 2, 3, 1");
 		
