@@ -21,12 +21,15 @@ package daraujo.faiticchecker;
 
 import java.awt.EventQueue;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -53,6 +56,9 @@ import javax.swing.SwingConstants;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JScrollPane;
@@ -76,7 +82,7 @@ public class ScheduleViewerGUI {
 	private static JLabel[] titleLabels;
 	private static JLabel addScheduleLabel;
 	
-	private static JLabel lblEdit, lblDelete, lblDuplicate;
+	private static JLabel lblEdit, lblDelete, lblDuplicate, lblExport;
 
 	/**
 	 * SCHEDULE THINGS
@@ -512,6 +518,75 @@ public class ScheduleViewerGUI {
 		
 	}
 	
+	private static boolean exportScheduleToImage(JPanel panel, String fileDest, String extension, double multiplier){
+		
+
+		Dimension prevsize=panel.getSize();
+		
+		panel.setSize(new Dimension((int)(prevsize.getWidth()*multiplier),(int)(prevsize.getHeight()*multiplier)));
+		
+		for(Component comp : panel.getComponents()){
+			
+			if(comp instanceof JPanel){
+				
+				for (Component comp2 : ((JPanel) comp).getComponents()){
+
+						int currentsize=comp2.getFont().getSize();
+						
+						comp2.setFont(new Font(comp2.getFont().getFontName(), comp2.getFont().getStyle(),currentsize*(int)Math.floor(multiplier)));
+						
+					
+				}
+				
+			}
+			
+		}
+		
+		BufferedImage imgToExport=new BufferedImage(panel.getWidth(), panel.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+		Graphics2D g2=imgToExport.createGraphics();
+		
+	    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+	    panel.paintAll(g2);
+		
+	    boolean returnvalue=false;
+	    
+	    try {
+	    	
+			returnvalue=ImageIO.write(imgToExport, extension, new File(fileDest));
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		}
+	    
+
+		for(Component comp : panel.getComponents()){
+			
+			if(comp instanceof JPanel){
+				
+				for (Component comp2 : ((JPanel) comp).getComponents()){
+
+						int currentsize=comp2.getFont().getSize();
+						
+						comp2.setFont(new Font(comp2.getFont().getFontName(), comp2.getFont().getStyle(),currentsize/(int)Math.floor(multiplier)));
+						
+				}
+				
+			}
+			
+		}
+		
+		panel.setSize(prevsize);
+	    
+	    return returnvalue;
+	    
+	}
+	
 	
 	private static void doAtActivation(){
 		
@@ -607,12 +682,7 @@ public class ScheduleViewerGUI {
 		panelEverything.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.UNRELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.UNRELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
+				FormFactory.PREF_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.GLUE_ROWSPEC,}));
@@ -650,7 +720,86 @@ public class ScheduleViewerGUI {
 		scrollPane.setOpaque(false);
 		scrollPane.getViewport().setOpaque(false);
 		
+		JPanel panel = new JPanel();
+		FlowLayout flowLayout = (FlowLayout) panel.getLayout();
+		flowLayout.setHgap(10);
+		flowLayout.setVgap(11);
+		panel.setOpaque(false);
+		panelEverything.add(panel, "3, 1, fill, fill");
+		
+		lblDuplicate = new JLabel(textdata.getKey("scheduleviewerduplicate"));
+		panel.add(lblDuplicate);
+		lblDuplicate.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					schedule.duplicateSchedule(scheduleindex);
+					initializeScheduleList();
+					
+					selectSchedule(scheduleindex+1);
+					
+				}
+				
+			}
+		});
+		
+		lblDuplicate.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblDuplicate.setForeground(new Color(0,110,198,255));
+		lblDuplicate.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblDuplicate.setVisible(false);
+		
+		lblEdit = new JLabel(textdata.getKey("schedulevieweredit"));
+		panel.add(lblEdit);
+		lblEdit.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					activateEditor(scheduleindex);
+					
+				}
+				
+			}
+		});
+		lblEdit.setVisible(false);
+		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblEdit.setForeground(new Color(0,110,198,255));
+		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
+		
+		lblExport = new JLabel("Export...");
+		lblExport.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					ExportScheduleGUI exportMenu=new ExportScheduleGUI();
+					
+					exportMenu.schedulename=titleLabels[scheduleindex].getText();
+					exportMenu.username=username;
+					
+					exportMenu.setVisible(true);
+					
+					if(exportMenu.isAccepted()){
+						
+						exportScheduleToImage(panelSchedule, exportMenu.txtdestination.getText(), (String)exportMenu.cbfiletype.getSelectedItem(), (double)(int)exportMenu.szoom.getValue()/100.0);
+
+					}
+					
+				}
+				
+			}
+		});
+		lblExport.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblExport.setForeground(new Color(0,110,198,255));
+		lblExport.setFont(new Font("Dialog", Font.BOLD, 14));
+		panel.add(lblExport);
+		
 		lblDelete = new JLabel(textdata.getKey("scheduleviewerdelete"));
+		panel.add(lblDelete);
 		lblDelete.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -672,53 +821,10 @@ public class ScheduleViewerGUI {
 			}
 		});
 		lblDelete.setVisible(false);
-		
-		lblEdit = new JLabel(textdata.getKey("schedulevieweredit"));
-		lblEdit.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				if(((JLabel)arg0.getSource()).isEnabled()){
-					
-					activateEditor(scheduleindex);
-					
-				}
-				
-			}
-		});
-		lblEdit.setVisible(false);
-		
-		lblDuplicate = new JLabel(textdata.getKey("scheduleviewerduplicate"));
-		lblDuplicate.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-				
-				if(((JLabel)arg0.getSource()).isEnabled()){
-					
-					schedule.duplicateSchedule(scheduleindex);
-					initializeScheduleList();
-					
-					selectSchedule(scheduleindex+1);
-					
-				}
-				
-			}
-		});
-		
-		lblDuplicate.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblDuplicate.setForeground(new Color(0,110,198,255));
-		lblDuplicate.setFont(new Font("Dialog", Font.BOLD, 14));
-		lblDuplicate.setVisible(false);
-		panelEverything.add(lblDuplicate, "3, 1");
-		lblEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblEdit.setForeground(new Color(0,110,198,255));
-		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
-		panelEverything.add(lblEdit, "5, 1");
 		lblDelete.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblDelete.setForeground(new Color(0,110,198,255));
 		lblDelete.setFont(new Font("Dialog", Font.BOLD, 14));
-		panelEverything.add(lblDelete, "7, 1");
-		panelEverything.add(scrollPane, "1, 2, 8, 1, fill, fill");
+		panelEverything.add(scrollPane, "1, 2, 3, 1, fill, fill");
 		
 		panelSchedule = new JPanel();
 		scrollPane.setViewportView(panelSchedule);

@@ -1,3 +1,15 @@
+
+
+# v.1.0.0 -> v.1.0.1:
+
+### English
+
+ * Export option in schedules.
+
+### Español
+
+ * Opción de exportar en los horarios.
+
 # v.0.1.1 -> v.1.0.0:
 
 ### English
