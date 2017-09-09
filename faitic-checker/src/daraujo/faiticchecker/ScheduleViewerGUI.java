@@ -205,6 +205,7 @@ public class ScheduleViewerGUI {
 		lblEdit.setVisible(index>=0);
 		lblDelete.setVisible(index>=0);
 		lblDuplicate.setVisible(index>=0);
+		lblExport.setVisible(index>=0);
 		
 		if(index>=0){
 			
@@ -542,7 +543,9 @@ public class ScheduleViewerGUI {
 			
 		}
 		
-		BufferedImage imgToExport=new BufferedImage(panel.getWidth(), panel.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage imgToExport=new BufferedImage(panel.getWidth(), panel.getHeight(), 
+				extension.toLowerCase().equals("jpg") || extension.toLowerCase().equals("bmp") ? 
+				BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);
 
 		Graphics2D g2=imgToExport.createGraphics();
 		
@@ -550,6 +553,13 @@ public class ScheduleViewerGUI {
 	    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+	    if(extension.toLowerCase().equals("jpg") || extension.toLowerCase().equals("bmp")){
+	    	
+	    	g2.setColor(Color.white);
+	    	g2.fillRect(0, 0, panel.getWidth(), panel.getHeight());
+	    	
+	    }
+	    
 	    panel.paintAll(g2);
 		
 	    boolean returnvalue=false;
@@ -770,11 +780,14 @@ public class ScheduleViewerGUI {
 		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
 		
 		lblExport = new JLabel("Export...");
+		lblExport.setVisible(false);
 		lblExport.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
 				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					// Export menu
 					
 					ExportScheduleGUI exportMenu=new ExportScheduleGUI();
 					
@@ -785,8 +798,42 @@ public class ScheduleViewerGUI {
 					
 					if(exportMenu.isAccepted()){
 						
-						exportScheduleToImage(panelSchedule, exportMenu.txtdestination.getText(), (String)exportMenu.cbfiletype.getSelectedItem(), (double)(int)exportMenu.szoom.getValue()/100.0);
+						// Accepted export
+						
+						boolean exportresult=false;
+						
+						if(exportMenu.cbwhattoexport.getSelectedIndex()==0 && "png,jpg,bmp".contains(((String)exportMenu.cbfiletype.getSelectedItem()).toLowerCase())){
+							
+							// Selected schedule
+							
+							exportresult=exportScheduleToImage(panelSchedule, exportMenu.txtdestination.getText(),
+								(String)exportMenu.cbfiletype.getSelectedItem(), (double)(int)exportMenu.szoom.getValue()/100.0);
 
+							
+						} else if(exportMenu.cbwhattoexport.getSelectedIndex()==0 && "json".contains(((String)exportMenu.cbfiletype.getSelectedItem()).toLowerCase())){
+
+							// Selected schedule
+							
+							exportresult=schedule.exportOneSchedule(scheduleindex, exportMenu.txtdestination.getText());
+							
+						} else if(exportMenu.cbwhattoexport.getSelectedIndex()==1 && "json".contains(((String)exportMenu.cbfiletype.getSelectedItem()).toLowerCase())){
+
+							// All schedules
+							
+							exportresult=schedule.exportAllSchedules(exportMenu.txtdestination.getText());
+							
+						}
+						
+						if(exportresult){
+							
+							JOptionPane.showMessageDialog(frmScheduleViewer, "Successfully exported to \"" + exportMenu.txtdestination.getText() + "\".", "Success", JOptionPane.INFORMATION_MESSAGE);
+							
+						} else{
+							
+							JOptionPane.showMessageDialog(frmScheduleViewer, "Error exporting to \"" + exportMenu.txtdestination.getText() + "\".\nSee console log for details.", "Error", JOptionPane.ERROR_MESSAGE);
+							
+						}
+						
 					}
 					
 				}

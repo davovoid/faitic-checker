@@ -52,6 +52,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.DefaultListModel;
 import javax.swing.JColorChooser;
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JList;
@@ -68,10 +69,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.filechooser.FileFilter;
 
 public class ScheduleEditorGUI extends JDialog {
 	
@@ -573,6 +577,62 @@ public class ScheduleEditorGUI extends JDialog {
 				
 			}
 		});
+		
+		JButton btnImportFromFile = new JCustomButton("Import from file...");
+		btnImportFromFile.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				JFileChooser openfilemenu=new JFileChooser();
+				
+				openfilemenu.setDialogTitle("Select file to import...");
+				openfilemenu.setMultiSelectionEnabled(false);
+				
+				openfilemenu.setFileFilter(new FileFilter(){
+
+					@Override
+					public boolean accept(File arg0) {
+
+						String path=arg0.getAbsolutePath();
+						
+						if(path.toLowerCase().lastIndexOf(".json") == path.length()-5){
+							
+							return true;
+							
+						}
+						
+						if(arg0.isDirectory()) return true;
+						
+						return false;
+					}
+
+					@Override
+					public String getDescription() {
+						
+						return "JSON files";
+					}
+					
+				});
+				
+				
+				int dialogresult=openfilemenu.showOpenDialog(null);
+				
+				if(dialogresult==JFileChooser.APPROVE_OPTION){
+					
+					try {
+						
+						schedule.importFromFile(openfilemenu.getSelectedFile().getCanonicalPath());
+						setVisible(false);
+						
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				}
+				
+			}
+		});
+		panelOptions.add(btnImportFromFile);
 		panelOptions.add(btnSave);
 		
 		JButton btnCancel = new JCustomButton(textdata.getKey("editorbtncancel"));

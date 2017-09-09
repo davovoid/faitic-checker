@@ -49,6 +49,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
 
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
@@ -61,9 +64,13 @@ public class ExportScheduleGUI extends JDialog {
 	protected static JTextField txtdestination;
 	protected static JComboBox cbwhattoexport, cbfiletype;
 	protected static JSpinner szoom;
+	private static JButton btnExport;
 	
 	protected static String schedulename;
 	protected static String username;
+	
+	protected static final String[] optionsoneschedule=new String[] {"png", "jpg", "bmp", "json"};
+	protected static final String[] optionsallschedules=new String[] {"json"};
 	
 	private static JPanel panelOptions;
 
@@ -94,6 +101,16 @@ public class ExportScheduleGUI extends JDialog {
 	 * Create the dialog.
 	 */
 	public ExportScheduleGUI() {
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent arg0) {
+
+				setSize(getWidth()+1, getHeight()+1);
+
+				setSize(getWidth()-1, getHeight()-1);
+
+			}
+		});
 
 		setTitle("Export schedule");
 		setModalityType(ModalityType.APPLICATION_MODAL);
@@ -173,14 +190,18 @@ public class ExportScheduleGUI extends JDialog {
 		panel.add(lblWhatToExport, "2, 4, right, default");
 		
 		cbwhattoexport = new JComboBox();
-		cbwhattoexport.setEnabled(false);
 		cbwhattoexport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
 				cbfiletype.setModel(new DefaultComboBoxModel(
 						cbwhattoexport.getSelectedIndex()==0 ?
-								new String[] {"png", "jpg", "bmp"} :
-								new String[] {"png", "jpg", "bmp", "xml"}));
+								optionsoneschedule :
+								optionsallschedules));
+				
+				boolean zoomaccepted="png,jpg,bmp".contains(((String)cbfiletype.getSelectedItem()).toLowerCase());
+				
+				szoom.setEnabled(zoomaccepted);
+				
 				
 			}
 		});
@@ -192,13 +213,40 @@ public class ExportScheduleGUI extends JDialog {
 		panel.add(lblFileType, "2, 6, right, default");
 		
 		cbfiletype = new JComboBox();
-		cbfiletype.setModel(new DefaultComboBoxModel(new String[] {"png", "jpg", "bmp"}));
+		cbfiletype.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				boolean zoomaccepted="png,jpg,bmp".contains(((String)cbfiletype.getSelectedItem()).toLowerCase());
+				
+				szoom.setEnabled(zoomaccepted);
+				
+			}
+		});
+		cbfiletype.setModel(new DefaultComboBoxModel(optionsoneschedule));
 		panel.add(cbfiletype, "4, 6, fill, default");
 		
 		JLabel lblDestination = new JLabel("Destination:");
 		panel.add(lblDestination, "2, 8, right, default");
 		
 		txtdestination = new JCustomTextField("",new Color(0,110,198,255));
+		txtdestination.getDocument().addDocumentListener(new DocumentListener(){
+
+			@Override
+			public void changedUpdate(DocumentEvent arg0) {textChanged(arg0);}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {textChanged(e);}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {textChanged(e);}
+			
+			public void textChanged(DocumentEvent e){
+				
+				btnExport.setEnabled(txtdestination.getText().length()>0);
+				
+			}
+			
+		});
 		panel.add(txtdestination, "4, 8, fill, default");
 		txtdestination.setColumns(10);
 		
@@ -207,8 +255,35 @@ public class ExportScheduleGUI extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				
 				JFileChooser savedialog=new JFileChooser();
-				savedialog.setSelectedFile(new File("Export-" + correctName(schedulename) + (String)cbfiletype.getSelectedItem()));
+				savedialog.setSelectedFile(new File("Export" + (cbwhattoexport.getSelectedIndex()==0 ?
+						"-" + correctName(schedulename) : "") + "." + (String)cbfiletype.getSelectedItem()));
+				savedialog.setDialogTitle("Export to file...");
 				savedialog.setMultiSelectionEnabled(false);
+				savedialog.setFileFilter(new FileFilter(){
+
+					@Override
+					public boolean accept(File arg0) {
+
+						String path=arg0.getAbsolutePath();
+						
+						if(path.toLowerCase().lastIndexOf("." + (String)cbfiletype.getSelectedItem()) == path.length()-((String)cbfiletype.getSelectedItem()).length()-1){
+							
+							return true;
+							
+						}
+						
+						if(arg0.isDirectory()) return true;
+						
+						return false;
+					}
+
+					@Override
+					public String getDescription() {
+						
+						return ((String)cbfiletype.getSelectedItem()).toUpperCase() + " files";
+					}
+					
+				});
 				
 				int dialogresult=savedialog.showSaveDialog(null);
 				
@@ -237,7 +312,8 @@ public class ExportScheduleGUI extends JDialog {
 		fl_panelOptions.setHgap(10);
 		panel.add(panelOptions, "1, 12, 7, 1, fill, fill");
 		
-		JButton btnExport = new JCustomButton("Export");
+		btnExport = new JCustomButton("Export");
+		btnExport.setEnabled(false);
 		btnExport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				

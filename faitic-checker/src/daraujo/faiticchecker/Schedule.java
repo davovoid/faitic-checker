@@ -441,6 +441,209 @@ public class Schedule {
 		
 	}
 	
+
+	public static boolean exportOneSchedule(int schedulepos, String fileDest){
+
+		// STEP 1: READ SCHEDULES
+		
+		JSONArray schedules=null;
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		String scheduleFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/schedule-" + iUsername + ".json");
+
+		if(new File(scheduleFile).exists()){ 
+
+			try {
+
+				// Read the schedule json
+				JSONObject schedulejson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(scheduleFile));
+
+				if(schedulejson.containsKey("schedules")){
+					
+					// Reads all schedules
+					schedules=(JSONArray) schedulejson.get("schedules");
+
+				}
+
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				
+			}
+
+		}
+		
+		// Are there schedules?
+		if(schedules==null){
+			
+			// No, let's clean them
+		
+			schedules=new JSONArray();
+			
+		}
+		
+		// Skip step 2. No entry to generate
+		
+		// STEP 3: MERGE THE NEW ENTRY
+		
+		JSONArray newschedules=new JSONArray();
+		
+		newschedules.add(schedules.get(schedulepos)); // Just the one we want to export
+		
+		// STEP 4: SAVE IT
+		
+		JSONObject schedulejsonout=new JSONObject();
+		schedulejsonout.put("schedules", newschedules);
+		
+		ClassicRoutines.writeFile(fileDest,schedulejsonout.toJSONString());
+		
+		return true;
+		
+	}
+	
+
+	public static boolean exportAllSchedules(String fileDest){
+
+		// STEP 1: READ SCHEDULES
+		
+		JSONArray schedules=null;
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		String scheduleFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/schedule-" + iUsername + ".json");
+
+		if(new File(scheduleFile).exists()){ 
+
+			try {
+
+				// Read the schedule json
+				JSONObject schedulejson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(scheduleFile));
+
+				if(schedulejson.containsKey("schedules")){
+					
+					// Reads all schedules
+					schedules=(JSONArray) schedulejson.get("schedules");
+
+				}
+
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				
+			}
+
+		}
+		
+		// Are there schedules?
+		if(schedules==null){
+			
+			// No, let's clean them
+		
+			schedules=new JSONArray();
+			
+		}
+		
+		// Skip step 2 and 3. No entry to generate nor merge
+		
+		// STEP 4: SAVE IT
+		
+		JSONObject schedulejsonout=new JSONObject();
+		schedulejsonout.put("schedules", schedules);
+		
+		ClassicRoutines.writeFile(fileDest,schedulejsonout.toJSONString());
+		
+		return true;
+		
+	}
+	
+
+	public static void importFromFile(String fileOrigin){
+
+		// STEP 1: READ SCHEDULES from local database
+		
+		JSONArray schedules=null;
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		String scheduleFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/schedule-" + iUsername + ".json");
+
+		if(new File(scheduleFile).exists()){ 
+
+			try {
+
+				// Read the schedule json
+				JSONObject schedulejson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(scheduleFile));
+
+				if(schedulejson.containsKey("schedules")){
+					
+					// Reads all schedules
+					schedules=(JSONArray) schedulejson.get("schedules");
+
+				}
+
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				
+			}
+
+		}
+		
+		// Are there schedules?
+		if(schedules==null){
+			
+			// No, let's clean them
+		
+			schedules=new JSONArray();
+			
+		}
+		
+		// ADDITIONAL STEP: load also the fileOrigin file in the same place
+		
+		if(new File(fileOrigin).exists()){ 
+
+			try {
+
+				// Read the schedule json
+				JSONObject schedulejson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(fileOrigin));
+
+				if(schedulejson.containsKey("schedules")){
+					
+					// Reads all schedules to local variable
+					JSONArray schedulestoimport=(JSONArray) schedulejson.get("schedules");
+					
+					// Add to local database
+					for(Object scheduletoimport : schedulestoimport){
+						
+						schedules.add(scheduletoimport);
+						
+					}
+
+				}
+
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				
+			}
+
+		}
+		
+		
+		// STEP 4: SAVE IT
+		
+		JSONObject schedulejsonout=new JSONObject();
+		schedulejsonout.put("schedules", schedules);
+		
+		ClassicRoutines.writeFile(scheduleFile,schedulejsonout.toJSONString());
+		
+	}
+	
 	
 
 }
