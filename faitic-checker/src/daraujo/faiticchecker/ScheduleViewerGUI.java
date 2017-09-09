@@ -82,7 +82,7 @@ public class ScheduleViewerGUI {
 	private static JLabel[] titleLabels;
 	private static JLabel addScheduleLabel;
 	
-	private static JLabel lblEdit, lblDelete, lblDuplicate, lblExport;
+	private static JLabel lblEdit, lblDelete, lblDuplicate, lblExport, lblleft, lblright;
 
 	/**
 	 * SCHEDULE THINGS
@@ -206,6 +206,11 @@ public class ScheduleViewerGUI {
 		lblDelete.setVisible(index>=0);
 		lblDuplicate.setVisible(index>=0);
 		lblExport.setVisible(index>=0);
+		lblleft.setVisible(index>=0);
+		lblright.setVisible(index>=0);
+		
+		lblleft.setEnabled(index>0);
+		lblright.setEnabled(index<titleLabels.length-1);
 		
 		if(index>=0){
 			
@@ -737,6 +742,51 @@ public class ScheduleViewerGUI {
 		panel.setOpaque(false);
 		panelEverything.add(panel, "3, 1, fill, fill");
 		
+		lblleft = new JLabel("<");
+		lblleft.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(((JLabel)arg0.getSource()).isEnabled()){
+					
+					schedule.moveSchedule(scheduleindex, scheduleindex-1);
+					initializeScheduleList();
+					
+					selectSchedule(scheduleindex-1);
+					
+				}
+				
+				
+			}
+		});
+		lblleft.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblleft.setForeground(new Color(0,110,198,255));
+		lblleft.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblleft.setVisible(false);
+		panel.add(lblleft);
+		
+		lblright = new JLabel(">");
+		lblright.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+
+				if(((JLabel)e.getSource()).isEnabled()){
+					
+					schedule.moveSchedule(scheduleindex, scheduleindex+1);
+					initializeScheduleList();
+					
+					selectSchedule(scheduleindex+1);
+					
+				}
+				
+			}
+		});
+		lblright.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblright.setForeground(new Color(0,110,198,255));
+		lblright.setFont(new Font("Dialog", Font.BOLD, 14));
+		lblright.setVisible(false);
+		panel.add(lblright);
+		
 		lblDuplicate = new JLabel(textdata.getKey("scheduleviewerduplicate"));
 		panel.add(lblDuplicate);
 		lblDuplicate.addMouseListener(new MouseAdapter() {
@@ -779,7 +829,7 @@ public class ScheduleViewerGUI {
 		lblEdit.setForeground(new Color(0,110,198,255));
 		lblEdit.setFont(new Font("Dialog", Font.BOLD, 14));
 		
-		lblExport = new JLabel("Export...");
+		lblExport = new JLabel(textdata.getKey("scheduleviewerexport"));
 		lblExport.setVisible(false);
 		lblExport.addMouseListener(new MouseAdapter() {
 			@Override

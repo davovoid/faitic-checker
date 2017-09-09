@@ -644,6 +644,71 @@ public class Schedule {
 		
 	}
 	
+
+	public static void moveSchedule(int scheduleposorigin, int scheduleposdest){
+
+		// STEP 1: PREVIOUS SCHEDULES
+		
+		JSONArray schedules=null;
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		String scheduleFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/schedule-" + iUsername + ".json");
+
+		if(new File(scheduleFile).exists()){ 
+
+			try {
+
+				// Read the schedule json
+				JSONObject schedulejson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(scheduleFile));
+
+				if(schedulejson.containsKey("schedules")){
+					
+					// Reads all schedules
+					schedules=(JSONArray) schedulejson.get("schedules");
+
+				}
+
+
+			} catch (Exception e) {
+
+				e.printStackTrace();
+				
+			}
+
+		}
+		
+		// Are there schedules?
+		if(schedules==null){
+			
+			// No, let's clean them
+		
+			schedules=new JSONArray();
+			
+		}
+		
+		if(scheduleposorigin<schedules.size() && scheduleposorigin>=0 &&
+		   scheduleposdest<schedules.size() && scheduleposdest>=0){
+			
+			Object scheduletomove=schedules.get(scheduleposorigin); // Get the element to move
+			
+			schedules.remove(scheduleposorigin); // Remove from list
+			
+			schedules.add(scheduleposdest, scheduletomove); // Put it at new pos
+			
+		}
+		
+		
+		// STEP 4: SAVE IT
+		
+		JSONObject schedulejsonout=new JSONObject();
+		schedulejsonout.put("schedules", schedules);
+		
+		ClassicRoutines.writeFile(scheduleFile,schedulejsonout.toJSONString());
+		
+		
+	}
+	
 	
 
 }
