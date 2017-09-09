@@ -839,7 +839,7 @@ public class ScheduleViewerGUI {
 					
 					// Export menu
 					
-					ExportScheduleGUI exportMenu=new ExportScheduleGUI();
+					ExportScheduleGUI exportMenu=new ExportScheduleGUI(textdata);
 					
 					exportMenu.schedulename=titleLabels[scheduleindex].getText();
 					exportMenu.username=username;
@@ -876,11 +876,11 @@ public class ScheduleViewerGUI {
 						
 						if(exportresult){
 							
-							JOptionPane.showMessageDialog(frmScheduleViewer, "Successfully exported to \"" + exportMenu.txtdestination.getText() + "\".", "Success", JOptionPane.INFORMATION_MESSAGE);
+							JOptionPane.showMessageDialog(frmScheduleViewer, textdata.getKey("exportsuccess",exportMenu.txtdestination.getText()), textdata.getKey("exportsuccesstitle"), JOptionPane.INFORMATION_MESSAGE);
 							
 						} else{
 							
-							JOptionPane.showMessageDialog(frmScheduleViewer, "Error exporting to \"" + exportMenu.txtdestination.getText() + "\".\nSee console log for details.", "Error", JOptionPane.ERROR_MESSAGE);
+							JOptionPane.showMessageDialog(frmScheduleViewer, textdata.getKey("exporterror",exportMenu.txtdestination.getText()), textdata.getKey("exporterrortitle"), JOptionPane.ERROR_MESSAGE);
 							
 						}
 						

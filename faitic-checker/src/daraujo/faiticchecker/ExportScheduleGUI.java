@@ -58,8 +58,11 @@ import java.awt.event.ItemEvent;
 import java.io.File;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.Toolkit;
 
 public class ExportScheduleGUI extends JDialog {
+
+	protected static TextData textdata;
 	
 	protected static JTextField txtdestination;
 	protected static JComboBox cbwhattoexport, cbfiletype;
@@ -100,7 +103,11 @@ public class ExportScheduleGUI extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public ExportScheduleGUI() {
+	public ExportScheduleGUI(TextData td) {
+		
+		textdata=td;
+		
+		setIconImage(Toolkit.getDefaultToolkit().getImage(ExportScheduleGUI.class.getResource("/daraujo/faiticchecker/icon.png")));
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowOpened(WindowEvent arg0) {
@@ -112,7 +119,7 @@ public class ExportScheduleGUI extends JDialog {
 			}
 		});
 
-		setTitle("Export schedule");
+		setTitle(textdata.getKey("exporttitle"));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setModal(true);
 		setBounds(100, 100, 520, 324);
@@ -182,11 +189,11 @@ public class ExportScheduleGUI extends JDialog {
 				RowSpec.decode("9dlu:grow"),
 				FormFactory.PREF_ROWSPEC,}));
 		
-		JLabel lblExportSchedule = new JLabel("Export schedule");
+		JLabel lblExportSchedule = new JLabel(textdata.getKey("exporttitle"));
 		lblExportSchedule.setFont(new Font("Dialog", Font.PLAIN, 25));
 		panel.add(lblExportSchedule, "2, 2, 5, 1");
 		
-		JLabel lblWhatToExport = new JLabel("What to export:");
+		JLabel lblWhatToExport = new JLabel(textdata.getKey("exportwhattoexport"));
 		panel.add(lblWhatToExport, "2, 4, right, default");
 		
 		cbwhattoexport = new JComboBox();
@@ -206,10 +213,10 @@ public class ExportScheduleGUI extends JDialog {
 			}
 		});
 
-		cbwhattoexport.setModel(new DefaultComboBoxModel(new String[] {"Current schedule", "All schedules"}));
+		cbwhattoexport.setModel(new DefaultComboBoxModel(textdata.getKey("exportwhattoexportlist").split(",")));
 		panel.add(cbwhattoexport, "4, 4, fill, default");
 		
-		JLabel lblFileType = new JLabel("File type:");
+		JLabel lblFileType = new JLabel(textdata.getKey("exportfiletype"));
 		panel.add(lblFileType, "2, 6, right, default");
 		
 		cbfiletype = new JComboBox();
@@ -225,7 +232,7 @@ public class ExportScheduleGUI extends JDialog {
 		cbfiletype.setModel(new DefaultComboBoxModel(optionsoneschedule));
 		panel.add(cbfiletype, "4, 6, fill, default");
 		
-		JLabel lblDestination = new JLabel("Destination:");
+		JLabel lblDestination = new JLabel(textdata.getKey("exportdestination"));
 		panel.add(lblDestination, "2, 8, right, default");
 		
 		txtdestination = new JCustomTextField("",new Color(0,110,198,255));
@@ -257,7 +264,7 @@ public class ExportScheduleGUI extends JDialog {
 				JFileChooser savedialog=new JFileChooser();
 				savedialog.setSelectedFile(new File("Export" + (cbwhattoexport.getSelectedIndex()==0 ?
 						"-" + correctName(schedulename) : "") + "." + (String)cbfiletype.getSelectedItem()));
-				savedialog.setDialogTitle("Export to file...");
+				savedialog.setDialogTitle(textdata.getKey("exportchoosertitle"));
 				savedialog.setMultiSelectionEnabled(false);
 				savedialog.setFileFilter(new FileFilter(){
 
@@ -280,7 +287,8 @@ public class ExportScheduleGUI extends JDialog {
 					@Override
 					public String getDescription() {
 						
-						return ((String)cbfiletype.getSelectedItem()).toUpperCase() + " files";
+						return textdata.getKey("filefilter",((String)cbfiletype.getSelectedItem()).toUpperCase());
+						
 					}
 					
 				});
@@ -297,7 +305,7 @@ public class ExportScheduleGUI extends JDialog {
 		});
 		panel.add(btnbrowse, "6, 8");
 		
-		JLabel lblZoom = new JLabel("Resolution (%):");
+		JLabel lblZoom = new JLabel(textdata.getKey("exportresolution"));
 		panel.add(lblZoom, "2, 10, right, fill");
 		
 		szoom = new JSpinner();
@@ -312,7 +320,7 @@ public class ExportScheduleGUI extends JDialog {
 		fl_panelOptions.setHgap(10);
 		panel.add(panelOptions, "1, 12, 7, 1, fill, fill");
 		
-		btnExport = new JCustomButton("Export");
+		btnExport = new JCustomButton(textdata.getKey("btnexport"));
 		btnExport.setEnabled(false);
 		btnExport.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -326,7 +334,7 @@ public class ExportScheduleGUI extends JDialog {
 		});
 		panelOptions.add(btnExport);
 		
-		JButton btnCancel = new JCustomButton("Cancel");
+		JButton btnCancel = new JCustomButton(textdata.getKey("editorbtncancel"));
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			

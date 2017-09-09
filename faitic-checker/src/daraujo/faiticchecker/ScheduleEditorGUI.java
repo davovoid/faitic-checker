@@ -578,13 +578,13 @@ public class ScheduleEditorGUI extends JDialog {
 			}
 		});
 		
-		JButton btnImportFromFile = new JCustomButton("Import from file...");
+		JButton btnImportFromFile = new JCustomButton(textdata.getKey("editorimportfile"));
 		btnImportFromFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
 				JFileChooser openfilemenu=new JFileChooser();
 				
-				openfilemenu.setDialogTitle("Select file to import...");
+				openfilemenu.setDialogTitle(textdata.getKey("editorimportchoosertitle"));
 				openfilemenu.setMultiSelectionEnabled(false);
 				
 				openfilemenu.setFileFilter(new FileFilter(){
@@ -608,7 +608,7 @@ public class ScheduleEditorGUI extends JDialog {
 					@Override
 					public String getDescription() {
 						
-						return "JSON files";
+						return textdata.getKey("filefilter","JSON");
 					}
 					
 				});

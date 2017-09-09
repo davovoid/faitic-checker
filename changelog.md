@@ -4,11 +4,11 @@
 
 ### English
 
- * Export option in schedules.
+ * Import, export and move option in schedules.
 
 ### Español
 
- * Opción de exportar en los horarios.
+ * Opción de importar, exportar y mover horarios.
 
 # v.0.1.1 -> v.1.0.0:
 
