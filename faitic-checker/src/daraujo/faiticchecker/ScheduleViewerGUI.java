@@ -860,13 +860,13 @@ public class ScheduleViewerGUI {
 								(String)exportMenu.cbfiletype.getSelectedItem(), (double)(int)exportMenu.szoom.getValue()/100.0);
 
 							
-						} else if(exportMenu.cbwhattoexport.getSelectedIndex()==0 && "json".contains(((String)exportMenu.cbfiletype.getSelectedItem()).toLowerCase())){
+						} else if(exportMenu.cbwhattoexport.getSelectedIndex()==0 && "json,faicheck".contains(((String)exportMenu.cbfiletype.getSelectedItem()).toLowerCase())){
 
 							// Selected schedule
 							
 							exportresult=schedule.exportOneSchedule(scheduleindex, exportMenu.txtdestination.getText());
 							
-						} else if(exportMenu.cbwhattoexport.getSelectedIndex()==1 && "json".contains(((String)exportMenu.cbfiletype.getSelectedItem()).toLowerCase())){
+						} else if(exportMenu.cbwhattoexport.getSelectedIndex()==1 && "json,faicheck".contains(((String)exportMenu.cbfiletype.getSelectedItem()).toLowerCase())){
 
 							// All schedules
 							

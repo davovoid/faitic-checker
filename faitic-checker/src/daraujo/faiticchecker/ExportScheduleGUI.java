@@ -72,8 +72,8 @@ public class ExportScheduleGUI extends JDialog {
 	protected static String schedulename;
 	protected static String username;
 	
-	protected static final String[] optionsoneschedule=new String[] {"png", "jpg", "bmp", "json"};
-	protected static final String[] optionsallschedules=new String[] {"json"};
+	protected static final String[] optionsoneschedule=new String[] {"png", "jpg", "bmp", "json", "faicheck"};
+	protected static final String[] optionsallschedules=new String[] {"json", "faicheck"};
 	
 	private static JPanel panelOptions;
 
