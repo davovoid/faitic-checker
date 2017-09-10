@@ -510,7 +510,7 @@ public class ScheduleViewerGUI {
 			panelEvent.add(lblHourSubject, "2, 3");
 			
 
-			if(Color.RGBtoHSB(event.getColor().getRed(), event.getColor().getGreen(), event.getColor().getBlue(), null)[2]<0.5){
+			if(Color.RGBtoHSB(event.getColor().getRed(), event.getColor().getGreen(), event.getColor().getBlue(), null)[2]<0.8){
 				
 				lblSubject.setForeground(Color.white);
 				lblHourSubject.setForeground(Color.white);

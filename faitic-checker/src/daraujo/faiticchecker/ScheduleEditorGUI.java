@@ -594,7 +594,8 @@ public class ScheduleEditorGUI extends JDialog {
 
 						String path=arg0.getAbsolutePath();
 						
-						if(path.toLowerCase().lastIndexOf(".json") == path.length()-5){
+						if(path.toLowerCase().lastIndexOf(".json") == path.length()-5 ||
+						   path.toLowerCase().lastIndexOf(".faicheck") == path.length()-9){
 							
 							return true;
 							
@@ -608,7 +609,7 @@ public class ScheduleEditorGUI extends JDialog {
 					@Override
 					public String getDescription() {
 						
-						return textdata.getKey("filefilter","JSON");
+						return textdata.getKey("filefilter","JSON / FAICHECK");
 					}
 					
 				});
