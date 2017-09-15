@@ -1,4 +1,13 @@
 
+# v.1.0.1 -> v.1.1.0:
+
+### English
+
+ * Event description in schedules.
+
+### Español
+
+ * Descripción de evento en horarios.
 
 # v.1.0.0 -> v.1.0.1:
 

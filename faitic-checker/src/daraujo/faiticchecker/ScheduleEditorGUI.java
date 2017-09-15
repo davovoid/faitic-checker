@@ -87,7 +87,7 @@ public class ScheduleEditorGUI extends JDialog {
 	
 	private static String[] schedulenames;
 	
-	private static JEditorPane txteventname;
+	private static JEditorPane txteventname, txtdescription;
 	private static JTextField txtschedulename, txtschedulepos;
 	private static JSpinner shstart,smstart,shend,smend;
 	private static JList listevents;
@@ -122,7 +122,7 @@ public class ScheduleEditorGUI extends JDialog {
 		ScheduleEvent event=new ScheduleEvent(txteventname.getText(),
 				(int)shstart.getValue()*60+(int)smstart.getValue(),
 				(int)shend.getValue()*60+(int)smend.getValue(),
-				cbday.getSelectedIndex(), pcolor.getBackground(), null);
+				cbday.getSelectedIndex(), pcolor.getBackground(), null, txtdescription.getText());
 
 		schedule.eventList.add(event);
 
@@ -138,7 +138,7 @@ public class ScheduleEditorGUI extends JDialog {
 			event.modify(txteventname.getText(),
 					(int)shstart.getValue()*60+(int)smstart.getValue(),
 					(int)shend.getValue()*60+(int)smend.getValue(),
-					cbday.getSelectedIndex(), pcolor.getBackground(), null);
+					cbday.getSelectedIndex(), pcolor.getBackground(), null, txtdescription.getText());
 
 		}
 
@@ -161,6 +161,8 @@ public class ScheduleEditorGUI extends JDialog {
 			cbday.setSelectedIndex(event.getDay());
 			
 			pcolor.setBackground(event.getColor());
+			
+			txtdescription.setText(event.getEventDescription());
 			
 		}
 		
@@ -209,7 +211,7 @@ public class ScheduleEditorGUI extends JDialog {
 		setTitle(textdata.getKey("scheduleeditortitle"));
 		setModalityType(ModalityType.APPLICATION_MODAL);
 		setModal(true);
-		setBounds(150, 150, 700, 500);
+		setBounds(100, 100, 800, 600);
 		
 		JPanel panel = new JPanel(){
 			
@@ -308,13 +310,13 @@ public class ScheduleEditorGUI extends JDialog {
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
+				ColumnSpec.decode("pref:grow"),
 				FormFactory.UNRELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
+				RowSpec.decode("pref:grow"),
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
@@ -327,6 +329,8 @@ public class ScheduleEditorGUI extends JDialog {
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
 		JLabel lblEventName = new JLabel(textdata.getKey("editoreventname"));
@@ -334,63 +338,69 @@ public class ScheduleEditorGUI extends JDialog {
 		
 		txteventname = new JCustomEditorPane(new Color(0,110,198,255));
 		panel_1.add(txteventname, "4, 2, 7, 1, fill, default");
+		
+		JLabel lblDescription = new JLabel(textdata.getKey("editordescription"));
+		panel_1.add(lblDescription, "2, 4, right, default");
+		
+		txtdescription = new JCustomEditorPane(new Color(0,110,198,255));
+		panel_1.add(txtdescription, "4, 4, 7, 1, fill, fill");
 		//txteventname.setColumns(10);
 		
 		JLabel lblAssocSubject = new JLabel(textdata.getKey("editorassocsubject"));
 		lblAssocSubject.setEnabled(false);
-		panel_1.add(lblAssocSubject, "2, 4, right, default");
+		panel_1.add(lblAssocSubject, "2, 6, right, default");
 		
 		JComboBox comboBox = new JComboBox();
 		comboBox.setEnabled(false);
-		panel_1.add(comboBox, "4, 4, 7, 1, fill, default");
+		panel_1.add(comboBox, "4, 6, 7, 1, fill, default");
 		
 		JLabel lblDay = new JLabel(textdata.getKey("editorday"));
-		panel_1.add(lblDay, "2, 6, right, default");
+		panel_1.add(lblDay, "2, 8, right, default");
 		
 		cbday = new JComboBox();
 		cbday.setModel(new DefaultComboBoxModel(textdata.getKey("daysofweek").split(",")));
-		panel_1.add(cbday, "4, 6, 7, 1, fill, default");
+		panel_1.add(cbday, "4, 8, 7, 1, fill, default");
 		
 		JLabel lblStartsAt = new JLabel(textdata.getKey("editorstartsat"));
-		panel_1.add(lblStartsAt, "2, 8, right, default");
+		panel_1.add(lblStartsAt, "2, 10, right, default");
 		
 		shstart = new JSpinner();
 		shstart.setModel(new SpinnerNumberModel(0, 0, 23, 1));
 		shstart.setValue(9);
-		panel_1.add(shstart, "4, 8");
+		panel_1.add(shstart, "4, 10");
 		
 		JLabel lblH = new JLabel(textdata.getKey("editorshorthour"));
-		panel_1.add(lblH, "6, 8");
+		panel_1.add(lblH, "6, 10");
 		
 		smstart = new JSpinner();
 		smstart.setModel(new SpinnerNumberModel(0, 0, 59, 1));
 		smstart.setValue(0);
-		panel_1.add(smstart, "8, 8");
+		panel_1.add(smstart, "8, 10");
 		
 		JLabel lblMin = new JLabel(textdata.getKey("editorshortminute"));
-		panel_1.add(lblMin, "10, 8");
+		panel_1.add(lblMin, "10, 10");
 		
 		JLabel lblEndsAt = new JLabel(textdata.getKey("editorendsat"));
-		panel_1.add(lblEndsAt, "2, 10, right, default");
+		panel_1.add(lblEndsAt, "2, 12, right, default");
 		
 		shend = new JSpinner();
 		shend.setModel(new SpinnerNumberModel(0, 0, 23, 1));
 		shend.setValue(10);
-		panel_1.add(shend, "4, 10");
+		panel_1.add(shend, "4, 12");
 		
 		JLabel lblH_1 = new JLabel(textdata.getKey("editorshorthour"));
-		panel_1.add(lblH_1, "6, 10");
+		panel_1.add(lblH_1, "6, 12");
 		
 		smend = new JSpinner();
 		smend.setModel(new SpinnerNumberModel(0, 0, 59, 1));
 		smend.setValue(0);
-		panel_1.add(smend, "8, 10");
+		panel_1.add(smend, "8, 12");
 		
 		JLabel lblMin_1 = new JLabel(textdata.getKey("editorshortminute"));
-		panel_1.add(lblMin_1, "10, 10");
+		panel_1.add(lblMin_1, "10, 12");
 		
 		JLabel lblEventColor = new JLabel(textdata.getKey("editoreventcolor"));
-		panel_1.add(lblEventColor, "2, 12, right, default");
+		panel_1.add(lblEventColor, "2, 14, right, default");
 		
 		pcolor = new JPanel(){
 			
@@ -434,7 +444,7 @@ public class ScheduleEditorGUI extends JDialog {
 		});
 		pcolor.setBackground(new Color(153, 204, 255));
 		pcolor.setPreferredSize(new Dimension(10, 20));
-		panel_1.add(pcolor, "4, 12, 7, 1, fill, fill");
+		panel_1.add(pcolor, "4, 14, 7, 1, fill, fill");
 		
 		btnaddevent = new JCustomButton(textdata.getKey("editoraddasnewevent"));
 		btnaddevent.addActionListener(new ActionListener() {
@@ -457,7 +467,7 @@ public class ScheduleEditorGUI extends JDialog {
 				}
 			}
 		});
-		panel_1.add(btnaddevent, "2, 14, 9, 1");
+		panel_1.add(btnaddevent, "2, 16, 9, 1");
 		
 		btnmodifyevent = new JCustomButton(textdata.getKey("editormodifyevent"));
 		btnmodifyevent.setEnabled(false);
@@ -484,7 +494,7 @@ public class ScheduleEditorGUI extends JDialog {
 
 			}
 		});
-		panel_1.add(btnmodifyevent, "2, 16, 9, 1");
+		panel_1.add(btnmodifyevent, "2, 18, 9, 1");
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(null);

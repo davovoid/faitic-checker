@@ -89,13 +89,14 @@ public class Schedule {
 							String eventname="untitled";
 							int minutestart=0, minuteend=0, day=0;
 							Color color=Color.WHITE;
-							String assocsubject=null;
+							String assocsubject=null, eventdescription=null;
 
-							if(eventjson.containsKey("eventname")) 		eventname 		= (String) 	eventjson.get("eventname");
-							if(eventjson.containsKey("assocsubject")) 	assocsubject 	= (String) 	eventjson.get("assocsubject");
-							if(eventjson.containsKey("minutestart"))	minutestart 	= (int)(long) 	eventjson.get("minutestart");
-							if(eventjson.containsKey("minuteend"))		minuteend 		= (int)(long) 	eventjson.get("minuteend");
-							if(eventjson.containsKey("day"))			day 			= (int)(long) 	eventjson.get("day");
+							if(eventjson.containsKey("eventname")) 			eventname 			= (String) 		eventjson.get("eventname");
+							if(eventjson.containsKey("eventdescription")) 	eventdescription 	= (String) 		eventjson.get("eventdescription");
+							if(eventjson.containsKey("assocsubject")) 		assocsubject 		= (String) 		eventjson.get("assocsubject");
+							if(eventjson.containsKey("minutestart"))		minutestart 		= (int)(long) 	eventjson.get("minutestart");
+							if(eventjson.containsKey("minuteend"))			minuteend 			= (int)(long) 	eventjson.get("minuteend");
+							if(eventjson.containsKey("day"))				day 				= (int)(long) 	eventjson.get("day");
 
 							if(eventjson.containsKey("colorr") &&
 							   eventjson.containsKey("colorg") &&
@@ -105,7 +106,7 @@ public class Schedule {
 																									(int)(long) eventjson.get("colorb"),
 																									(int)(long) eventjson.get("colora"));
 
-							ScheduleEvent event=new ScheduleEvent(eventname, minutestart, minuteend, day, color, assocsubject);
+							ScheduleEvent event=new ScheduleEvent(eventname, minutestart, minuteend, day, color, assocsubject,eventdescription);
 
 							eventList.add(event);
 
@@ -243,6 +244,7 @@ public class Schedule {
 			JSONObject eventjson=new JSONObject();
 
 			String eventname=event.getEventName();
+			String eventdescription=event.getEventDescription();
 			int minutestart=event.getMinuteStart(), minuteend=event.getMinuteEnd(), day=event.getDay();
 			Color color=event.getColor();
 			String assocsubject=event.getAssocSubject();
@@ -257,6 +259,7 @@ public class Schedule {
 			eventjson.put("colora", color.getAlpha());
 			
 			if(assocsubject!=null) eventjson.put("assocsubject", assocsubject);
+			if(eventdescription!=null) eventjson.put("eventdescription", eventdescription);
 			
 			events.add(eventjson); // Add event to list
 			

@@ -82,7 +82,13 @@ public class ScheduleViewerGUI {
 	private static JLabel[] titleLabels;
 	private static JLabel addScheduleLabel;
 	
-	private static JLabel lblEdit, lblDelete, lblDuplicate, lblExport, lblleft, lblright;
+	private static JLabel lblEdit, lblDelete, lblDuplicate, lblExport, lblleft, lblright,
+	lbleventname, lbleventhours, lblclose;
+	
+	private static JTextPane txtdescription;
+	
+	private static JPanel paneldescription;
+	private static JScrollPane scrollDescription;
 
 	/**
 	 * SCHEDULE THINGS
@@ -222,6 +228,8 @@ public class ScheduleViewerGUI {
 			panelSchedule.updateUI();
 			
 		}
+		
+		paneldescription.setVisible(false);
 		
 	}
 	
@@ -517,6 +525,47 @@ public class ScheduleViewerGUI {
 				
 			}
 			
+			// Actions when panel or the elements inside it are clicked
+			
+			MouseAdapter dowhenclicked=new CustomMouseAdapter(event){
+				
+				@Override
+				public void mouseClicked(MouseEvent arg0) {
+					
+					if(arg0.getComponent().isEnabled()){
+						
+						ScheduleEvent event=(ScheduleEvent)super.getObject();
+						
+						lbleventname.setText(event.getEventName());
+
+						int hs=ScheduleEvent.getHour(event.getMinuteStart());
+						int ms=ScheduleEvent.getMinute(event.getMinuteStart());
+						int he=ScheduleEvent.getHour(event.getMinuteEnd());
+						int me=ScheduleEvent.getMinute(event.getMinuteEnd());
+						
+						String output= 	hs + ":" + (ms > 9 ? ms : "0" + ms) + " - " +
+										he + ":" + (me > 9 ? me : "0" + me);
+						
+						lbleventhours.setText(" " + textdata.getKey("daysofweek").split(",")[event.getDay()].toLowerCase() + ", " + output + " ");
+						
+						txtdescription.setText(event.getEventDescription()!=null ? event.getEventDescription() : "");
+
+						txtdescription.setCaretPosition(0);
+
+						scrollDescription.setVisible(event.getEventDescription()!=null);
+						
+						paneldescription.setVisible(true);
+						
+					}
+					
+				}
+				
+			};
+			
+			lblSubject.addMouseListener(dowhenclicked);
+			lblHourSubject.addMouseListener(dowhenclicked);
+			panelEvent.addMouseListener(dowhenclicked);
+			
 			
 		}
 		
@@ -656,6 +705,7 @@ public class ScheduleViewerGUI {
 				// Variables
 				
 				int topbarheight=panelOptions!=null ? panelOptions.getHeight() : 40;
+				int bottombarheight=paneldescription!=null ? paneldescription.getHeight() : 100;
 				Color borderColor=new Color(110,110,110,200);
 				
 				// Background
@@ -687,6 +737,30 @@ public class ScheduleViewerGUI {
 					
 				}
 				
+				// bottom bar
+				if(paneldescription!=null){
+					
+					if(paneldescription.isVisible()){
+						
+						g.setColor(Color.white);
+						g.fillRect(0,getHeight()-bottombarheight, getWidth(), bottombarheight);
+						
+						g.setColor(borderColor);
+						g.drawLine(0, getHeight()-bottombarheight, getWidth(), getHeight()-bottombarheight);
+						
+						for(int i=0; i<8; i++){
+							
+							g.setColor(new Color(110,110,110,(8-i)*40/8));
+							g.drawLine(0, getHeight()-bottombarheight-i, getWidth(), getHeight()-bottombarheight-i);
+							
+							
+						}
+						
+						
+					}
+					
+				}
+				
 				
 				
 			}
@@ -700,7 +774,8 @@ public class ScheduleViewerGUI {
 				FormFactory.PREF_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,}));
+				FormFactory.GLUE_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,}));
 		
 		panelOptions = new JPanel();
 		panelOptions.setOpaque(false);
@@ -999,5 +1074,70 @@ public class ScheduleViewerGUI {
 		
 		JLabel label_3 = new JLabel("10:00 - 10:30");
 		panel_7.add(label_3);
+		
+		paneldescription = new JPanel();
+		paneldescription.setVisible(false);
+		paneldescription.setOpaque(false);
+		panelEverything.add(paneldescription, "1, 3, 3, 1, fill, fill");
+		paneldescription.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.GLUE_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,},
+			new RowSpec[] {
+				FormFactory.UNRELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.UNRELATED_GAP_ROWSPEC,
+				RowSpec.decode("min(50dlu;default)"),
+				FormFactory.UNRELATED_GAP_ROWSPEC,}));
+		
+		
+		lbleventname = new JLabel("Event name");
+		lbleventname.setFont(new Font("Dialog", Font.BOLD, 16));
+		lbleventname.setForeground(new Color(33,33,33,255));
+		paneldescription.add(lbleventname, "2, 2");
+		
+		lbleventhours = new JLabel("Event hours");
+		lbleventhours.setFont(new Font("Dialog", Font.ITALIC, 16));
+		lbleventhours.setForeground(new Color(117,117,117,255));
+		paneldescription.add(lbleventhours, "4, 2");
+		
+		lblclose = new JLabel("X");
+		lblclose.setFont(new Font("Dialog", Font.BOLD, 16));
+		lblclose.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(arg0.getComponent().isEnabled()){
+					
+					paneldescription.setVisible(false);
+					
+				}
+				
+			}
+		});
+		lblclose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblclose.setForeground(new Color(0,110,198,255));
+		paneldescription.add(lblclose, "6, 2");
+		
+		scrollDescription = new JScrollPane();
+		scrollDescription.setBorder(null);
+		scrollDescription.getVerticalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollDescription.getVerticalScrollBar().setOpaque(false);
+		scrollDescription.getHorizontalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollDescription.getHorizontalScrollBar().setOpaque(false);
+		scrollDescription.setOpaque(false);
+		scrollDescription.getViewport().setOpaque(false);
+		paneldescription.add(scrollDescription, "2, 4, 5, 1, fill, fill");
+		
+		txtdescription = new JTextPane();
+		txtdescription.setFont(new Font("Dialog", Font.PLAIN, 15));
+		txtdescription.setText("Event description");
+		txtdescription.setOpaque(false);
+		txtdescription.setEditable(false);
+		scrollDescription.setViewportView(txtdescription);
 	}
 }

@@ -23,7 +23,7 @@ import java.awt.Color;
 
 public class ScheduleEvent {
 
-	private String iEventName;
+	private String iEventName, iEventDescription=null;
 	private int iMinuteStart, iMinuteEnd, iDay;
 	private Color iColor=Color.WHITE;
 	private String iAssocSubject=null;
@@ -31,33 +31,34 @@ public class ScheduleEvent {
 	public final int MONDAY=0, TUESDAY=1, WEDNESDAY=2,
 			THURSDAY=3, FRIDAY=4, SATURDAY=5, SUNDAY=6;
 	
-	public ScheduleEvent(String eventName, int minuteStart, int minuteEnd, int day, Color color, String assocSubject) {
+	public ScheduleEvent(String eventName, int minuteStart, int minuteEnd, int day, Color color, String assocSubject, String eventDescription) {
 
-		modify(eventName,minuteStart,minuteEnd,day,color,assocSubject);
+		modify(eventName,minuteStart,minuteEnd,day,color,assocSubject, eventDescription);
 		
 	}
-	
+	/*
 	public ScheduleEvent(String eventName, int minuteStart, int minuteEnd, int day) {
 
-		modify(eventName,minuteStart,minuteEnd,day,getColor(),getAssocSubject());
+		modify(eventName,minuteStart,minuteEnd,day);
 		
 	}
-	
-	public void modify(String eventName, int minuteStart, int minuteEnd, int day, Color color, String assocSubject){
+	*/
+	public void modify(String eventName, int minuteStart, int minuteEnd, int day, Color color, String assocSubject, String eventDescription){
 		
 		iEventName=eventName;
 		iMinuteStart=minuteStart; iMinuteEnd=minuteEnd; iDay=day;
 		iColor=color;
 		iAssocSubject=assocSubject;
+		iEventDescription=eventDescription;
 		
 	}
-	
+	/*
 	public void modify(String eventName, int minuteStart, int minuteEnd, int day){
 		
 		modify(eventName,minuteStart,minuteEnd,day,getColor(),getAssocSubject());
 		
 	}
-	
+	*/
 	
 	public static int getHour(int minutes){
 		
@@ -108,6 +109,11 @@ public class ScheduleEvent {
 		
 	}
 	
+	public String getEventDescription(){
+		
+		return iEventDescription;
+		
+	}
 	
 
 }
