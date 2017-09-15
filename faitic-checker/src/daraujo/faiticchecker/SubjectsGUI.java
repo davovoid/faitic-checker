@@ -41,6 +41,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 
@@ -105,6 +106,7 @@ import javax.swing.JTextField;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.FlowLayout;
 
 public class SubjectsGUI {
 
@@ -141,6 +143,7 @@ public class SubjectsGUI {
 	private static int subjectType;
 	private static String subjectURL;
 	private static ArrayList<FileFromURL> fileList;
+	private static String htmlannouncements=null, htmlintroduction=null;
 	private static String subjectPath;
 	
 	private static File jDirChooserCurrentDir;
@@ -168,6 +171,8 @@ public class SubjectsGUI {
 	private static JPanel btnSearch;
 	private JPanel panel;
 	private JPanel btnSchedule;
+	private static JPanel panelSections;
+	private static JLabel lblIntroduction,lblAnnouncements,lblFiles;
 	
 	/**
 	 * Application functions
@@ -393,6 +398,7 @@ public class SubjectsGUI {
 						lblSubjectName.setText(textdata.getKey("loadingopeningsubject"));
 						lblProperties.setText("");
 						lblSubjectFolder.setText("");
+						panelSections.setVisible(false);
 						
 						SwingWorker thread=new SwingWorker(){
 
@@ -415,6 +421,9 @@ public class SubjectsGUI {
 									
 									String subjectName=subjectList.get(selectedSubject).getName();
 									
+									// Announcements and intro cleaned
+									htmlannouncements=null; htmlintroduction=null;
+									
 									if(online){
 										
 										// Online mode
@@ -428,6 +437,8 @@ public class SubjectsGUI {
 										if(subjectType == Faitic.CLAROLINE){
 
 											fileList = faitic.listDocumentsClaroline(subjectURL);
+											htmlintroduction=faitic.readClarolineIntro(subjectURL);
+											htmlannouncements=faitic.readClarolineAnnouncements(subjectURL);
 
 										}
 										else if(subjectType == Faitic.MOODLE){
@@ -446,7 +457,11 @@ public class SubjectsGUI {
 
 										}
 
-										if(fileList!=null && offlinesaving) OfflineFaitic.setOfflineFileList(username, subjectList.get(selectedSubject).getName(), fileList);
+										if(fileList!=null && offlinesaving) {
+											
+											OfflineFaitic.setOfflineFileList(username, subjectList.get(selectedSubject).getName(), fileList, htmlannouncements, htmlintroduction);
+											
+										}
 
 									} else{
 										
@@ -454,6 +469,8 @@ public class SubjectsGUI {
 										
 										subjectType=Faitic.UNKNOWN;
 										fileList=OfflineFaitic.getOfflineFileList(username, subjectName);
+										htmlannouncements=OfflineFaitic.getKey(username, subjectName,"announcements");
+										htmlintroduction=OfflineFaitic.getKey(username, subjectName,"introduction");
 										
 									}
 									
@@ -555,6 +572,13 @@ public class SubjectsGUI {
 										
 									}
 									
+									panelSections.setVisible(htmlintroduction!=null || htmlannouncements!=null);
+									if(panelSections.isVisible()){
+										
+										selectsectionbutton(lblFiles);
+										
+									}
+									
 									// List files now, do after getting the subject path, UI
 									fillFilesFromSubject();
 
@@ -614,6 +638,92 @@ public class SubjectsGUI {
 		}
 		
 		return true;
+		
+	}
+	
+	private static void deselectallsectionbuttons(){
+		
+		for(Component comp : panelSections.getComponents()){
+			
+			if(comp instanceof JLabel){
+				
+				JLabel lblcomp=(JLabel) comp;
+				
+				lblcomp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				lblcomp.setForeground(new Color(0,110,198,255));
+				
+			}
+			
+		}
+		
+	}
+	
+	private static void selectsectionbutton(Component selcomp){
+		
+		deselectallsectionbuttons();
+		
+		for(Component comp : panelSections.getComponents()){
+			
+			if(comp instanceof JLabel && selcomp.equals(comp)){
+				
+				JLabel lblcomp=(JLabel) comp;
+				
+				lblcomp.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				lblcomp.setForeground(SystemColor.windowText);
+				
+			}
+			
+		}
+		
+		
+	}
+	
+	private static void fillWithHTML(String html){
+		
+		panelToDownload.removeAll();
+		panelToDownload.updateUI();
+
+		panelToDownload.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC,
+				FormFactory.GLUE_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,},
+		new RowSpec[] {
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,}));
+		
+		JTextPane htmlvisor=new JTextPane();
+		htmlvisor.setEditable(false);
+		htmlvisor.setContentType("text/html");
+		
+		// Prepare the html
+		
+		StringBuffer outputhtml=new StringBuffer();
+		
+		outputhtml.append("<html><head>");
+		outputhtml.append("<style type=\"text/css\">");
+		
+		outputhtml.append("body { font-family: arial, helvetica, sans-serif; }");
+		outputhtml.append(".claroTable th { margin: 35px 0px 5px 0px; padding: 5px 5px 5px 5px; text-align: left;"
+				+ " border-top: 1px solid #202020; border-bottom: 1px solid #888888; background-color: #dddddd; }");
+		outputhtml.append(".claroTable {border-bottom: 1px solid #888888;}");
+		
+		
+		outputhtml.append("</style>");
+		outputhtml.append("</head><body>");
+		
+		outputhtml.append(html);
+		
+		outputhtml.append("</body></html>");
+		
+		htmlvisor.setText(outputhtml.toString());
+		
+		htmlvisor.setCaretPosition(0);
+		
+		System.out.println(outputhtml.toString());
+		
+		panelToDownload.add(htmlvisor, "2, 2, fill, fill");
+		
 		
 	}
 	
@@ -1791,7 +1901,8 @@ public class SubjectsGUI {
 				FormFactory.GLUE_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,}));
+				FormFactory.GLUE_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,}));
 		
 		panelSearch = new JPanel(){
 			
@@ -1937,6 +2048,8 @@ public class SubjectsGUI {
 		scrollPane.getViewport().setOpaque(false);
 		scrollPane.getVerticalScrollBar().setUnitIncrement(20);
 		scrollPane.getVerticalScrollBar().setUI(new CustomScrollBarUI(Color.white,new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
+		scrollPane.getHorizontalScrollBar().setUI(new CustomScrollBarUI(Color.white,new Color(110,110,110,255),new Color(110,110,110,50)));
 		scrollPane.setBorder(null);
 		
 		panelToDownload = new JPanel()/*{
@@ -1991,6 +2104,98 @@ public class SubjectsGUI {
 		lblSeleccioneUnaAsignatura.setForeground(new Color(117,117,117,255));
 		lblSeleccioneUnaAsignatura.setHorizontalAlignment(SwingConstants.CENTER);
 		panelToDownload.add(lblSeleccioneUnaAsignatura, "2, 2, 3, 1");
+		
+		panelSections = new JPanel(){
+			
+			@Override
+			public void paintComponent(Graphics g){
+				
+				Color borderColor=new Color(110,110,110,180);
+				
+				// Background
+
+				for(int i=0; i<super.getHeight(); i++){
+					g.setColor(new Color(220,220,220, i*150/getHeight() ));
+					g.drawLine(0, i, super.getWidth(), i);
+				}
+				
+				// Bottom bar
+				
+				g.setColor(borderColor);
+				g.drawLine(0, 0, getWidth(), 0);
+				
+				for(int i=0; i<8; i++){
+					
+					g.setColor(new Color(110,110,110,(8-i)*40/8));
+					g.drawLine(0, i, getWidth(), i);
+					
+					
+				}
+				
+			}
+			
+		};
+		panelSections.setVisible(false);
+		FlowLayout fl_panelSections = (FlowLayout) panelSections.getLayout();
+		fl_panelSections.setVgap(8);
+		fl_panelSections.setHgap(10);
+		panelSections.setOpaque(false);
+		panelSubject.add(panelSections, "1, 3, fill, fill");
+		
+		lblIntroduction = new JLabel(textdata.getKey("sectionintroduction"));
+		lblIntroduction.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(arg0.getComponent().isEnabled()){
+					
+					fillWithHTML(htmlintroduction !=null ? htmlintroduction : "");
+					
+					selectsectionbutton(arg0.getComponent());
+					
+				}
+				
+			}
+		});
+		lblIntroduction.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblIntroduction.setForeground(new Color(0,110,198,255));
+		panelSections.add(lblIntroduction);
+		
+		lblAnnouncements = new JLabel(textdata.getKey("sectionannouncements"));
+		lblAnnouncements.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+
+				if(arg0.getComponent().isEnabled()){
+					
+					fillWithHTML(htmlannouncements !=null ? htmlannouncements : "");
+					
+					selectsectionbutton(arg0.getComponent());
+					
+				}
+				
+			}
+		});
+		lblAnnouncements.setForeground(new Color(0,110,198,255));
+		lblAnnouncements.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		panelSections.add(lblAnnouncements);
+		
+		lblFiles = new JLabel(textdata.getKey("sectionfiles"));
+		lblFiles.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+
+				if(arg0.getComponent().isEnabled()){
+					
+					fillFilesFromSubject();
+					
+					selectsectionbutton(arg0.getComponent());
+					
+				}
+				
+			}
+		});
+		panelSections.add(lblFiles);
 		
 		scrollPane_1 = new JScrollPane();
 		scrollPane_1.setOpaque(false);

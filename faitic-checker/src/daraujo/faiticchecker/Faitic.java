@@ -34,6 +34,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,8 +124,14 @@ public class Faitic {
 	}
 
 	public static String lastRequestedURL="";
-
+	
 	public static String requestDocument(String strurl, String post) throws Exception{
+		
+		return requestDocument(strurl,post,StandardCharsets.UTF_8);
+		
+	}
+
+	public static String requestDocument(String strurl, String post, Charset inputCharset) throws Exception{
 
 		lastRequestedURL=strurl;
 
@@ -206,7 +213,7 @@ public class Faitic {
 		int counter=0;
 
 		while (read != -1) {
-			output.append(new String(temp,0,read,StandardCharsets.UTF_8));
+			output.append(new String(temp,0,read,inputCharset));
 			read = reader.read(temp);
 			counter+=read;
 
@@ -719,6 +726,7 @@ public class Faitic {
 		return output.toString();
 
 	}
+	
 
 	public static String faiticLogin(String username, String password) throws Exception{
 
@@ -1199,6 +1207,105 @@ public class Faitic {
 		}
 
 	}
+	
+
+	public static String readClarolineIntro(String platformURL) throws Exception{
+
+		String output="";
+		
+		int untilWhenUrlToUse= platformURL.indexOf("/", platformURL.indexOf("/claroline")+1);
+
+		if(untilWhenUrlToUse>=0){
+
+			// Get url from intro using the platform url
+			
+			String urlBase = platformURL.substring(0, untilWhenUrlToUse);
+			String urlToUse =  urlBase + "/course/index.php";
+			
+			// Get the document
+			
+			String document=requestDocument(urlToUse,"",StandardCharsets.ISO_8859_1);
+
+			// Parse the document
+			
+			int preintro=document.indexOf("<!-- - - - - - - - - - - Claroline Body - - - - - - - - - -->");
+			
+			if(preintro<0) return output;
+			
+			int introstart=document.indexOf("<td valign=\"top\">",preintro+1);
+			
+			if(introstart<0) return output;
+			
+			int postend=document.lastIndexOf("<!-- - - - - - - - - - -   End of Claroline Body   - - - - - - - - - - -->");
+			
+			if(postend<0) return output;
+			
+			int introend=document.lastIndexOf("</td>",postend-1);
+			
+			introstart+=17; // Compensation for introstart
+			
+			if(introstart>=introend) return output;
+			
+			// No problem parsing
+			
+			String introhtmloriginal=document.substring(introstart, introend);
+			
+			output=introhtmloriginal; // TODO try to correct urls to be absolute
+			
+		}
+		
+		return output;
+
+	}
+
+
+	public static String readClarolineAnnouncements(String platformURL) throws Exception{
+
+		String output="";
+		
+		int untilWhenUrlToUse= platformURL.indexOf("/", platformURL.indexOf("/claroline")+1);
+
+		if(untilWhenUrlToUse>=0){
+
+			// Get url from announcements using the platform url
+			
+			String urlBase = platformURL.substring(0, untilWhenUrlToUse);
+			String urlToUse =  urlBase + "/announcements/announcements.php";
+			
+			// Get the document
+			
+			String document=requestDocument(urlToUse,"",StandardCharsets.ISO_8859_1);
+
+			// Parse the document
+			
+			int preintro=document.indexOf("<!-- - - - - - - - - - - Claroline Body - - - - - - - - - -->");
+			
+			if(preintro<0) return output;
+			
+			int introstart=document.indexOf("<table class=\"claroTable\"",preintro+1);
+			
+			if(introstart<0) return output;
+			
+			int postend=document.lastIndexOf("<!-- - - - - - - - - - -   End of Claroline Body   - - - - - - - - - - -->");
+			
+			if(postend<0) return output;
+			
+			int introend=document.lastIndexOf("</div>",postend-1);
+			
+			if(introstart>=introend) return output;
+			
+			// No problem parsing
+			
+			String introhtmloriginal=document.substring(introstart, introend);
+			
+			output=filterTags(introhtmloriginal, new String[]{"img"});
+			
+		}
+		
+		return output;
+
+	}
+
 
 
 	public static ArrayList<FileFromURL> listDocumentsMoodle(String platformURL) throws Exception{
@@ -1673,4 +1780,52 @@ public class Faitic {
 		}
 
 	}
+	
+	public static String filterTags(String html, String[] tags){
+
+		String output=html+"";
+		
+		while(output.indexOf("< ") >= 0){
+			
+			output.replace("< ","<");
+			
+		}
+
+		while(output.indexOf("</ ") >= 0){
+			
+			output.replace("</ ","</");
+			
+		}
+		
+		// No problem now with cases like the ones from before
+		
+		for(String tag : tags){
+			
+			for(String posiblestart : new String[]{"<","</"}){ // For all type of tags
+				
+				int firsttagstart=output.toLowerCase().indexOf(posiblestart + tag);
+				int firsttagend=output.indexOf(">", firsttagstart);
+				
+				while(firsttagstart>=0 && firsttagend>firsttagstart){ // Do until no tag remains
+					
+					output=output.replace(output.substring(firsttagstart,firsttagend+1),""); // Remove the tag
+					
+					// Next loop
+					firsttagstart=output.toLowerCase().indexOf(posiblestart + tag);
+					firsttagend=output.indexOf(">", firsttagstart);
+
+				}
+				
+				
+			}
+
+		}
+		
+
+		System.out.println("Ended");
+		
+		return output;
+		
+	}
+	
 }

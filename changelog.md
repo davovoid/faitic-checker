@@ -4,10 +4,12 @@
 ### English
 
  * Event description in schedules.
+ * Introduction and announcements in Claroline (Also with offline mode)
 
 ### Español
 
  * Descripción de evento en horarios.
+ * Introducción y anuncios en Claroline (También en modo desconectado)
 
 # v.1.0.0 -> v.1.0.1:
 

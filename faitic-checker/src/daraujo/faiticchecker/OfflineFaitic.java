@@ -150,7 +150,42 @@ public class OfflineFaitic {
 		
 	}
 	
+
+	public static String getKey(String username, String subjectName, String key){
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		String secureSubjectName=Settings.getSubjectUniqueName(subjectName);
+		
+		String filesFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/offline-" + username + "-subject-" + secureSubjectName + ".json");
+		
+		if(new File(filesFile).exists()){
+			
+			try{
+				
+				JSONObject filesjson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(filesFile));
+
+				if(filesjson.containsKey(key)) return (String)filesjson.get(key);
+				
+			} catch(Exception e){
+				
+			}
+			
+		}
+		
+		// Not returned. JSONConf couldn't be loaded
+		return null;
+		
+	}
+	
+	
 	public static void setOfflineFileList(String username, String subjectName, ArrayList<FileFromURL>fileList){
+		
+		setOfflineFileList(username, subjectName, fileList, null, null);
+		
+	}
+	
+	public static void setOfflineFileList(String username, String subjectName, ArrayList<FileFromURL>fileList, String announcements, String introduction){
 
 		String secureSubjectName=Settings.getSubjectUniqueName(subjectName);
 		
@@ -174,6 +209,8 @@ public class OfflineFaitic {
 		filesjson.put("username", username);
 		filesjson.put("subjectname", subjectName);		
 		filesjson.put("files", fileArray);
+		if(announcements!=null) filesjson.put("announcements", announcements);
+		if(introduction!=null) filesjson.put("introduction", introduction);
 		
 		ClassicRoutines.writeFile(filesFile,filesjson.toJSONString());
 		
