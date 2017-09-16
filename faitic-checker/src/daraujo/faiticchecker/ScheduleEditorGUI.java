@@ -122,7 +122,8 @@ public class ScheduleEditorGUI extends JDialog {
 		ScheduleEvent event=new ScheduleEvent(txteventname.getText(),
 				(int)shstart.getValue()*60+(int)smstart.getValue(),
 				(int)shend.getValue()*60+(int)smend.getValue(),
-				cbday.getSelectedIndex(), pcolor.getBackground(), null, txtdescription.getText());
+				cbday.getSelectedIndex(), pcolor.getBackground(), null,
+				txtdescription.getText().length()>0 ? txtdescription.getText() : null);
 
 		schedule.eventList.add(event);
 
@@ -138,7 +139,8 @@ public class ScheduleEditorGUI extends JDialog {
 			event.modify(txteventname.getText(),
 					(int)shstart.getValue()*60+(int)smstart.getValue(),
 					(int)shend.getValue()*60+(int)smend.getValue(),
-					cbday.getSelectedIndex(), pcolor.getBackground(), null, txtdescription.getText());
+					cbday.getSelectedIndex(), pcolor.getBackground(), null,
+					txtdescription.getText().length()>0 ? txtdescription.getText() : null);
 
 		}
 

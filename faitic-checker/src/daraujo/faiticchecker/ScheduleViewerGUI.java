@@ -536,7 +536,7 @@ public class ScheduleViewerGUI {
 						
 						ScheduleEvent event=(ScheduleEvent)super.getObject();
 						
-						lbleventname.setText(event.getEventName());
+						lbleventname.setText(event.getEventName().replace("\n", " "));
 
 						int hs=ScheduleEvent.getHour(event.getMinuteStart());
 						int ms=ScheduleEvent.getMinute(event.getMinuteStart());
