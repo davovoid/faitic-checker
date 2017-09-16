@@ -178,6 +178,46 @@ public class OfflineFaitic {
 		
 	}
 	
+
+	public static void setKey(String username, String subjectName, String key, Object value){
+
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		JSONObject filesjson=null;
+		
+		String secureSubjectName=Settings.getSubjectUniqueName(subjectName);
+		
+		String filesFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/offline-" + username + "-subject-" + secureSubjectName + ".json");
+		
+		if(new File(filesFile).exists()){
+			
+			try{
+				
+				filesjson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(filesFile));
+
+			} catch(Exception e){
+				
+			}
+			
+		}
+		
+		if(filesjson==null){
+			
+			// No object read before, create one
+			
+			filesjson=new JSONObject();
+			
+		}
+		
+		if(filesjson.containsKey(key)) filesjson.remove(key);
+		filesjson.put(key, value);
+		
+		ClassicRoutines.writeFile(filesFile,filesjson.toJSONString());
+		
+		
+	}
+
+	
 	
 	public static void setOfflineFileList(String username, String subjectName, ArrayList<FileFromURL>fileList){
 		
@@ -187,11 +227,33 @@ public class OfflineFaitic {
 	
 	public static void setOfflineFileList(String username, String subjectName, ArrayList<FileFromURL>fileList, String announcements, String introduction){
 
+		JSONParser jsonParser=new JSONParser();	// Initializes the JSONParser
+
+		JSONObject filesjson=null;
+		
 		String secureSubjectName=Settings.getSubjectUniqueName(subjectName);
 		
-		String filesFile=ClassicRoutines.createNeededFolders(ClassicRoutines.getUserDataPath(true) + "/offline-" + username + "-subject-" + secureSubjectName + ".json");
+		String filesFile=ClassicRoutines.cpath(ClassicRoutines.getUserDataPath(true) + "/offline-" + username + "-subject-" + secureSubjectName + ".json");
 		
-		JSONObject filesjson=new JSONObject();
+		if(new File(filesFile).exists()){
+			
+			try{
+				
+				filesjson=(JSONObject) jsonParser.parse(ClassicRoutines.readFile(filesFile));
+
+			} catch(Exception e){
+				
+			}
+			
+		}
+		
+		if(filesjson==null){
+			
+			// No object read before, create one
+			
+			filesjson=new JSONObject();
+			
+		}
 		
 		JSONArray fileArray=new JSONArray();
 		

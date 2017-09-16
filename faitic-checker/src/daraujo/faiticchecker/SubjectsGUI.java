@@ -144,6 +144,8 @@ public class SubjectsGUI {
 	private static String subjectURL;
 	private static ArrayList<FileFromURL> fileList;
 	private static String htmlannouncements=null, htmlintroduction=null;
+	private static String prevhtmlannouncements=null, prevhtmlintroduction=null;
+	private static boolean announcementsread=true, introductionread=true;
 	private static String subjectPath;
 	
 	private static File jDirChooserCurrentDir;
@@ -423,6 +425,8 @@ public class SubjectsGUI {
 									
 									// Announcements and intro cleaned
 									htmlannouncements=null; htmlintroduction=null;
+									prevhtmlannouncements=null; prevhtmlintroduction=null;
+									announcementsread=true; introductionread=true;
 									
 									if(online){
 										
@@ -459,7 +463,19 @@ public class SubjectsGUI {
 
 										if(fileList!=null && offlinesaving) {
 											
+											// New data and allowed to read offline
+											
+											prevhtmlannouncements=OfflineFaitic.getKey(username, subjectName,"announcements");
+											prevhtmlintroduction=OfflineFaitic.getKey(username, subjectName,"introduction");
+											
 											OfflineFaitic.setOfflineFileList(username, subjectList.get(selectedSubject).getName(), fileList, htmlannouncements, htmlintroduction);
+											
+										} else if(!offlinesaving){
+											
+											// No offline available, but new data
+											
+											prevhtmlannouncements=htmlannouncements;
+											prevhtmlintroduction=htmlintroduction;
 											
 										}
 
@@ -472,7 +488,15 @@ public class SubjectsGUI {
 										htmlannouncements=OfflineFaitic.getKey(username, subjectName,"announcements");
 										htmlintroduction=OfflineFaitic.getKey(username, subjectName,"introduction");
 										
+										prevhtmlannouncements=htmlannouncements;
+										prevhtmlintroduction=htmlintroduction;
+										
 									}
+									
+									// Check section read
+									
+									introductionread=sectionIsRead(prevhtmlintroduction, htmlintroduction, "introduction", subjectName);
+									announcementsread=sectionIsRead(prevhtmlannouncements, htmlannouncements, "announcements", subjectName);
 									
 									// Get subject path
 									subjectPath=settings.getSubjectPath(subjectName);
@@ -572,11 +596,17 @@ public class SubjectsGUI {
 										
 									}
 									
+									// Sections for subjects supported
+									
 									panelSections.setVisible(htmlintroduction!=null || htmlannouncements!=null);
 									if(panelSections.isVisible()){
 										
 										selectsectionbutton(lblFiles);
+
+										lblIntroduction.setIcon(introductionread ? null : new ImageIcon(getHotIcon(7)));
 										
+										lblAnnouncements.setIcon(announcementsread ? null : new ImageIcon(getHotIcon(7)));
+
 									}
 									
 									// List files now, do after getting the subject path, UI
@@ -638,6 +668,45 @@ public class SubjectsGUI {
 		}
 		
 		return true;
+		
+	}
+	
+	private static boolean sectionIsRead(String oldtext, String newtext, String key, String subjectName){
+		
+		if(!offlinesaving) return true;
+		
+		boolean areequal;
+		
+		if(oldtext==null ^ newtext==null){
+			
+			areequal=false;
+			
+		} else if(oldtext==null && newtext==null){
+			
+			areequal=true;
+			
+		} else{
+			
+			areequal=oldtext.equals(newtext);
+			
+		}
+		
+		if(OfflineFaitic.getKey(username, subjectName, key + "read")==null){ // If not set
+			
+			OfflineFaitic.setKey(username, subjectName, key + "read",areequal ? "1" : "0"); // Save the situation
+
+			return areequal;
+			
+		}
+		
+		if(OfflineFaitic.getKey(username, subjectName, key + "read").equals("0")) return false; // So it will be different until read
+		else{ // If read before or not taken into account
+			
+				OfflineFaitic.setKey(username, subjectName, key + "read",areequal ? "1" : "0"); // Save the situation
+
+				return areequal;
+				
+		}
 		
 	}
 	
@@ -725,6 +794,23 @@ public class SubjectsGUI {
 		panelToDownload.add(htmlvisor, "2, 2, fill, fill");
 		
 		
+	}
+	
+	private static BufferedImage getHotIcon(int width){
+		
+		BufferedImage img=new BufferedImage(width,width,BufferedImage.TYPE_INT_ARGB);
+		
+		Graphics2D g2=img.createGraphics();
+
+	    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+	    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+	    g2.setColor(Color.red);
+	    g2.fillOval(0, 0, width, width);
+		
+	    return img;
+	    
 	}
 	
 	private static void fillFilesFromSubject(){ fillFilesFromSubject(""); }
@@ -2153,6 +2239,10 @@ public class SubjectsGUI {
 					
 					selectsectionbutton(arg0.getComponent());
 					
+					if(offlinesaving) OfflineFaitic.setKey(username, subjectList.get(selectedSubject).getName(), "introductionread","1"); // Save as read if possible
+					
+					((JLabel)arg0.getComponent()).setIcon(null);
+					
 				}
 				
 			}
@@ -2171,6 +2261,10 @@ public class SubjectsGUI {
 					fillWithHTML(htmlannouncements !=null ? htmlannouncements : "");
 					
 					selectsectionbutton(arg0.getComponent());
+					
+					if(offlinesaving) OfflineFaitic.setKey(username, subjectList.get(selectedSubject).getName(), "announcementsread","1"); // Save as read if possible
+
+					((JLabel)arg0.getComponent()).setIcon(null);
 					
 				}
 				

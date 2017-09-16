@@ -5,11 +5,13 @@
 
  * Event description in schedules.
  * Introduction and announcements in Claroline (Also with offline mode)
+ * Warning when new introduction or announcements are set
 
 ### Español
 
  * Descripción de evento en horarios.
  * Introducción y anuncios en Claroline (También en modo desconectado)
+ * Aviso cuando se pongan nuevas introducciones o anuncios
 
 # v.1.0.0 -> v.1.0.1:
 

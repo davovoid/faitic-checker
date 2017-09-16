@@ -28,18 +28,11 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 import java.net.HttpCookie;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 import java.util.zip.GZIPInputStream;
 
@@ -127,11 +120,11 @@ public class Faitic {
 	
 	public static String requestDocument(String strurl, String post) throws Exception{
 		
-		return requestDocument(strurl,post,StandardCharsets.UTF_8);
+		return requestDocument(strurl,post,"UTF-8");
 		
 	}
 
-	public static String requestDocument(String strurl, String post, Charset inputCharset) throws Exception{
+	public static String requestDocument(String strurl, String post, String inputCharset) throws Exception{
 
 		lastRequestedURL=strurl;
 
@@ -181,7 +174,7 @@ public class Faitic {
 		if(post.length()>0){
 
 			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-			writer.write(post.getBytes(StandardCharsets.UTF_8));
+			writer.write(post.getBytes("UTF-8"));
 
 		}
 
@@ -348,7 +341,7 @@ public class Faitic {
 		if(post.length()>0){
 
 			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-			writer.write(post.getBytes(StandardCharsets.UTF_8));
+			writer.write(post.getBytes("UTF-8"));
 
 		}
 
@@ -573,7 +566,7 @@ public class Faitic {
 		if(post.length()>0){
 
 			DataOutputStream writer = new DataOutputStream(connection.getOutputStream());
-			writer.write(post.getBytes(StandardCharsets.UTF_8));
+			writer.write(post.getBytes("UTF-8"));
 
 		}
 
@@ -1224,7 +1217,7 @@ public class Faitic {
 			
 			// Get the document
 			
-			String document=requestDocument(urlToUse,"",StandardCharsets.ISO_8859_1);
+			String document=requestDocument(urlToUse,"","ISO-8859-1");
 
 			// Parse the document
 			
@@ -1274,7 +1267,7 @@ public class Faitic {
 			
 			// Get the document
 			
-			String document=requestDocument(urlToUse,"",StandardCharsets.ISO_8859_1);
+			String document=requestDocument(urlToUse,"","ISO-8859-1");
 
 			// Parse the document
 			
@@ -1427,8 +1420,6 @@ public class Faitic {
 					} else if(realurl.contains(urlBase)){
 
 						// Document, let's get the real name
-
-						String realname="undefined";
 
 						int filePathStart=realurl.indexOf("/", (urlBase + "/file.php/").length()+1);
 
