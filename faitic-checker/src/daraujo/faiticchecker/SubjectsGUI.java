@@ -772,10 +772,11 @@ public class SubjectsGUI {
 		outputhtml.append("<html><head>");
 		outputhtml.append("<style type=\"text/css\">");
 		
-		outputhtml.append("body { font-family: arial, helvetica, sans-serif; }");
+		outputhtml.append("body { font-family: arial, helvetica, sans-serif; color: #212121; }");
 		outputhtml.append(".claroTable th { margin: 35px 0px 5px 0px; padding: 5px 5px 5px 5px; text-align: left;"
-				+ " border-top: 1px solid #202020; border-bottom: 1px solid #888888; background-color: #dddddd; }");
+				+ " border-top: 1px solid #006ec6; border-bottom: 0px solid #888888; background-color: #D8ECFB; }");
 		outputhtml.append(".claroTable {border-bottom: 1px solid #888888;}");
+		outputhtml.append("a { color: #006ec6; text-decoration: none; font-weight: bold; }");
 		
 		
 		outputhtml.append("</style>");

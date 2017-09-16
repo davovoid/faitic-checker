@@ -1201,7 +1201,6 @@ public class Faitic {
 
 	}
 	
-
 	public static String readClarolineIntro(String platformURL) throws Exception{
 
 		String output="";
@@ -1243,7 +1242,7 @@ public class Faitic {
 			
 			String introhtmloriginal=document.substring(introstart, introend);
 			
-			output=introhtmloriginal; // TODO try to correct urls to be absolute
+			output=filterTags(introhtmloriginal, new String[]{}); // TODO try to correct urls to be absolute
 			
 		}
 		

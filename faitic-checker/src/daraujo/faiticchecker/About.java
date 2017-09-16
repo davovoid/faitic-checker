@@ -63,7 +63,7 @@ import java.awt.event.MouseEvent;
 
 public class About {
 
-	protected static final String VERSION="1.1.0-testing";
+	protected static final String VERSION="1.1.0";
 	private static final String WEBPAGE="https://davovoid.github.io/faicheck/";
 
 	protected static TextData textdata;

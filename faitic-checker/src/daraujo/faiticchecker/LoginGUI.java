@@ -482,7 +482,9 @@ public class LoginGUI {
 
 						window.subjectsFrame.setVisible(true);
 
-
+						window.subjectsFrame.setBounds(loginFrame.getBounds());
+						window.subjectsFrame.setExtendedState(loginFrame.getExtendedState());
+						
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
