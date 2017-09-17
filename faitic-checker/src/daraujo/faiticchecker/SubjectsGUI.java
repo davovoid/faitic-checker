@@ -90,12 +90,18 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.awt.Toolkit;
 
 import javax.swing.JSplitPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkEvent.EventType;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 
 import java.awt.event.ComponentAdapter;
@@ -169,7 +175,7 @@ public class SubjectsGUI {
 	
 	private static boolean descargando=false;
 	private static JPanel panelSearch;
-	private JTextField txtSearch;
+	private static JTextField txtSearch;
 	private static JPanel btnSearch;
 	private JPanel panel;
 	private JPanel btnSchedule;
@@ -791,6 +797,58 @@ public class SubjectsGUI {
 		htmlvisor.setCaretPosition(0);
 		
 		System.out.println(outputhtml.toString());
+		
+		htmlvisor.addHyperlinkListener(new HyperlinkListener(){
+
+			@Override
+			public void hyperlinkUpdate(HyperlinkEvent arg0) {
+
+				if(arg0.getEventType()==EventType.ACTIVATED){
+					
+					String host=arg0.getURL().getHost();
+					String path=arg0.getURL().getFile();
+					String url=arg0.getURL().toString();
+					
+					if(host.equals("cursos.faitic.uvigo.es")){
+						
+						int endofname=path.indexOf("?");
+						if(endofname<=0) endofname=path.length();
+						int startofname=path.lastIndexOf("/",endofname-1);
+						if(startofname<=0) startofname=-1;
+						
+						try {
+							
+							txtSearch.setText(URLDecoder.decode(path.substring(startofname+1, endofname), "iso-8859-1"));
+
+							panelSearch.setVisible(true);
+							txtSearch.requestFocus();
+							
+							
+						} catch (UnsupportedEncodingException e) {
+							
+							e.printStackTrace();
+							
+						}
+						
+					} else if(host.length()>0 && Desktop.isDesktopSupported()){
+						
+						try {
+							
+							Desktop.getDesktop().browse(arg0.getURL().toURI());
+							
+						} catch (IOException | URISyntaxException e) {
+							e.printStackTrace();
+						}
+						
+					}
+					
+				}
+				
+			}
+			
+			
+			
+		});
 		
 		panelToDownload.add(htmlvisor, "2, 2, fill, fill");
 		
@@ -2116,6 +2174,12 @@ public class SubjectsGUI {
 							cArchivos[i].setSelected(prevSelected[i]);
 							
 						}
+						
+					}
+					
+					if(panelSections.isVisible()){
+						
+						selectsectionbutton(lblFiles);
 						
 					}
 					
