@@ -20,6 +20,7 @@ package daraujo.faiticchecker;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -31,6 +32,7 @@ import java.awt.Toolkit;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.SwingConstants;
 
@@ -70,6 +72,8 @@ import java.io.IOException;
 import java.awt.event.ItemListener;
 import java.awt.event.ItemEvent;
 
+import javax.swing.JCheckBox;
+
 public class FirstStart extends JDialog {
 
 	protected static Locale language;
@@ -98,10 +102,32 @@ public class FirstStart extends JDialog {
 			rSaveAppdata.setForeground(rSaveAppdata.isSelected() ? new Color(0,110,198,255) : new Color(169,192,210,255));
 			rSaveRelative.setForeground(rSaveRelative.isSelected() ? new Color(0,110,198,255) : new Color(169,192,210,255));
 			
+			for(Component comp : panelShortcuts.getComponents())
+				comp.setEnabled(rSaveAppdata.isSelected());
+			
+		}
+	};
+	
+
+	private static ItemListener itemlistener2=new ItemListener(){
+		@Override
+		public void itemStateChanged(ItemEvent e) {
+
+			JCheckBox element = (JCheckBox)e.getItemSelectable();
+			
+			element.setForeground(element.isSelected() ? new Color(0,110,198,255) : new Color(169,192,210,255));
+			
+			lblAddShortcutTo.setForeground(csdesktop.isSelected() || csquickstart.isSelected() || csprogrammenu.isSelected() ? 
+					new Color(0,110,198,255) : new Color(169,192,210,255));
+			
+			
 		}
 	};
 	
 	private static String appdatapath, relativepath;
+	private static JPanel panelShortcuts;
+	private static JLabel lblAddShortcutTo;
+	private static JCheckBox csdesktop, csquickstart, csprogrammenu;
 	
 	private void updateWindowText(){
 		
@@ -122,6 +148,11 @@ public class FirstStart extends JDialog {
 		lblWelcome.setText(textdata.getKey("welcome"));
 		
 		setTitle(textdata.getKey("firststarttitle"));
+		
+		lblAddShortcutTo.setText(textdata.getKey("lbladdshortcutto"));
+		csdesktop.setText(textdata.getKey("shortcutdesktop"));
+		csquickstart.setText(textdata.getKey("shortcutquickstart"));
+		csprogrammenu.setText(textdata.getKey("shortcutprogrammenu"));
 		
 	}
 	
@@ -219,6 +250,16 @@ public class FirstStart extends JDialog {
 				updateLanguageMenu();
 				updateWindowText();
 				
+				boolean thisiswindows=System.getProperty("os.name").toLowerCase().contains("win");
+				
+				csdesktop.setSelected(thisiswindows);	// Mac or Linuw may not like to have a shortcut on desktop
+				csprogrammenu.setSelected(true);
+				
+				csquickstart.setVisible(thisiswindows); // Just for windows
+				
+				csquickstart.setSelected(csquickstart.isVisible());
+				
+				
 			}
 		});
 		setModal(true);
@@ -248,7 +289,7 @@ public class FirstStart extends JDialog {
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.GLUE_ROWSPEC,
+				RowSpec.decode("0dlu:grow"),
 				FormFactory.MIN_ROWSPEC,
 				RowSpec.decode("30dlu"),}));
 		
@@ -427,6 +468,8 @@ public class FirstStart extends JDialog {
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.RELATED_GAP_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
+				FormFactory.RELATED_GAP_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
 		rSaveAppdata = new JRadioButton("Los ajustes se guardarán en este ordenador");
@@ -479,6 +522,44 @@ public class FirstStart extends JDialog {
 		
 		ButtonGroup rgroup=new ButtonGroup();
 		rgroup.add(rSaveAppdata);
+		
+		panelShortcuts = new JPanel();
+		FlowLayout fl_panelShortcuts = (FlowLayout) panelShortcuts.getLayout();
+		fl_panelShortcuts.setAlignment(FlowLayout.LEADING);
+		panelShortcuts.setOpaque(false);
+		panelAppdata.add(panelShortcuts, "2, 6, fill, fill");
+		
+		lblAddShortcutTo = new JLabel("Create shortcut on:");
+		lblAddShortcutTo.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblAddShortcutTo.setForeground(new Color(169,192,210,255));
+		panelShortcuts.add(lblAddShortcutTo);
+		
+		csdesktop = new JCheckBox("desktop");
+		csdesktop.addItemListener(itemlistener2);
+		csdesktop.setFont(new Font("Dialog", Font.BOLD, 15));
+		csdesktop.setOpaque(false);
+		csdesktop.setForeground(new Color(169,192,210,255));
+		csdesktop.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		csdesktop.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
+		panelShortcuts.add(csdesktop);
+		
+		csprogrammenu = new JCheckBox("program menu");
+		csprogrammenu.addItemListener(itemlistener2);
+		csprogrammenu.setOpaque(false);
+		csprogrammenu.setFont(new Font("Dialog", Font.BOLD, 15));
+		csprogrammenu.setForeground(new Color(169,192,210,255));
+		csprogrammenu.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		csprogrammenu.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
+		panelShortcuts.add(csprogrammenu);
+		
+		csquickstart = new JCheckBox("quick start menu");
+		csquickstart.addItemListener(itemlistener2);
+		csquickstart.setOpaque(false);
+		csquickstart.setFont(new Font("Dialog", Font.BOLD, 15));
+		csquickstart.setForeground(new Color(169,192,210,255));
+		csquickstart.setIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxfalse.png")));
+		csquickstart.setSelectedIcon(new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/checkboxtrue.png")));
+		panelShortcuts.add(csquickstart);
 		rgroup.add(rSaveRelative);
 		
 		btnCancel = new JCustomButton("Cancelar");
