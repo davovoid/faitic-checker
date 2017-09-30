@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Exec=java -jar '%0'
+Comment=A non-official Faitic management application
+Comment[es]=Un programa no oficial de gestión de Faitic
+Comment[gl]=Un programa non oficial de xestión de Faitic
+Icon=%1
+Name=Faicheck
+NoDisplay=false
+StartupNotify=true
+Terminal=0
+Type=Application

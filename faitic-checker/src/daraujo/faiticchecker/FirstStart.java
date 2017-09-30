@@ -234,6 +234,25 @@ public class FirstStart extends JDialog {
 		
 	}
 	
+	private static void createShortcuts(){
+		
+		if(System.getProperty("os.name").toUpperCase().contains("WIN")){
+			
+			// Windows
+			
+			if(csdesktop.isSelected()) Shortcut.createShortcut(ClassicRoutines.cpath(System.getProperty("user.home") + "/Desktop/"));
+			if(csprogrammenu.isSelected()) Shortcut.createShortcut(ClassicRoutines.cpath(System.getenv("APPDATA") + "/Microsoft/Windows/Start Menu/Programs/"));
+
+		} else if(System.getProperty("os.name").toUpperCase().contains("NUX")){
+			
+			// Linux
+			
+			if(csprogrammenu.isSelected()) Shortcut.createShortcut(ClassicRoutines.cpath(System.getProperty("user.home") + "/.local/share/applications/"));
+			
+		}
+		
+	}
+	
 	/**
 	 * Create the dialog.
 	 */
@@ -252,12 +271,23 @@ public class FirstStart extends JDialog {
 				
 				boolean thisiswindows=System.getProperty("os.name").toLowerCase().contains("win");
 				
-				csdesktop.setSelected(thisiswindows);	// Mac or Linuw may not like to have a shortcut on desktop
-				csprogrammenu.setSelected(true);
-				
-				csquickstart.setVisible(thisiswindows); // Just for windows
-				
-				csquickstart.setSelected(csquickstart.isVisible());
+				if(System.getProperty("os.name").toUpperCase().contains("MAC") || !LoginGUI.isTheJarPathAFile()){
+					
+					lblAddShortcutTo.setVisible(false);
+					csdesktop.setVisible(false);
+					csquickstart.setVisible(false);
+					csprogrammenu.setVisible(false);
+					
+				} else{
+					
+					csdesktop.setVisible(thisiswindows);
+					csprogrammenu.setSelected(true);
+					
+					csquickstart.setVisible(false); // Not available by now
+					
+					csquickstart.setSelected(csquickstart.isVisible());
+					
+				}
 				
 				
 			}
@@ -578,6 +608,7 @@ public class FirstStart extends JDialog {
 				
 				createsettingspath(rSaveAppdata.isSelected());
 				firstConfig();
+				createShortcuts();
 				dispose();
 				
 			}
