@@ -1047,6 +1047,7 @@ public class Faitic {
 
 		cleanArtifacts(list);
 		deleteRepeatedFiles(list);
+		sortandaggrupatelist(list);
 
 		return list;
 
@@ -1330,6 +1331,7 @@ public class Faitic {
 
 		cleanArtifacts(list);
 		deleteRepeatedFiles(list);
+		sortandaggrupatelist(list);
 
 		return list;
 
@@ -1489,6 +1491,7 @@ public class Faitic {
 
 		cleanArtifacts(list);
 		deleteRepeatedFiles(list);
+		sortandaggrupatelist(list);
 
 		return list;
 
@@ -1769,6 +1772,171 @@ public class Faitic {
 
 		}
 
+	}
+	
+	protected static boolean aisbeforeb(String a, String b){
+		
+		int maxcheck=a.length();
+		if(b.length()<maxcheck) maxcheck=b.length();
+		
+		// Checkers
+		
+		boolean concluded=false;
+		boolean before=false;
+		
+		// To upper case
+		
+		String aupper=a.toUpperCase();
+		String bupper=b.toUpperCase();
+		
+		// Check every character
+		
+		for(int i=0; i<maxcheck && !concluded; i++){
+			
+			int chara=(int) aupper.charAt(i);
+			int charb=(int) bupper.charAt(i);
+			
+			if(chara<charb){
+				
+				concluded=true;
+				before=true;
+				
+			} else if (chara>charb){
+				
+				concluded=true;
+				before=false;
+				
+			}
+			
+		}
+		
+		if(!concluded){
+			
+			// Equals until the maxcheck, check the length
+			
+			before=a.length()<b.length();
+			
+		}
+		
+		// If the same... well... it wouldn't expect that
+		
+		return before;
+		
+	}
+
+	protected static void sortList(ArrayList<FileFromURL> list){
+
+		ArrayList<FileFromURL> orderedlist=new ArrayList<FileFromURL>();
+		
+		for(FileFromURL element : list){
+			
+			boolean elementisafter=true; // The checked element is after the current i-element. The for will continue until the element is not after
+			int i=0;
+			
+			for(i=0; i<orderedlist.size() && elementisafter; i++){
+				
+				elementisafter=aisbeforeb(orderedlist.get(i).getFileDestination(),element.getFileDestination()); // a before b, so b after a, so element after i-element
+				
+				if(!elementisafter) i--; // Required when for is finished because it will automatically do i++
+				
+			}
+			
+			orderedlist.add(i, element); // Add at i, pos in orderedlist with value that should be after element
+			
+		}
+		
+		list.clear();
+		
+		for(FileFromURL element : orderedlist) list.add(element);
+		
+	}
+
+	protected static void sortListString(ArrayList<String> list){
+
+		ArrayList<String> orderedlist=new ArrayList<String>();
+		
+		for(String element : list){
+			
+			boolean elementisafter=true; // The checked element is after the current i-element. The for will continue until the element is not after
+			int i=0;
+			
+			for(i=0; i<orderedlist.size() && elementisafter; i++){
+				
+				elementisafter=aisbeforeb(orderedlist.get(i),element); // a before b, so b after a, so element after i-element
+				
+				if(!elementisafter) i--; // Required when for is finished because it will automatically do i++
+				
+			}
+			
+			orderedlist.add(i, element); // Add at i, pos in orderedlist with value that should be after element
+			
+		}
+		
+		list.clear();
+		
+		for(String element : orderedlist) list.add(element);
+		
+	}
+	
+	protected static void sortandaggrupatelist(ArrayList<FileFromURL> list){
+		
+		// First get all the folders, with no repetition
+		
+		ArrayList<String> folderlist=new ArrayList<String>();
+		
+		for(FileFromURL element : list){ // Check repetition for each element. We are checking repetition on parents!
+			
+			boolean contained=false;
+			
+			for(int i=0; i<folderlist.size() && !contained; i++){
+				
+				contained=element.getParent().equals(folderlist.get(i)); // getParent gives the folder containing the file
+				
+			}
+			
+			if(!contained) folderlist.add(element.getParent()); // Parent not contained
+			
+		}
+		
+		// Order folderlist
+		
+		sortListString(folderlist);
+		
+		// Lists for the elements
+		
+		ArrayList<FileFromURL> orderedlist=new ArrayList<FileFromURL>();
+		ArrayList<FileFromURL> elementswithsameparent=new ArrayList<FileFromURL>();
+		
+		// Check elements with same parent for all the parents in the list and order them
+		
+		for(String parent : folderlist){
+			
+			elementswithsameparent.clear();
+			
+			// Fill with elements with same parent
+			
+			for(FileFromURL element : list){
+				
+				if(element.getParent().equals(parent)) elementswithsameparent.add(element);
+				
+			}
+			
+			// Order them
+			
+			sortList(elementswithsameparent);
+			
+			// Now all to orderedlist and go on
+			
+			for(FileFromURL element : elementswithsameparent) orderedlist.add(element);
+			
+		}
+		
+		// All to the original list
+
+		list.clear();
+		
+		for(FileFromURL element : orderedlist) list.add(element);
+		
 	}
 	
 	public static String filterTags(String html, String[] tags){

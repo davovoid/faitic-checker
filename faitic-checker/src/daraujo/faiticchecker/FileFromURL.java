@@ -33,6 +33,14 @@ public class FileFromURL {
 	
 	public String getFileDestination(){ return intfiledestination; }
 
-
+	public String getParent(){
+		
+		int lastdivider=getFileDestination().lastIndexOf("/");
+		
+		if(lastdivider>=0) return getFileDestination().substring(0, lastdivider+1);
+		
+		return "";
+		
+	}
 	
 }

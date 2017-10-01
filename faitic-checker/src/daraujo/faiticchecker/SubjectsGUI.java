@@ -140,7 +140,7 @@ public class SubjectsGUI {
 	
 	private static JLabel[] lblSubjects;
 	private static JCheckBox[] cArchivos;
-	private static JLabel[] lArchivos, lParentPaths;
+	private static JLabel[] lArchivos, lParentPaths, lGeneralParentPaths;
 	private static JLabel[] btnAbrirArchivos;
 	
 	private static int selectedSubject=-1, prevSelectedSubject=-1;
@@ -879,9 +879,11 @@ public class SubjectsGUI {
 		panelToDownload.removeAll();
 		panelToDownload.updateUI();
 		
-		// Check matches
+		// Check matches and number of folders
 		
 		int matchcounter=0;
+		int folders=0;
+		String lastfolder="";
 
 		boolean[] matcheswithtext=new boolean[fileList.size()];
 		
@@ -889,13 +891,28 @@ public class SubjectsGUI {
 			
 			matcheswithtext[i]=searchInText(fileList.get(i).getFileDestination(),search);
 			
-			if(matcheswithtext[i]) matchcounter++;
+			if(matcheswithtext[i]){
+			
+				matchcounter++;
+				
+				// Check if folder changes
+				
+				if(!fileList.get(i).getParent().equals(lastfolder)){
+					
+					folders++;
+					lastfolder=fileList.get(i).getParent();
+					
+				}
+			
+			}
 			
 		}
 		
+		lastfolder=""; // Reset last folder
+		
 		// Now with counter let's size the table
 		
-		RowSpec[] fRowSpec=new RowSpec[matchcounter*4+1];
+		RowSpec[] fRowSpec=new RowSpec[matchcounter*4+folders*4+1];
 		
 		for(int i=0; i<fRowSpec.length; i++){
 			
@@ -916,14 +933,88 @@ public class SubjectsGUI {
 		cArchivos=new JCheckBox[fileList.size()];
 		lArchivos=new JLabel[fileList.size()];
 		lParentPaths=new JLabel[fileList.size()];
+		
+		lGeneralParentPaths=new JLabel[folders];
+		int currentgeneralparentpath=0; // When filling the labels
+		
 		btnAbrirArchivos=new JLabel[fileList.size()];
 		
 		int iDisc=0;	// For putting the info in the GUI table
+		
+		int folderaccu=0; // +4 when new folder label is added
+		
+		// lastfolder already declared and reset
 		
 		for(int i=0; i<fileList.size(); i++){
 			
 			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i).getFileDestination());
 			boolean matchfound=matcheswithtext[i];
+			
+			if(matchfound && !fileList.get(i).getParent().equals(lastfolder)){
+				
+				folderaccu+=2;
+				
+				// Add label for folder
+				
+				String textforlabel=fileList.get(i).getParent();
+				if(textforlabel.length()>0) if(textforlabel.charAt(0)=='/') textforlabel=textforlabel.substring(1, textforlabel.length());
+				if(textforlabel.length()>0) if(textforlabel.charAt(textforlabel.length()-1)=='/') textforlabel=textforlabel.substring(0, textforlabel.length()-1);
+				textforlabel=textforlabel.replace("/", " > ").replace("_", " ");
+				
+				lGeneralParentPaths[currentgeneralparentpath]=new JLabel(textforlabel);
+				lGeneralParentPaths[currentgeneralparentpath].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				lGeneralParentPaths[currentgeneralparentpath].setFont(new Font("Dialog", Font.BOLD, 18));
+				lGeneralParentPaths[currentgeneralparentpath].setForeground(new Color(33,33,33,255));
+				lGeneralParentPaths[currentgeneralparentpath].addMouseListener(new CustomMouseAdapter(fileList.get(i).getParent()){
+
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+
+							if(subjectPath!=null){
+								
+								// Subject path selected
+
+								String parentname=(String) getObject();
+								
+								if(fileIsAlreadyDownloaded(subjectPath,parentname)){
+									
+									// Already created. Open it
+									
+									try {
+										
+										Desktop.getDesktop().open(new File(fileDestination(subjectPath,parentname)));
+										
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+								}
+
+							
+							
+							
+							
+						}
+						
+						
+					}
+
+				});
+				
+				
+				panelToDownload.add(lGeneralParentPaths[currentgeneralparentpath], "4, " + (int)(iDisc*4+folderaccu+2));
+				
+				// Increase currentgeneralparentpath
+				currentgeneralparentpath++;
+				
+				// Increase folderaccu
+				folderaccu+=2;
+				
+				// Update last folder
+				lastfolder=fileList.get(i).getParent();
+				
+			}
 			
 			cArchivos[i]=new JCheckBox(""){
 
@@ -984,7 +1075,7 @@ public class SubjectsGUI {
 				
 			});
 			
-			if(matchfound)panelToDownload.add(cArchivos[i], "2, " + (int)(iDisc*4+2) + ", 1, 3");
+			if(matchfound)panelToDownload.add(cArchivos[i], "2, " + (int)(iDisc*4+folderaccu+2) + ", 1, 3");
 			
 			String completePath=fileList.get(i).getFileDestination();
 			int divisionpos=completePath.lastIndexOf("/");
@@ -1046,7 +1137,7 @@ public class SubjectsGUI {
 
 			});
 			
-			if(matchfound)panelToDownload.add(lArchivos[i], "4, " + (int)(iDisc*4+2));
+			if(matchfound)panelToDownload.add(lArchivos[i], "4, " + (int)(iDisc*4+folderaccu+2));
 			
 			// Label for URL
 
@@ -1106,7 +1197,7 @@ public class SubjectsGUI {
 
 			});
 			
-			if(matchfound)panelToDownload.add(lParentPaths[i], "4, " + (int)(iDisc*4+4));
+			if(matchfound)panelToDownload.add(lParentPaths[i], "4, " + (int)(iDisc*4+folderaccu+4));
 			
 			// Download and open button
 			
@@ -1247,7 +1338,7 @@ public class SubjectsGUI {
 				
 			});
 			
-			if(matchfound)panelToDownload.add(btnAbrirArchivos[i], "6, " + (int)(iDisc*4+2) + ", 1, 3");
+			if(matchfound)panelToDownload.add(btnAbrirArchivos[i], "6, " + (int)(iDisc*4+folderaccu+2) + ", 1, 3");
 			if(matchfound)iDisc++;
 			
 		}

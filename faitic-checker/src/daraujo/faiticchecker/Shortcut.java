@@ -151,13 +151,10 @@ public class Shortcut {
 			commandlist.add("wscript");
 			commandlist.add(vbsfile);
 			
-			Process executor=new ProcessBuilder(commandlist).start();
-			int executionresult=executor.exitValue();
+			Process executor=new ProcessBuilder(commandlist).start(); // The shortcut creator (VBS program)
+			executor.waitFor(); // Wait for the program to end
 			
-			new File(vbsscript).delete();
-			new File(iconfile).delete();
-			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

@@ -281,6 +281,8 @@ public class FirstStart extends JDialog {
 				} else{
 					
 					csdesktop.setVisible(thisiswindows);
+					
+					csdesktop.setSelected(thisiswindows);
 					csprogrammenu.setSelected(true);
 					
 					csquickstart.setVisible(false); // Not available by now

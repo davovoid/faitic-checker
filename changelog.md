@@ -1,4 +1,16 @@
 
+# v.1.1.0 -> v.1.1.1:
+
+### English
+
+ * Shortcut creation option when first started.
+ * Files sorted by name and aggroupated by folders.
+
+### Español
+
+ * Creación de accesos directos en primera ejecución.
+ * Archivos ordenados por nombre y agrupados por carpetas.
+
 # v.1.0.1 -> v.1.1.0:
 
 ### English
