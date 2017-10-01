@@ -83,6 +83,7 @@ public class ScheduleEditorGUI extends JDialog {
 	
 	public static Schedule schedule;
 	public static int scheduleIndex;
+	public static int eventIndex=-1;
 	public static String username;
 	
 	private static String[] schedulenames;
@@ -105,7 +106,37 @@ public class ScheduleEditorGUI extends JDialog {
 		
 		for(int i=0; i<schedule.eventList.size(); i++){
 			
-			eventListModel.addElement(schedule.eventList.get(i).getEventName());
+			// Get info from the event
+			
+			ScheduleEvent event=schedule.eventList.get(i);
+
+			int sh = event.getHour(event.getMinuteStart());
+			int sm = event.getMinute(event.getMinuteStart());
+			
+			int eh = event.getHour(event.getMinuteEnd());
+			int em = event.getMinute(event.getMinuteEnd());
+			
+			String[] dayofweek=textdata.getKey("daysofweek").split(",");
+			
+			String day=dayofweek[event.getDay()];
+
+			// Prepare text to display on list
+			
+			StringBuffer displaytext=new StringBuffer();
+			
+			displaytext.append(event.getEventName());
+			displaytext.append(" - ");
+
+			displaytext.append(day.length() > 2 ? day.substring(0, 2) : day);
+			
+			displaytext.append(" ");
+			
+			displaytext.append(sh + ":" + (sm < 10 ? "0" + sm : sm));
+			displaytext.append(" -> ");
+			displaytext.append(eh + ":" + (em < 10 ? "0" + em : em));
+			
+			
+			eventListModel.addElement(displaytext.toString());
 			
 		}
 		
@@ -204,9 +235,19 @@ public class ScheduleEditorGUI extends JDialog {
 				
 				txteventname.requestFocus();
 				
+				// The viewer requested to select an event
+				
+				if(eventIndex>=0 && eventIndex<listevents.getModel().getSize()){
+					
+					listevents.setSelectedIndex(eventIndex);
+					
+				}
+				
+				// Workaround
+				
 				setSize(getWidth()+1, getHeight()+1);
 				setSize(getWidth()-1, getHeight()-1);
-
+				
 			}
 		});
 		setIconImage(Toolkit.getDefaultToolkit().getImage(ScheduleEditorGUI.class.getResource("/daraujo/faiticchecker/icon.png")));

@@ -1085,7 +1085,7 @@ public class SubjectsGUI {
 			lArchivos[i]=new JLabel(filename);
 			lArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			lArchivos[i].setFont(new Font("Dialog", Font.BOLD, 12));
-			lArchivos[i].setForeground(new Color(33,33,33,255));
+			lArchivos[i].setForeground(!online && !isAlreadyDownloaded ? new Color(160,160,160,255) : new Color(33,33,33,255));
 			lArchivos[i].setIcon(new ImageIcon(getImgIdentifierForFile(new File(fileDestination(subjectPath, fileList.get(i).getFileDestination())),12)));
 			lArchivos[i].addMouseListener(new MouseAdapter(){
 
@@ -1144,7 +1144,7 @@ public class SubjectsGUI {
 			lParentPaths[i]=new JLabel(parentname);
 			lParentPaths[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			lParentPaths[i].setFont(new Font("Dialog", Font.PLAIN, 10));
-			lParentPaths[i].setForeground(new Color(117,117,117,255));
+			lParentPaths[i].setForeground(!online && !isAlreadyDownloaded ? new Color(160,160,160,255) : new Color(117,117,117,255));
 			lParentPaths[i].addMouseListener(new MouseAdapter(){
 
 				@Override

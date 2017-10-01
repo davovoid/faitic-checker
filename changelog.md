@@ -5,11 +5,17 @@
 
  * Shortcut creation option when first started.
  * Files sorted by name and aggroupated by folders.
+ * Changelog in about window.
+ * File display improved.
+ * Event direct edit in schedules.
 
 ### Español
 
  * Creación de accesos directos en primera ejecución.
  * Archivos ordenados por nombre y agrupados por carpetas.
+ * Changelog en ventana de acerca de.
+ * Presentación de los archivos mejorada.
+ * Edición directa del evento en horarios.
 
 # v.1.0.1 -> v.1.1.0:
 

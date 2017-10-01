@@ -50,7 +50,7 @@ public class Updater {
 		
 	}
 	
-	private static String getFileFromInternet(String url) throws Exception{	// Really simplified version of the Faitic.java class
+	protected static String getFileFromInternet(String url) throws Exception{	// Really simplified version of the Faitic.java class
 		
 		HttpURLConnection connection= (HttpURLConnection) new URL(url).openConnection();
 		

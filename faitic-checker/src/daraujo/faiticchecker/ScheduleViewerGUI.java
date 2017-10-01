@@ -83,7 +83,7 @@ public class ScheduleViewerGUI {
 	private static JLabel addScheduleLabel;
 	
 	private static JLabel lblEdit, lblDelete, lblDuplicate, lblExport, lblleft, lblright,
-	lbleventname, lbleventhours, lblclose;
+	lbleventname, lbleventhours, lblclose, lblEditEvent;
 	
 	private static JTextPane txtdescription;
 	
@@ -174,12 +174,21 @@ public class ScheduleViewerGUI {
 		
 	}
 	
+
 	private static void activateEditor(int scheduleIndex){
+		
+		activateEditor(scheduleIndex, -1);
+		
+	}
+		
+	
+	private static void activateEditor(int scheduleIndex, int eventIndex){
 		
 		ScheduleEditorGUI scheduleeditor=new ScheduleEditorGUI(textdata);
 		scheduleeditor.schedule=schedule;
 		scheduleeditor.username=username;
 		scheduleeditor.scheduleIndex=scheduleIndex;
+		scheduleeditor.eventIndex=eventIndex;
 		
 		scheduleeditor.setVisible(true);
 		
@@ -468,7 +477,9 @@ public class ScheduleViewerGUI {
 		
 		// Now for every event make a panel and so on
 		
-		for(ScheduleEvent event : schedule.eventList){
+		for(int i=0; i<schedule.eventList.size(); i++){
+			
+			ScheduleEvent event=schedule.eventList.get(i);
 			
 			int posstart=listminutes.indexOf(event.getMinuteStart());
 			int posend=listminutes.indexOf(event.getMinuteEnd());
@@ -553,6 +564,36 @@ public class ScheduleViewerGUI {
 						txtdescription.setCaretPosition(0);
 
 						scrollDescription.setVisible(event.getEventDescription()!=null);
+
+						// Now the edit option for the event
+						
+						while(lblEditEvent.getMouseListeners().length>0) lblEditEvent.removeMouseListener(lblEditEvent.getMouseListeners()[0]);
+						
+						int indexofevent=-1;
+						
+						for(int i=0; i<schedule.eventList.size() && indexofevent<0; i++){
+							
+							if(schedule.eventList.get(i).equals(event)) indexofevent=i;
+							
+						}
+						
+						if(indexofevent>=0)
+							lblEditEvent.addMouseListener(new CustomMouseAdapter(indexofevent){
+								
+								@Override
+								public void mouseClicked(MouseEvent arg0) {
+									
+									System.out.println((int) getObject());
+	
+									activateEditor(scheduleindex, (int) getObject());
+									
+									
+									
+								}
+								
+							});
+							
+						// Make all visible
 						
 						paneldescription.setVisible(true);
 						
@@ -560,12 +601,12 @@ public class ScheduleViewerGUI {
 					
 				}
 				
+				
 			};
 			
 			lblSubject.addMouseListener(dowhenclicked);
 			lblHourSubject.addMouseListener(dowhenclicked);
 			panelEvent.addMouseListener(dowhenclicked);
-			
 			
 		}
 		
@@ -1084,6 +1125,8 @@ public class ScheduleViewerGUI {
 				FormFactory.PREF_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.PREF_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,},
@@ -1105,6 +1148,15 @@ public class ScheduleViewerGUI {
 		lbleventhours.setForeground(new Color(117,117,117,255));
 		paneldescription.add(lbleventhours, "4, 2");
 		
+		scrollDescription = new JScrollPane();
+		scrollDescription.setBorder(null);
+		scrollDescription.getVerticalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollDescription.getVerticalScrollBar().setOpaque(false);
+		scrollDescription.getHorizontalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
+		scrollDescription.getHorizontalScrollBar().setOpaque(false);
+		scrollDescription.setOpaque(false);
+		scrollDescription.getViewport().setOpaque(false);
+		
 		lblclose = new JLabel("X");
 		lblclose.setFont(new Font("Dialog", Font.BOLD, 16));
 		lblclose.addMouseListener(new MouseAdapter() {
@@ -1119,19 +1171,16 @@ public class ScheduleViewerGUI {
 				
 			}
 		});
+		
+		lblEditEvent = new JLabel(textdata.getKey("schedulevieweredit"));
+		lblEditEvent.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblEditEvent.setForeground(new Color(0,110,198,255));
+		paneldescription.add(lblEditEvent, "6, 2");
+		
 		lblclose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblclose.setForeground(new Color(0,110,198,255));
-		paneldescription.add(lblclose, "6, 2");
-		
-		scrollDescription = new JScrollPane();
-		scrollDescription.setBorder(null);
-		scrollDescription.getVerticalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
-		scrollDescription.getVerticalScrollBar().setOpaque(false);
-		scrollDescription.getHorizontalScrollBar().setUI(new CustomScrollBarUI(new Color(255,255,255,0),new Color(110,110,110,255),new Color(110,110,110,50)));
-		scrollDescription.getHorizontalScrollBar().setOpaque(false);
-		scrollDescription.setOpaque(false);
-		scrollDescription.getViewport().setOpaque(false);
-		paneldescription.add(scrollDescription, "2, 4, 5, 1, fill, fill");
+		paneldescription.add(lblclose, "8, 2");
+		paneldescription.add(scrollDescription, "2, 4, 7, 1, fill, fill");
 		
 		txtdescription = new JTextPane();
 		txtdescription.setFont(new Font("Dialog", Font.PLAIN, 15));

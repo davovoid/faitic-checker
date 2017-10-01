@@ -33,6 +33,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
@@ -52,6 +53,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -65,6 +67,7 @@ public class About {
 
 	protected static final String VERSION="1.1.1-test1";
 	private static final String WEBPAGE="https://davovoid.github.io/faicheck/";
+	private static final String CHANGELOGURL="https://raw.githubusercontent.com/davovoid/faitic-checker/master/changelog.md";
 
 	protected static TextData textdata;
 	
@@ -84,6 +87,7 @@ public class About {
 	private static JLabel lblContributors;
 	private static JLabel lblFaicheckLicense;
 	private JLabel labelWebPage;
+	private static JLabel lblChangelog;
 
 	/**
 	 * Create the application.
@@ -128,7 +132,7 @@ public class About {
 	
 	private static void selectOption(JLabel selectedLabel, String filename){
 		
-		JLabel[] labels=new JLabel[]{lblLicensesAndAttributions, lblFaicheckLicense, lblContributors};
+		JLabel[] labels=new JLabel[]{lblLicensesAndAttributions, lblFaicheckLicense, lblContributors, lblChangelog};
 		
 		for(JLabel label : labels){
 			
@@ -148,7 +152,53 @@ public class About {
 			
 		}
 		
-		loadTextFile(filename);
+		if(filename!=null) loadTextFile(filename);
+		
+	}
+	
+	protected static void selectchangelog(){
+		selectOption(lblChangelog,null);
+		
+		SwingWorker worker=new SwingWorker(){
+
+			@Override
+			protected Object doInBackground() throws Exception {
+				
+				return Updater.getFileFromInternet(CHANGELOGURL);
+			}
+			
+			@Override
+			protected void done(){
+				
+				try {
+					
+					String result=(String) super.get();
+					
+					txtAbout.setText(result);
+					
+				} catch (InterruptedException | ExecutionException e) {
+					
+					e.printStackTrace();
+					
+					txtAbout.setText("Error retrieving text from \"" + CHANGELOGURL + "\".");
+					
+				}
+
+				// Keep scrollPane up
+				
+				txtAbout.setCaretPosition(0);
+
+			}
+			
+			
+		};
+		
+
+		txtAbout.setText("Retrieving data from \"" + CHANGELOGURL + "\".");
+
+		txtAbout.setCaretPosition(0);
+
+		worker.execute();
 		
 	}
 
@@ -325,6 +375,8 @@ public class About {
 				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.DEFAULT_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.DEFAULT_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,},
 			new RowSpec[] {
 				FormFactory.GLUE_ROWSPEC,
@@ -364,6 +416,17 @@ public class About {
 		lblContributors.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		lblContributors.setForeground(new Color(0,110,198,255));
 		panelFooter.add(lblContributors, "6, 2");
+		
+		lblChangelog = new JLabel("Changelog");
+		lblChangelog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				selectchangelog();
+			}
+		});
+		lblChangelog.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblChangelog.setForeground(new Color(0,110,198,255));
+		panelFooter.add(lblChangelog, "8, 2");
 		
 	}
 }
