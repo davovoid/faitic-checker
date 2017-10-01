@@ -469,6 +469,7 @@ public class LoginGUI {
 						window.username=username;
 						window.online=online;
 						window.offlinesaving=offlinesaving;
+						window.verbose=verbose;
 
 						// End with settings and create it for the subjects GUI
 

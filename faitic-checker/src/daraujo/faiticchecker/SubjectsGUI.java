@@ -32,6 +32,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Stroke;
 
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
@@ -126,6 +127,8 @@ public class SubjectsGUI {
 	protected static String username;
 	protected static boolean online=true;
 	protected static boolean offlinesaving=true;
+	protected static boolean verbose=false;
+	protected static boolean justloggingout=false;
 	
 	private static JPanel panelLogos, panelSubjects, panelSubject, panelOptions, panelEverything;
 	
@@ -163,6 +166,8 @@ public class SubjectsGUI {
 	private JLabel lblSeleccioneUnaAsignatura;
 	private static JLabel itemSelectSubjectFolder;
 	private static JPanel panelLoading;
+	public static Timer timer=null;
+	
 	
 	protected static String loadingText="Loading...";
 	protected static Semaphore accessToLoadingText=new Semaphore(1);
@@ -178,7 +183,7 @@ public class SubjectsGUI {
 	private static JTextField txtSearch;
 	private static JPanel btnSearch;
 	private JPanel panel;
-	private JPanel btnSchedule;
+	private static JPanel btnSchedule, btnLogout;
 	private static JPanel panelSections;
 	private static JLabel lblIntroduction,lblAnnouncements,lblFiles;
 	
@@ -232,7 +237,8 @@ public class SubjectsGUI {
 
 		btnSearch.setVisible(false);
 		panelSearch.setVisible(false);
-
+		btnLogout.setVisible(false);
+		
 	}
 	
 	private static void activateInterface(){
@@ -247,7 +253,8 @@ public class SubjectsGUI {
 		}
 		
 		if(fileList!=null) if(fileList.size()>0) btnSearch.setVisible(true);
-		
+
+		btnLogout.setVisible(true);
 	}
 	
 	// The rest
@@ -1522,6 +1529,84 @@ public class SubjectsGUI {
 		
 	}
 	
+	private static void todowhenclosing(){
+
+		isLoading=true;
+		
+		blockInterface();
+		panelLoading.setVisible(true);
+		writeLoadingText(textdata.getKey("loadingclosingsession"));
+		
+		SwingWorker thread=new SwingWorker(){
+
+			@Override
+			protected Object doInBackground() throws Exception {
+				
+				try {
+
+					settings.saveSettings();
+					
+					if(selectedSubject>=0 && subjectURL!=null && subject!=null && online)
+						faitic.logoutSubject(subjectURL, subject.getDocument(), subjectType);
+					
+					
+					if(online) faitic.faiticLogout(mainDocument);
+
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+				return null;
+			}
+			
+			@Override
+			protected void done(){
+
+				// Stop the timer and make the panel invisible for the loading animation
+				
+				panelLoading.setVisible(false);
+				
+				if(timer!=null){
+					timer.cancel();
+					timer.purge();
+					timer=null;
+				}
+
+				if(justloggingout){
+					
+					// Reset the variables
+					
+					justloggingout=false;
+					
+					selectedSubject=-1;
+					prevSelectedSubject=-1;
+					isLoading=false;
+					
+					// Dispose
+					
+					subjectsFrame.dispose();
+					
+					LoginGUI window = new LoginGUI(verbose);
+					window.loginFrame.setVisible(true);
+									
+				} else{
+					
+					subjectsFrame.dispose();
+					
+				}
+				
+				//System.exit(0);
+				
+			}
+			
+		};
+		
+		thread.execute();
+		
+	}
+	
 	/**
 	 * Create the application.
 	 */
@@ -1539,49 +1624,8 @@ public class SubjectsGUI {
 		subjectsFrame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent arg0) {
-				
-				isLoading=true;
-				
-				blockInterface();
-				panelLoading.setVisible(true);
-				writeLoadingText(textdata.getKey("loadingclosingsession"));
-				
-				SwingWorker thread=new SwingWorker(){
-
-					@Override
-					protected Object doInBackground() throws Exception {
-						
-						try {
-
-							settings.saveSettings();
-							
-							if(selectedSubject>=0 && subjectURL!=null && subject!=null && online)
-								faitic.logoutSubject(subjectURL, subject.getDocument(), subjectType);
-							
-							
-							if(online) faitic.faiticLogout(mainDocument);
-
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						
-						return null;
-					}
-					
-					@Override
-					protected void done(){
-						
-						subjectsFrame.dispose();
-						System.exit(0);
-						
-					}
-					
-				};
-				
-				thread.execute();
-				
+				if(isLoading) return;
+				todowhenclosing();
 			}
 			@Override
 			public void windowOpened(WindowEvent e) {
@@ -1845,16 +1889,14 @@ public class SubjectsGUI {
 		panelLogoSpace.setOpaque(false);
 		panelLogos.add(panelLogoSpace, "1, 1, 1, 7, fill, fill");
 		
-		lblSubjectName = new JLabel(textdata.getKey("selectsubject"));
-		lblSubjectName.setForeground(new Color(33,33,33,255));
-		panelLogos.add(lblSubjectName, "3, 2, 4, 1");
-		lblSubjectName.setFont(new Font("Dialog", Font.PLAIN, 23));
-		
 		panel = new JPanel();
 		panel.setOpaque(false);
-		panelLogos.add(panel, "8, 2, fill, fill");
+		panelLogos.add(panel, "3, 2, 6, 1, fill, fill");
 		panel.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.GLUE_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.PREF_COLSPEC,},
@@ -1896,10 +1938,60 @@ public class SubjectsGUI {
 				
 			}
 		});
+		
+		lblSubjectName = new JLabel(textdata.getKey("selectsubject"));
+		panel.add(lblSubjectName, "1, 1, 1, 3");
+		lblSubjectName.setForeground(new Color(33,33,33,255));
+		lblSubjectName.setFont(new Font("Dialog", Font.PLAIN, 23));
 		btnSchedule.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnSchedule.setPreferredSize(new Dimension(30, 30));
 		btnSchedule.setOpaque(false);
-		panel.add(btnSchedule, "2, 2, fill, fill");
+		panel.add(btnSchedule, "3, 2, fill, fill");
+		
+
+		btnLogout = new JPanel(){
+			 
+			@Override
+			public void paintComponent(Graphics g){
+				
+				Graphics2D g2=(Graphics2D) g;
+				
+			    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			    //g2.drawImage(iconSchedule, 0, 0, getWidth(), getHeight(), null);
+			    //g2.setColor(Color.gray);
+			    //g2.fillRect(0, 0, getWidth(),getHeight());
+			    
+			    g2.setColor(new Color(0,110,198,255));
+			    g2.setStroke(new BasicStroke(2));
+			    
+			    g2.drawArc(getWidth()/6, getHeight()/6, getWidth()*4/6, getHeight()*4/6, 120, 300);
+			    g2.drawLine(getWidth()/2, getHeight()/12, getWidth()/2, getHeight()/2);
+			    
+			}
+			
+		};
+		btnLogout.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(arg0.getComponent().isEnabled()){
+					
+					justloggingout=true;
+					
+					todowhenclosing();
+					
+				}
+
+				
+			}
+		});
+		btnLogout.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnLogout.setPreferredSize(new Dimension(30, 30));
+		btnLogout.setOpaque(false);
+		panel.add(btnLogout, "7, 2, fill, fill");
 		
 		btnSearch = new JPanel(){
 			
@@ -1918,7 +2010,7 @@ public class SubjectsGUI {
 			
 		};
 		btnSearch.setPreferredSize(new Dimension(30, 30));
-		panel.add(btnSearch, "4, 2");
+		panel.add(btnSearch, "5, 2");
 		btnSearch.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnSearch.setVisible(false);
 		btnSearch.setOpaque(false);
@@ -2008,45 +2100,42 @@ public class SubjectsGUI {
 		
 		panelLoading = new JPanel(){
 			
-			public Timer timer=null;
-			
 			public int angle=0;
 			public int angleBase=0;
 			public boolean filled=false;
 			
-			TimerTask task=new TimerTask(){
-
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					
-					angle+=20;
-					angleBase+=4;
-					if(angle>=360){
-						angle-=360;
-						filled=!filled;
-					}
-					if(angleBase>=360) angleBase-=360;
-
-					//System.out.println(angle);
-					panelLoading.repaint();
-					
-				}
-				
-			};
+			TimerTask task=null;
 			
 			@Override
 			public void paintComponent(Graphics g){
 				
-				super.paintComponent(g);
+				//super.paintComponent(g);
 				
 				// Timer
 				if(super.isVisible() && timer==null){
+					task=new TimerTask(){
+
+						@Override
+						public void run() {
+
+							angle+=20;
+							angleBase+=4;
+							if(angle>=360){
+								angle-=360;
+								filled=!filled;
+							}
+							if(angleBase>=360) angleBase-=360;
+
+							//System.out.println(angle);
+							panelLoading.repaint();
+							
+						}
+						
+					};
+					
 					timer=new Timer();
 					timer.scheduleAtFixedRate(task, 80, 80);
-				} else if(!super.isVisible() && timer!=null){
-					timer.cancel();
-					timer=null;
+					//System.out.println("Started");
 				}
 				
 				// Painting
@@ -2079,6 +2168,20 @@ public class SubjectsGUI {
 			}
 			
 		};
+		panelLoading.addComponentListener(new ComponentAdapter(){
+			
+			@Override
+			public void componentHidden(ComponentEvent e){
+				
+				if(timer!=null){
+					timer.cancel();
+					timer.purge();
+					timer=null;
+				}
+				
+			}
+			
+		});
 		panelLoading.setMinimumSize(new Dimension(10, 40));
 		panelLoading.setVisible(false);
 		

@@ -1,5 +1,4 @@
-
-# v.1.1.0 -> v.1.1.1:
+# v.1.1.0 -> v.1.2.0:
 
 ### English
 
@@ -8,6 +7,8 @@
  * Changelog in about window.
  * File display improved.
  * Event direct edit in schedules.
+ * Logout button added.
+ * Bugs fixed.
 
 ### Español
 
@@ -16,6 +17,8 @@
  * Changelog en ventana de acerca de.
  * Presentación de los archivos mejorada.
  * Edición directa del evento en horarios.
+ * Añadido botón de cierre de sesión.
+ * Bugs corregidos.
 
 # v.1.0.1 -> v.1.1.0:
 
