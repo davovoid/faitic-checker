@@ -133,8 +133,8 @@ public class SubjectsGUI {
 	private static JPanel panelLogos, panelSubjects, panelSubject, panelOptions, panelEverything;
 	
 	private final static Image imgFaicheck=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/logoFaicheck.png")).getImage();
-	private final static Image iconSchedule=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/schedule.png")).getImage();
-	private final static Image iconSearch=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/search.png")).getImage();
+	// private final static Image iconSchedule=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/schedule.png")).getImage();
+	// private final static Image iconSearch=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/search.png")).getImage();
 	
 	private static JCustomButton btnDescargarMarcados;
 	private JCustomButton btnMarcarNuevos;
@@ -233,7 +233,6 @@ public class SubjectsGUI {
 		}
 
 		itemSelectSubjectFolder.setVisible(false);
-		lblOpenFolder.setVisible(false);
 
 		btnSearch.setVisible(false);
 		panelSearch.setVisible(false);
@@ -244,7 +243,6 @@ public class SubjectsGUI {
 	private static void activateInterface(){
 
 		itemSelectSubjectFolder.setVisible(selectedSubject>=0);
-		lblOpenFolder.setVisible(subjectPath!=null && selectedSubject>=0);
 
 		panelLoading.setVisible(false);
 		scrollPane.setVisible(true);
@@ -904,7 +902,7 @@ public class SubjectsGUI {
 				
 				// Check if folder changes
 				
-				if(!fileList.get(i).getParent().equals(lastfolder)){
+				if(!fileList.get(i).getParent().equals(lastfolder) && fileList.get(i).getParent().replace("/", "").length()>0){
 					
 					folders++;
 					lastfolder=fileList.get(i).getParent();
@@ -923,7 +921,7 @@ public class SubjectsGUI {
 		
 		for(int i=0; i<fRowSpec.length; i++){
 			
-			fRowSpec[i]= i==0 || i==fRowSpec.length-1 ? FormFactory.UNRELATED_GAP_ROWSPEC : i % 4 == 0 ? FormFactory.PARAGRAPH_GAP_ROWSPEC : i % 2 == 0 ? FormFactory.LINE_GAP_ROWSPEC : FormFactory.PREF_ROWSPEC;
+			fRowSpec[i]= i==0 || i==fRowSpec.length-1 ? FormFactory.PARAGRAPH_GAP_ROWSPEC : i % 4 == 0 ? FormFactory.PARAGRAPH_GAP_ROWSPEC : i % 2 == 0 ? FormFactory.LINE_GAP_ROWSPEC : FormFactory.PREF_ROWSPEC;
 		
 		}
 		
@@ -957,7 +955,7 @@ public class SubjectsGUI {
 			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i).getFileDestination());
 			boolean matchfound=matcheswithtext[i];
 			
-			if(matchfound && !fileList.get(i).getParent().equals(lastfolder)){
+			if(matchfound && !fileList.get(i).getParent().equals(lastfolder) && fileList.get(i).getParent().replace("/", "").length()>0){
 				
 				folderaccu+=2;
 				
@@ -1065,7 +1063,7 @@ public class SubjectsGUI {
 
 			};
 			cArchivos[i].setOpaque(false);
-			cArchivos[i].setVisible(online);
+			cArchivos[i].setVisible(online && matchfound); // Visible determines if it's selectable with the selection buttons
 			cArchivos[i].setMinimumSize(new Dimension(40,40));
 			cArchivos[i].setHorizontalAlignment(SwingConstants.CENTER);
 			cArchivos[i].setSelected(!isAlreadyDownloaded); // Not selected if downloaded
@@ -1384,7 +1382,7 @@ public class SubjectsGUI {
 			
 			String fileRelPath=fileList.get(i).getFileDestination();
 			
-			cArchivos[i].setSelected(!fileIsAlreadyDownloaded(subjectPath, fileRelPath));
+			cArchivos[i].setSelected(!fileIsAlreadyDownloaded(subjectPath, fileRelPath) && cArchivos[i].isVisible());
 			
 		}
 		
@@ -1916,8 +1914,17 @@ public class SubjectsGUI {
 			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-			    g2.drawImage(iconSchedule, 0, 0, getWidth(), getHeight(), null);
+			    //g2.drawImage(iconSchedule, 0, 0, getWidth(), getHeight(), null);
 			    
+			    g2.setColor(new Color(0,110,198,255));
+			    g2.fillRoundRect(getWidth()/8, getHeight()/8+1, getWidth()*6/8, getHeight()*6/8, 5, 5);
+			    
+			    g2.setColor(new Color(255,255,255,255));
+			    g2.fillRect(getWidth()/8+2, getHeight()/8+7, getWidth()*6/8-4, getHeight()*6/8-8);
+
+			    g2.setColor(new Color(0,110,198,255));
+			    g2.fillRoundRect(getWidth()/8+3, getHeight()/12, 3, 5, 2, 2);
+			    g2.fillRoundRect(getWidth()*7/8-7, getHeight()/12, 3, 5, 2, 2);
 			    
 			}
 			
@@ -1946,7 +1953,7 @@ public class SubjectsGUI {
 		btnSchedule.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnSchedule.setPreferredSize(new Dimension(30, 30));
 		btnSchedule.setOpaque(false);
-		panel.add(btnSchedule, "3, 2, fill, fill");
+		panel.add(btnSchedule, "5, 2, fill, fill");
 		
 
 		btnLogout = new JPanel(){
@@ -1977,7 +1984,7 @@ public class SubjectsGUI {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
-				if(arg0.getComponent().isEnabled()){
+				if(arg0.getComponent().isEnabled() && !isLoading){
 					
 					justloggingout=true;
 					
@@ -2004,13 +2011,20 @@ public class SubjectsGUI {
 			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-			    g2.drawImage(iconSearch, 0, 0, getWidth(), getHeight(), null);
+			    //g2.drawImage(iconSearch, 0, 0, getWidth(), getHeight(), null);
+
+			    g2.setColor(new Color(0,110,198,255));
+			    g2.setStroke(new BasicStroke(2));
+
+			    g2.drawOval(getWidth()/8, getHeight()/8+1, getWidth()*7/12, getWidth()*7/12);
+			    g2.drawLine(18, 18, 25, 25);
 			    
+
 			}
 			
 		};
 		btnSearch.setPreferredSize(new Dimension(30, 30));
-		panel.add(btnSearch, "5, 2");
+		panel.add(btnSearch, "3, 2");
 		btnSearch.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnSearch.setVisible(false);
 		btnSearch.setOpaque(false);
@@ -2042,13 +2056,8 @@ public class SubjectsGUI {
 		lblSubjectFolder = new JLabel("");
 		lblSubjectFolder.setForeground(new Color(117,117,117,255));
 		lblSubjectFolder.setHorizontalAlignment(SwingConstants.LEFT);
-		panelLogos.add(lblSubjectFolder, "4, 6");
-		
-		lblOpenFolder = new JLabel(textdata.getKey("btnopensubjectfolder"));
-		lblOpenFolder.setForeground(new Color(0,110,198,255));
-		lblOpenFolder.setVisible(false);
-		lblOpenFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		lblOpenFolder.addMouseListener(new MouseAdapter() {
+		lblSubjectFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblSubjectFolder.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				
@@ -2077,7 +2086,7 @@ public class SubjectsGUI {
 			}
 		});
 		
-		panelLogos.add(lblOpenFolder, "6, 6");
+		panelLogos.add(lblSubjectFolder, "4, 6");
 		
 		itemSelectSubjectFolder = new JLabel(textdata.getKey("btnchoosesubjectfolder"));
 		itemSelectSubjectFolder.setForeground(new Color(0,110,198,255));
@@ -2749,7 +2758,7 @@ public class SubjectsGUI {
 				if(cArchivos==null) return;
 				
 				for(int i=0; i<cArchivos.length; i++){
-					cArchivos[i].setSelected(true);
+					cArchivos[i].setSelected(cArchivos[i].isVisible());
 				}
 				
 			}
