@@ -8,6 +8,8 @@
  * File display improved.
  * Event direct edit in schedules.
  * Logout button added.
+ * Default folder for subject if it is not assigned.
+ * Search by folder (isolate button).
  * Bugs fixed.
 
 ### Español
@@ -18,6 +20,8 @@
  * Presentación de los archivos mejorada.
  * Edición directa del evento en horarios.
  * Añadido botón de cierre de sesión.
+ * Carpeta por defecto para una asignatura si no está asignada.
+ * Búsqueda por carpeta (botón aislar).
  * Bugs corregidos.
 
 # v.1.0.1 -> v.1.1.0:

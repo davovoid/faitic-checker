@@ -186,6 +186,7 @@ public class SubjectsGUI {
 	private static JPanel btnSchedule, btnLogout;
 	private static JPanel panelSections;
 	private static JLabel lblIntroduction,lblAnnouncements,lblFiles;
+	private JPanel btnDeleteSearch;
 	
 	/**
 	 * Application functions
@@ -534,6 +535,16 @@ public class SubjectsGUI {
 										
 									}
 									
+									// TODO put default folders (important to know if relative or not)
+									
+									if(subjectPath==null){
+										
+										// Still null, so let's put a default one
+										
+										subjectPath=getDefaultFolderForSubject(subjectName);
+										
+									}
+									
 								}catch(Exception ex){
 									
 									ex.printStackTrace();
@@ -663,6 +674,45 @@ public class SubjectsGUI {
 		}
 		
 		panelSubjects.repaint();
+		
+	}
+	
+	private static String getDefaultFolderForSubject(String subject){
+		
+		String[] wordsinsubject=subject.split(" ");
+		StringBuffer initials=new StringBuffer();
+		
+		for(int i=0; i<wordsinsubject.length; i++){ // Write initials. It will take the upper cased letters and numbers
+			
+			boolean foundinitial=false;
+			String letters="QWERTYUIOPASDFGHJKLZXCVBNM1234567890";
+			
+			for(int pos=0; pos<wordsinsubject[i].length() && !foundinitial; pos++){
+				
+				if(letters.indexOf(wordsinsubject[i].charAt(pos))>=0){ // Avoid symbols
+					initials.append(wordsinsubject[i].charAt(pos));
+					foundinitial=true;
+				}
+				
+			}
+			
+		}
+		
+		// If no name is found
+		
+		if(initials.length()<=0) initials.append("untitled");
+		
+		// Different if it is portable or not
+		
+		if(ClassicRoutines.isPortable()){
+			
+			return ClassicRoutines.cpath(ClassicRoutines.getJarPathFolder() + "/Faicheck subjects/" + initials.toString());
+			
+		} else{
+
+			return ClassicRoutines.cpath(System.getProperty("user.home") + "/Faicheck subjects/" + initials.toString());
+			
+		}
 		
 	}
 	
@@ -957,6 +1007,52 @@ public class SubjectsGUI {
 			
 			if(matchfound && !fileList.get(i).getParent().equals(lastfolder) && fileList.get(i).getParent().replace("/", "").length()>0){
 				
+				JPanel separatorpanel=new JPanel(){
+					
+					@Override
+					public void paintComponent(Graphics g){
+
+						/*Graphics2D g2=(Graphics2D) g;
+
+					    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+					    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+					    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+						g.setColor(new Color(220,220,220,255));
+						
+						g.fillRect(0, 0, getWidth(), getHeight());
+						
+						int radius=5;
+						
+						for(int i=3; i>0; i--){
+							
+							g2.setColor(new Color(100,100,100,80*(4-i)/3));
+							g2.fillRoundRect(-i, -(radius+i), getWidth()+2*i, (radius+i)*2, (radius+i)*2, (radius+i)*2);
+							g2.fillRoundRect(-i, getHeight()-1-(radius+i), getWidth()+2*i, (radius+i)*2, (radius+i)*2, (radius+i)*2);
+							
+						}
+						
+						g2.setColor(Color.WHITE);
+						g2.fillRoundRect(0, -radius, getWidth(), radius*2, radius, radius);
+						g2.fillRoundRect(0, getHeight()-1-radius, getWidth(), radius*2, radius, radius);*/
+						
+						
+						g.setColor(new Color(160,160,160,10));
+						
+						for(int i=0; i<getWidth()/2; i+=5){
+							
+							g.drawLine(i, (getHeight()-1)/2, getWidth()-2*i, (getHeight()-1)/2);
+
+						}
+						
+					}
+					
+				};
+				
+				separatorpanel.setPreferredSize(new Dimension(10,10));
+				
+				if(iDisc!=0) panelToDownload.add(separatorpanel, "1, " + (int)(iDisc*4+folderaccu+2) + ", 7, 1");
+				
 				folderaccu+=2;
 				
 				// Add label for folder
@@ -1009,6 +1105,28 @@ public class SubjectsGUI {
 				
 				
 				panelToDownload.add(lGeneralParentPaths[currentgeneralparentpath], "4, " + (int)(iDisc*4+folderaccu+2));
+				
+				JLabel btnIsolateFolder=new JLabel("[ " + textdata.getKey("filelistisolate") + " ]");
+				btnIsolateFolder.setForeground(new Color(0,110,198,255));
+				btnIsolateFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				btnIsolateFolder.setHorizontalAlignment(JLabel.CENTER);
+				
+				btnIsolateFolder.addMouseListener(new CustomMouseAdapter(fileList.get(i).getParent()){
+
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+
+						panelSearch.setVisible(true);
+						
+						txtSearch.setText((String) getObject());
+						txtSearch.selectAll();
+						txtSearch.requestFocus();
+						
+					}
+					
+				});
+				
+				panelToDownload.add(btnIsolateFolder, "6, " + (int)(iDisc*4+folderaccu+2));
 				
 				// Increase currentgeneralparentpath
 				currentgeneralparentpath++;
@@ -2041,6 +2159,10 @@ public class SubjectsGUI {
 						
 						txtSearch.requestFocus();
 						
+					} else{
+						
+						txtSearch.setText("");
+						
 					}
 					
 				}
@@ -2298,10 +2420,12 @@ public class SubjectsGUI {
 		panelSearch.setLayout(new FormLayout(new ColumnSpec[] {
 				ColumnSpec.decode("15dlu"),
 				FormFactory.GLUE_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				ColumnSpec.decode("18pt"),
 				ColumnSpec.decode("15dlu"),},
 			new RowSpec[] {
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
+				RowSpec.decode("pref:grow"),
 				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
 		
 		txtSearch = new JTextField(){
@@ -2387,6 +2511,8 @@ public class SubjectsGUI {
 					}
 					
 				}
+				
+				btnDeleteSearch.repaint();
 
 			}
 			
@@ -2395,6 +2521,48 @@ public class SubjectsGUI {
 
 		panelSearch.add(txtSearch, "2, 2, fill, default");
 		txtSearch.setColumns(10);
+		
+		btnDeleteSearch = new JPanel(){
+			
+			@Override
+			public void paintComponent(Graphics g){
+
+				Graphics2D g2=(Graphics2D) g;
+				
+			    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+			    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			    g2.setColor(txtSearch.getText().length()>0 ? new Color(0,110,198,255) : new Color(220,220,220,255));
+			    g2.setStroke(new BasicStroke(2));
+			    
+			    int side=(getWidth()<getHeight() ? getWidth() : getHeight())-5;
+			    
+			    int heightdiff=getHeight()-side;
+			    int widthdiff=getWidth()-side;
+			    
+			    g2.drawLine(widthdiff/2, heightdiff/2, widthdiff/2+side, heightdiff/2+side);
+			    g2.drawLine(widthdiff/2+side, heightdiff/2, widthdiff/2, heightdiff/2+side);
+			    
+			    
+			}
+			
+		};
+		btnDeleteSearch.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(arg0.getComponent().isEnabled()){
+					
+					txtSearch.setText("");
+					
+				}
+				
+			}
+		});
+		btnDeleteSearch.setOpaque(false);
+		btnDeleteSearch.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		panelSearch.add(btnDeleteSearch, "4, 2, fill, fill");
 		
 		scrollPane = new JScrollPane();
 		panelSubject.add(scrollPane, "1, 2, fill, fill");

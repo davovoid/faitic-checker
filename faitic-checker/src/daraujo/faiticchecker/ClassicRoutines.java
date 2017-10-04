@@ -43,7 +43,7 @@ public class ClassicRoutines {
 	
 	public static String getUserDataPath(boolean useMyDataPath){
 
-		String out=getUserDataPath(useMyDataPath,true);
+		String out=getUserDataPath(true,true);
 		
 		if(new File(out).exists()){
 			
