@@ -142,7 +142,7 @@ public class SubjectsGUI {
 	private JCustomButton btnMarcarNada;
 	
 	private static JLabel[] lblSubjects;
-	private static JCheckBox[] cArchivos;
+	private static JCheckBox[] cArchivos, cFolders;
 	private static JLabel[] lArchivos, lParentPaths, lGeneralParentPaths;
 	private static JLabel[] btnAbrirArchivos;
 	
@@ -166,7 +166,7 @@ public class SubjectsGUI {
 	private JLabel lblSeleccioneUnaAsignatura;
 	private static JLabel itemSelectSubjectFolder;
 	private static JPanel panelLoading;
-	public static Timer timer=null;
+	public static Timer timer=null, timerDownloadCheck=null;
 	
 	
 	protected static String loadingText="Loading...";
@@ -187,6 +187,12 @@ public class SubjectsGUI {
 	private static JPanel panelSections;
 	private static JLabel lblIntroduction,lblAnnouncements,lblFiles;
 	private JPanel btnDeleteSearch;
+	
+	private static int cnDownloadedFiles=0;
+	private static Semaphore snDownloadedFiles=new Semaphore(1);
+	
+	private static int nFilesToDownload=0;
+	
 	
 	/**
 	 * Application functions
@@ -224,7 +230,44 @@ public class SubjectsGUI {
 		}
 		
 	}
-	
+
+	protected static int getNDownloadedFiles(){
+
+		try{
+
+			snDownloadedFiles.acquire();
+			int out=cnDownloadedFiles;
+			snDownloadedFiles.release();
+
+			return out;
+
+		} catch(Exception ex){
+
+			// Weird. Stop the download just in case
+
+			ex.printStackTrace();
+			return 0;
+
+		}
+
+	}
+
+	protected static void setNDownloadedFiles(int value){
+
+		try{
+
+			snDownloadedFiles.acquire();
+			cnDownloadedFiles=value;
+			snDownloadedFiles.release();
+
+		} catch(Exception ex){
+
+			ex.printStackTrace();
+
+		}
+
+	}
+
 	private static void blockInterface(){
 
 		panelLoading.setVisible(true);
@@ -990,6 +1033,7 @@ public class SubjectsGUI {
 		lParentPaths=new JLabel[fileList.size()];
 		
 		lGeneralParentPaths=new JLabel[folders];
+		cFolders=new JSubjectCheckBox[folders];
 		int currentgeneralparentpath=0; // When filling the labels
 		
 		btnAbrirArchivos=new JLabel[fileList.size()];
@@ -997,6 +1041,7 @@ public class SubjectsGUI {
 		int iDisc=0;	// For putting the info in the GUI table
 		
 		int folderaccu=0; // +4 when new folder label is added
+		int foldercounter=0; // +1 when new folder is identified
 		
 		// lastfolder already declared and reset
 		
@@ -1007,6 +1052,131 @@ public class SubjectsGUI {
 			
 			if(matchfound && !fileList.get(i).getParent().equals(lastfolder) && fileList.get(i).getParent().replace("/", "").length()>0){
 				
+				// Add label for folder
+				
+				String textforlabel=fileList.get(i).getParent();
+				if(textforlabel.length()>0) if(textforlabel.charAt(0)=='/') textforlabel=textforlabel.substring(1, textforlabel.length());
+				if(textforlabel.length()>0) if(textforlabel.charAt(textforlabel.length()-1)=='/') textforlabel=textforlabel.substring(0, textforlabel.length()-1);
+				textforlabel=textforlabel.replace("/", " > ").replace("_", " ");
+				
+				lGeneralParentPaths[currentgeneralparentpath]=new JLabel(textforlabel);
+				lGeneralParentPaths[currentgeneralparentpath].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				lGeneralParentPaths[currentgeneralparentpath].setFont(new Font("Dialog", Font.BOLD, 18));
+				lGeneralParentPaths[currentgeneralparentpath].setPreferredSize(new Dimension(10,40));
+				lGeneralParentPaths[currentgeneralparentpath].setVerticalAlignment(JLabel.BOTTOM);
+				lGeneralParentPaths[currentgeneralparentpath].setForeground(new Color(33,33,33,255));
+				lGeneralParentPaths[currentgeneralparentpath].addMouseListener(new CustomMouseAdapter(fileList.get(i).getParent()){
+
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+
+							if(subjectPath!=null){
+								
+								// Subject path selected
+
+								String parentname=(String) getObject();
+								
+								if(fileIsAlreadyDownloaded(subjectPath,parentname)){
+									
+									// Already created. Open it
+									
+									try {
+										
+										Desktop.getDesktop().open(new File(fileDestination(subjectPath,parentname)));
+										
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+								}
+
+							
+							
+							
+							
+						}
+						
+						
+					}
+
+				});
+				
+				
+				panelToDownload.add(lGeneralParentPaths[currentgeneralparentpath], "4, " + (int)(iDisc*4+folderaccu+2));
+				
+				// Isolate folder
+				
+				JLabel btnIsolateFolder=new JLabel("[ " + textdata.getKey("filelistisolate") + " ]");
+				btnIsolateFolder.setForeground(new Color(0,110,198,255));
+				btnIsolateFolder.setVerticalAlignment(JLabel.BOTTOM);
+				btnIsolateFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				btnIsolateFolder.setHorizontalAlignment(JLabel.CENTER);
+				
+				btnIsolateFolder.addMouseListener(new CustomMouseAdapter(fileList.get(i).getParent()){
+
+					@Override
+					public void mouseClicked(MouseEvent arg0) {
+
+						panelSearch.setVisible(true);
+						
+						txtSearch.setText((String) getObject());
+						txtSearch.selectAll();
+						txtSearch.requestFocus();
+						
+					}
+					
+				});
+				
+				panelToDownload.add(btnIsolateFolder, "6, " + (int)(iDisc*4+folderaccu+2) + ", center, bottom");
+				
+				// The check button for selecting all the folder
+				
+				cFolders[foldercounter]=new JSubjectCheckBox(fileList.get(i).getParent());
+				cFolders[foldercounter].setOpaque(false);
+				cFolders[foldercounter].setVisible(online); // Visible determines if it's selectable with the selection buttons
+				cFolders[foldercounter].setMinimumSize(new Dimension(40,20));
+				cFolders[foldercounter].setPreferredSize(new Dimension(40,20));
+				cFolders[foldercounter].setMaximumSize(new Dimension(40,20));
+				cFolders[foldercounter].setHorizontalAlignment(SwingConstants.CENTER);
+
+				// Checked changed
+				cFolders[foldercounter].addItemListener(new CustomItemListener(fileList.get(i).getParent()){
+
+					@Override
+					public void itemStateChanged(ItemEvent arg0) {
+						
+						if(cArchivos==null) return;
+						
+						for(int i=0; i<fileList.size(); i++){
+							
+							if(fileList.get(i).getParent().equals((String)getObject())){
+								
+								// If the parents match
+								
+								if(cArchivos!=null){
+									
+									// If not null
+									
+									if(arg0.getStateChange()==arg0.SELECTED && !cArchivos[i].isSelected()) cArchivos[i].setSelected(true);
+									if(arg0.getStateChange()==arg0.DESELECTED && cArchivos[i].isSelected()) cArchivos[i].setSelected(false);
+									// Done this way so as not to arise unnecessary events
+
+								}
+								
+							}
+							
+						}
+						
+					}
+					
+				});
+				
+				if(online) panelToDownload.add(cFolders[foldercounter], "2, " + (int)(iDisc*4+folderaccu+2) + ", center, bottom");
+				
+				// Increase folderaccu for next line
+				folderaccu+=2;
+
 				JPanel separatorpanel=new JPanel(){
 					
 					@Override
@@ -1049,142 +1219,32 @@ public class SubjectsGUI {
 					
 				};
 				
-				separatorpanel.setPreferredSize(new Dimension(10,10));
+				separatorpanel.setPreferredSize(new Dimension(5,5));
 				
-				if(iDisc!=0) panelToDownload.add(separatorpanel, "1, " + (int)(iDisc*4+folderaccu+2) + ", 7, 1");
-				
-				folderaccu+=2;
-				
-				// Add label for folder
-				
-				String textforlabel=fileList.get(i).getParent();
-				if(textforlabel.length()>0) if(textforlabel.charAt(0)=='/') textforlabel=textforlabel.substring(1, textforlabel.length());
-				if(textforlabel.length()>0) if(textforlabel.charAt(textforlabel.length()-1)=='/') textforlabel=textforlabel.substring(0, textforlabel.length()-1);
-				textforlabel=textforlabel.replace("/", " > ").replace("_", " ");
-				
-				lGeneralParentPaths[currentgeneralparentpath]=new JLabel(textforlabel);
-				lGeneralParentPaths[currentgeneralparentpath].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				lGeneralParentPaths[currentgeneralparentpath].setFont(new Font("Dialog", Font.BOLD, 18));
-				lGeneralParentPaths[currentgeneralparentpath].setForeground(new Color(33,33,33,255));
-				lGeneralParentPaths[currentgeneralparentpath].addMouseListener(new CustomMouseAdapter(fileList.get(i).getParent()){
-
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-
-							if(subjectPath!=null){
+				panelToDownload.add(separatorpanel, "1, " + (int)(iDisc*4+folderaccu+2) + ", 7, 1");
 								
-								// Subject path selected
-
-								String parentname=(String) getObject();
-								
-								if(fileIsAlreadyDownloaded(subjectPath,parentname)){
-									
-									// Already created. Open it
-									
-									try {
-										
-										Desktop.getDesktop().open(new File(fileDestination(subjectPath,parentname)));
-										
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-									
-								}
-
-							
-							
-							
-							
-						}
-						
-						
-					}
-
-				});
-				
-				
-				panelToDownload.add(lGeneralParentPaths[currentgeneralparentpath], "4, " + (int)(iDisc*4+folderaccu+2));
-				
-				JLabel btnIsolateFolder=new JLabel("[ " + textdata.getKey("filelistisolate") + " ]");
-				btnIsolateFolder.setForeground(new Color(0,110,198,255));
-				btnIsolateFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				btnIsolateFolder.setHorizontalAlignment(JLabel.CENTER);
-				
-				btnIsolateFolder.addMouseListener(new CustomMouseAdapter(fileList.get(i).getParent()){
-
-					@Override
-					public void mouseClicked(MouseEvent arg0) {
-
-						panelSearch.setVisible(true);
-						
-						txtSearch.setText((String) getObject());
-						txtSearch.selectAll();
-						txtSearch.requestFocus();
-						
-					}
-					
-				});
-				
-				panelToDownload.add(btnIsolateFolder, "6, " + (int)(iDisc*4+folderaccu+2));
-				
 				// Increase currentgeneralparentpath
 				currentgeneralparentpath++;
 				
 				// Increase folderaccu
 				folderaccu+=2;
 				
+				// Increase foldercounter
+				foldercounter++;
+				
 				// Update last folder
 				lastfolder=fileList.get(i).getParent();
 				
 			}
 			
-			cArchivos[i]=new JCheckBox(""){
-
-				@Override
-				public void paintComponent(Graphics g){
-
-					//super.paintComponent(g);
-					
-					Color borderColor=isSelected() ? new Color(0,110,198,255) : new Color(200,200,200,255);
-					
-					int maxside=super.getWidth()<super.getHeight() ? super.getWidth() : super.getHeight();
-					int marginleft=super.getWidth()<super.getHeight() ? 0 : (super.getWidth()-maxside)/2;
-					int margintop=super.getWidth()<super.getHeight() ? (super.getHeight()-maxside)/2 : 0;
-
-					Graphics2D g2=(Graphics2D) g;
-					
-				    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-				    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-				    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-				    g2.setColor(borderColor);
-				    
-					g2.fillRoundRect(marginleft+8, margintop+8, maxside-16+1, maxside-16+1, 3, 3);
-					
-					if(isSelected()){
-						
-						g2.setStroke(new BasicStroke(3));
-						g2.setColor(Color.white);
-						
-						g2.drawLine(marginleft + 12, margintop+maxside/2, marginleft + maxside/2-1 , margintop+maxside-14);
-						g2.drawLine(marginleft + maxside/2 -1, margintop+maxside-14, marginleft + maxside - 12, margintop + 14);
-						
-					} else{
-						
-						g2.setColor(Color.white);
-						g2.fillRect(marginleft+10, margintop+10, maxside-20+1, maxside-20+1);
-						
-					}
-					
-				}
-
-			};
+			cArchivos[i]=new JSubjectCheckBox();
 			cArchivos[i].setOpaque(false);
 			cArchivos[i].setVisible(online && matchfound); // Visible determines if it's selectable with the selection buttons
 			cArchivos[i].setMinimumSize(new Dimension(40,40));
 			cArchivos[i].setHorizontalAlignment(SwingConstants.CENTER);
 			cArchivos[i].setSelected(!isAlreadyDownloaded); // Not selected if downloaded
+			
+			// CAREFUL! the listener is below so as not to be triggered by the setSelected method
 			
 			// Checked changed
 			cArchivos[i].addItemListener(new ItemListener(){
@@ -1193,6 +1253,64 @@ public class SubjectsGUI {
 				public void itemStateChanged(ItemEvent arg0) {
 					
 					updateDownloadMarkedText();	// "Download marked files" button text set
+					
+					// Now check if the corresponding folder is (de)selected, only if all the files with this parent are (de)selected
+					
+					// Get check position
+					int currentpos=-1;
+					
+					for(int i=0; i<cArchivos.length && currentpos<0; i++){
+						
+						if(cArchivos[i].equals(arg0.getSource())) currentpos=i;
+						
+					}
+					
+					if(currentpos>=0){ // Position found
+						
+						// System.out.println("Found");
+						
+						// Parent of file checked/unchecked
+						String parentoffile=fileList.get(currentpos).getParent();
+						
+						// Get parent check position
+						int checkparentpos=-1;
+						
+						for(int i=0; i<cFolders.length && checkparentpos<0; i++){
+							
+							if(((String)((JSubjectCheckBox)cFolders[i]).getObject()).equals(parentoffile))
+								checkparentpos=i;
+							
+						}
+						
+						if(checkparentpos>=0){ // There is a parent check
+
+							// System.out.println("Parent found");
+							
+							boolean currentIsSelected=arg0.getStateChange()==arg0.SELECTED;
+							
+							boolean sameselection=true;
+							
+							// Check if all files from same parent share the same state
+							
+							for(int i=0; i<cArchivos.length && sameselection; i++){
+								
+								if(fileList.get(i).getParent().equals(parentoffile) &&
+										cArchivos[i].isSelected()!=currentIsSelected) sameselection=false;
+								
+							}
+							
+							if(sameselection && cFolders[checkparentpos].isSelected() != currentIsSelected){
+								// All selected the same way but not the parent check, change the parent state
+								
+								cFolders[checkparentpos].setSelected(currentIsSelected);
+								
+							}
+							
+						}
+						
+						
+					}
+					
 					
 				}
 				
@@ -1205,7 +1323,7 @@ public class SubjectsGUI {
 			String filename=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(divisionpos+1, completePath.length()) : completePath;
 			String parentname=divisionpos>=0 && divisionpos<completePath.length()-1 ? completePath.substring(0, divisionpos+1) : "";
 			
-			lArchivos[i]=new JLabel(filename);
+			lArchivos[i]=new JLabel(" " + filename);
 			lArchivos[i].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			lArchivos[i].setFont(new Font("Dialog", Font.BOLD, 12));
 			lArchivos[i].setForeground(!online && !isAlreadyDownloaded ? new Color(160,160,160,255) : new Color(33,33,33,255));
@@ -1606,13 +1724,15 @@ public class SubjectsGUI {
 			
 		} else{
 			
-			int numMarcados=0;
+			int markedChecks=0;
 			
 			for(JCheckBox checkbox : cArchivos){
-				if(checkbox.isSelected()) numMarcados++;
+				if(checkbox.isSelected()) markedChecks++;
 			}
 			
-			btnDescargarMarcados.setText(textdata.getKey("btndownloadmarked"," (" + numMarcados + ")"));
+			btnDescargarMarcados.setText(textdata.getKey("btndownloadmarked"," (" + markedChecks + ")"));
+			
+			nFilesToDownload=markedChecks;
 			
 		}
 		
@@ -2825,19 +2945,21 @@ public class SubjectsGUI {
 					blockInterface();
 
 					faitic.setCancelDownload(false);
+					setNDownloadedFiles(0);
+					
 					descargando=true;
 					btnDescargarMarcados.setEnabled(true);
 
 					btnDescargarMarcados.setText(textdata.getKey("btncanceldownload"));
 
-					writeLoadingText("Descargando...");
+					timerDownloadCheck=new Timer();
 
+					writeLoadingText(textdata.getKey("loadingdownloading", "1", nFilesToDownload + "", "-", "-"));
+					
 					SwingWorker thread=new SwingWorker(){
 
 						@Override
 						protected Object doInBackground() throws Exception {
-
-							int nDownloadedFiles=0;
 
 							for(int i=0; i<fileList.size(); i++){
 
@@ -2845,7 +2967,7 @@ public class SubjectsGUI {
 
 									downloadFileFromList(i);
 
-									writeLoadingText(textdata.getKey("loadingdownloading", ++nDownloadedFiles + ""));
+									setNDownloadedFiles(getNDownloadedFiles()+1);
 
 								}
 
@@ -2860,7 +2982,14 @@ public class SubjectsGUI {
 						protected void done(){
 
 							isLoading=false;
-
+							
+							// Stop download timer
+							if(timerDownloadCheck!=null){
+								timerDownloadCheck.cancel();
+								timerDownloadCheck.purge();
+								timerDownloadCheck=null;
+							}
+							
 							selectNotDownloadedFiles();
 							setDownloadButtonsText();
 
@@ -2877,6 +3006,26 @@ public class SubjectsGUI {
 					};
 
 					thread.execute();
+					
+					timerDownloadCheck.scheduleAtFixedRate(new TimerTask(){
+
+						@Override
+						public void run() {
+
+							long downloaded=faitic.getDownloaded();
+							long downloadsize=faitic.getDownloadSize();
+							
+							writeLoadingText(textdata.getKey("loadingdownloading", (getNDownloadedFiles()+1) + "", nFilesToDownload + "",
+									(downloaded>1024*1024 ? ((double)(downloaded*10/1024/1024)/10.0) + " MiB" :
+									downloaded>1024 ? ((double)(downloaded*10/1024)/10.0) + " kiB" :
+									downloaded + " B"),
+									(downloadsize>1024*1024 ? ((double)(downloadsize*10/1024/1024)/10.0) + " MiB" :
+										downloadsize>1024 ? ((double)(downloadsize*10/1024)/10.0) + " kiB" :
+											downloadsize + " B")));
+							
+						}
+						
+					}, 250, 250);
 
 				}
 

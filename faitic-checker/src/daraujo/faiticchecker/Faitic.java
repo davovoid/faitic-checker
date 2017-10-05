@@ -55,6 +55,11 @@ public class Faitic {
 
 	private static boolean cCancelDownload=false;
 	private static Semaphore sCancelDownload=new Semaphore(1);
+	
+	private static long cDownloadSize=0;
+	private static Semaphore sDownloadSize=new Semaphore(1);
+	private static long cDownloaded=1;
+	private static Semaphore sDownloaded=new Semaphore(1);
 
 	public Faitic(boolean verbose){
 		toDoAtStartup(verbose, android);
@@ -95,6 +100,80 @@ public class Faitic {
 			sCancelDownload.acquire();
 			cCancelDownload=value;
 			sCancelDownload.release();
+
+		} catch(Exception ex){
+
+			ex.printStackTrace();
+
+		}
+
+	}
+
+	protected static long getDownloadSize(){
+
+		try{
+
+			sDownloadSize.acquire();
+			long out=cDownloadSize;
+			sDownloadSize.release();
+
+			return out;
+
+		} catch(Exception ex){
+
+			// Weird. Stop the download just in case
+
+			ex.printStackTrace();
+			return 0;
+
+		}
+
+	}
+
+	protected static void setDownloadSize(long value){
+
+		try{
+
+			sDownloadSize.acquire();
+			cDownloadSize=value;
+			sDownloadSize.release();
+
+		} catch(Exception ex){
+
+			ex.printStackTrace();
+
+		}
+
+	}
+
+	protected static long getDownloaded(){
+
+		try{
+
+			sDownloaded.acquire();
+			long out=cDownloaded;
+			sDownloaded.release();
+
+			return out;
+
+		} catch(Exception ex){
+
+			// Weird. Stop the download just in case
+
+			ex.printStackTrace();
+			return 1;
+
+		}
+
+	}
+
+	protected static void setDownloaded(long value){
+
+		try{
+
+			sDownloaded.acquire();
+			cDownloaded=value;
+			sDownloaded.release();
 
 		} catch(Exception ex){
 
@@ -422,6 +501,11 @@ public class Faitic {
 
 		reader = connection.getInputStream();
 
+		// Save the download length
+		
+		setDownloadSize(connection.getContentLengthLong());
+		setDownloaded(0);
+		
 		// Let's write the document
 
 		FileOutputStream filewriter;
@@ -445,10 +529,13 @@ public class Faitic {
 
 		try{
 
-			temp = new byte[1000];
+			temp = new byte[2048];
 			read = reader.read(temp);
 
 			while (read != -1 && !getCancelDownload()) {
+				
+				setDownloaded(getDownloaded()+read);
+				
 				filewriter.write(temp, 0, read);
 
 				read = reader.read(temp);

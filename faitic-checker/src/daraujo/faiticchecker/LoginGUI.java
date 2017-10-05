@@ -1088,6 +1088,24 @@ public class LoginGUI {
 		panelSettings.add(lblConfigurationFolder, "3, 10, 3, 1");
 		lblConfigurationFolder.setForeground(Color.GRAY);
 		lblConfigurationFolder.setHorizontalAlignment(SwingConstants.CENTER);
+		lblConfigurationFolder.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblConfigurationFolder.addMouseListener(new MouseAdapter(){
+			
+			@Override
+			public void mouseClicked(MouseEvent e){
+				
+				try {
+					
+					Desktop.getDesktop().browse(new File(ClassicRoutines.getUserDataPath(true)).toURI());
+					
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+			
+		});
 		
 		
 		JLabel lblAcercaDe = new JLabel(textdata.getKey("btnabout"));

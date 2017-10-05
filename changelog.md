@@ -9,7 +9,9 @@
  * Event direct edit in schedules.
  * Logout button added.
  * Default folder for subject if it is not assigned.
- * Search by folder (isolate button).
+ * Search by folder.
+ * Select/deselect all files in a folder.
+ * Download state display improved.
  * Bugs fixed.
 
 ### Español
@@ -21,7 +23,9 @@
  * Edición directa del evento en horarios.
  * Añadido botón de cierre de sesión.
  * Carpeta por defecto para una asignatura si no está asignada.
- * Búsqueda por carpeta (botón aislar).
+ * Búsqueda por carpeta.
+ * Seleccionar/deseleccionar todos los archivos de una carpeta.
+ * Mejorada visualización del estado de descarga.
  * Bugs corregidos.
 
 # v.1.0.1 -> v.1.1.0:
