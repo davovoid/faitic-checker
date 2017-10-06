@@ -171,6 +171,10 @@ public class SubjectsGUI {
 	
 	protected static String loadingText="Loading...";
 	protected static Semaphore accessToLoadingText=new Semaphore(1);
+	
+	protected static int cloadingpercent=-1;
+	protected static Semaphore sloadingpercent=new Semaphore(1);
+	
 	protected static boolean isLoading=false;
 	private JSplitPane splitPane;
 	private JScrollPane scrollPane_1;
@@ -267,6 +271,45 @@ public class SubjectsGUI {
 		}
 
 	}
+	
+
+	protected static int getloadingpercent(){
+
+		try{
+
+			sloadingpercent.acquire();
+			int out=cloadingpercent;
+			sloadingpercent.release();
+
+			return out;
+
+		} catch(Exception ex){
+
+			// Weird. Stop the download just in case
+
+			ex.printStackTrace();
+			return -1;
+
+		}
+
+	}
+
+	protected static void setloadingpercent(int value){
+
+		try{
+
+			sloadingpercent.acquire();
+			cloadingpercent=value;
+			sloadingpercent.release();
+
+		} catch(Exception ex){
+
+			ex.printStackTrace();
+
+		}
+
+	}
+	
 
 	private static void blockInterface(){
 
@@ -2368,15 +2411,34 @@ public class SubjectsGUI {
 
 						@Override
 						public void run() {
+							
+							int percent=getloadingpercent();
+							
+							if(percent<0){
+								
+								if(angle%20!=0) angle=0;
+								if(angleBase%4!=0) angleBase=0;
+									
+								angle+=20;
+								angleBase+=4;
+								
+								if(angle>=360){
+									
+									angle-=360;
+									filled=!filled;
+									
+								}
+								
+								if(angleBase>=360) angleBase-=360;
 
-							angle+=20;
-							angleBase+=4;
-							if(angle>=360){
-								angle-=360;
-								filled=!filled;
+							} else{
+								
+								filled=false;
+								angleBase=-90;
+								angle=360*percent/100;
+								
 							}
-							if(angleBase>=360) angleBase-=360;
-
+							
 							//System.out.println(angle);
 							panelLoading.repaint();
 							
@@ -2955,6 +3017,7 @@ public class SubjectsGUI {
 					timerDownloadCheck=new Timer();
 
 					writeLoadingText(textdata.getKey("loadingdownloading", "1", nFilesToDownload + "", "-", "-"));
+					setloadingpercent(0);
 					
 					SwingWorker thread=new SwingWorker(){
 
@@ -2990,6 +3053,8 @@ public class SubjectsGUI {
 								timerDownloadCheck=null;
 							}
 							
+							setloadingpercent(-1);
+							
 							selectNotDownloadedFiles();
 							setDownloadButtonsText();
 
@@ -3014,14 +3079,17 @@ public class SubjectsGUI {
 
 							long downloaded=faitic.getDownloaded();
 							long downloadsize=faitic.getDownloadSize();
+							int ndownloadedfiles=getNDownloadedFiles();
 							
-							writeLoadingText(textdata.getKey("loadingdownloading", (getNDownloadedFiles()+1) + "", nFilesToDownload + "",
+							writeLoadingText(textdata.getKey("loadingdownloading", (ndownloadedfiles+1) + "", nFilesToDownload + "",
 									(downloaded>1024*1024 ? ((double)(downloaded*10/1024/1024)/10.0) + " MiB" :
 									downloaded>1024 ? ((double)(downloaded*10/1024)/10.0) + " kiB" :
 									downloaded + " B"),
 									(downloadsize>1024*1024 ? ((double)(downloadsize*10/1024/1024)/10.0) + " MiB" :
 										downloadsize>1024 ? ((double)(downloadsize*10/1024)/10.0) + " kiB" :
 											downloadsize + " B")));
+							
+							setloadingpercent(ndownloadedfiles*100/nFilesToDownload + (int)(downloaded*100/downloadsize/nFilesToDownload));
 							
 						}
 						

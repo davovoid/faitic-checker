@@ -597,7 +597,7 @@ public class Faitic {
 		}
 
 		logger.log(Logger.INFO, "--- Request finished ---\n");
-
+		setDownloaded(0); // Clean up the value before next download
 
 		return;
 
