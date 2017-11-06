@@ -1,3 +1,19 @@
+# v.1.2.0 -> v.1.2.1:
+
+### English
+
+ * Individual file download button now works asynchronously and with progress bar.
+ * Now clicking a not-downloaded file implies downloading and automatically opening it.
+ * Bug solved: folder unchecked after opening subject, despite having all the files inside it checked.
+ * Download progress bar with faster refreshing. Also bug solved: division by zero in download progress bar.
+
+### Español
+
+ * Botón de descarga individual de archivos ahora funciona de forma asíncrona y con barra de progreso.
+ * Al picar un archivo sin descargar, ahora se descarga y abre automáticamente al terminar.
+ * Solucionado bug que deja sin marcar la carpeta, cuando todos sus archivos están seleccionados, tras abrir una asignatura.
+ * Barra de descarga con actualización más rápida. También solucionado bug por división entre cero en la barra de descarga.
+
 # v.1.1.0 -> v.1.2.0:
 
 ### English

@@ -1285,79 +1285,8 @@ public class SubjectsGUI {
 			cArchivos[i].setVisible(online && matchfound); // Visible determines if it's selectable with the selection buttons
 			cArchivos[i].setMinimumSize(new Dimension(40,40));
 			cArchivos[i].setHorizontalAlignment(SwingConstants.CENTER);
-			cArchivos[i].setSelected(!isAlreadyDownloaded); // Not selected if downloaded
 			
-			// CAREFUL! the listener is below so as not to be triggered by the setSelected method
-			
-			// Checked changed
-			cArchivos[i].addItemListener(new ItemListener(){
-
-				@Override
-				public void itemStateChanged(ItemEvent arg0) {
-					
-					updateDownloadMarkedText();	// "Download marked files" button text set
-					
-					// Now check if the corresponding folder is (de)selected, only if all the files with this parent are (de)selected
-					
-					// Get check position
-					int currentpos=-1;
-					
-					for(int i=0; i<cArchivos.length && currentpos<0; i++){
-						
-						if(cArchivos[i].equals(arg0.getSource())) currentpos=i;
-						
-					}
-					
-					if(currentpos>=0){ // Position found
-						
-						// System.out.println("Found");
-						
-						// Parent of file checked/unchecked
-						String parentoffile=fileList.get(currentpos).getParent();
-						
-						// Get parent check position
-						int checkparentpos=-1;
-						
-						for(int i=0; i<cFolders.length && checkparentpos<0; i++){
-							
-							if(((String)((JSubjectCheckBox)cFolders[i]).getObject()).equals(parentoffile))
-								checkparentpos=i;
-							
-						}
-						
-						if(checkparentpos>=0){ // There is a parent check
-
-							// System.out.println("Parent found");
-							
-							boolean currentIsSelected=arg0.getStateChange()==arg0.SELECTED;
-							
-							boolean sameselection=true;
-							
-							// Check if all files from same parent share the same state
-							
-							for(int i=0; i<cArchivos.length && sameselection; i++){
-								
-								if(fileList.get(i).getParent().equals(parentoffile) &&
-										cArchivos[i].isSelected()!=currentIsSelected) sameselection=false;
-								
-							}
-							
-							if(sameselection && cFolders[checkparentpos].isSelected() != currentIsSelected){
-								// All selected the same way but not the parent check, change the parent state
-								
-								cFolders[checkparentpos].setSelected(currentIsSelected);
-								
-							}
-							
-						}
-						
-						
-					}
-					
-					
-				}
-				
-			});
+			// Later checking and event must be added
 			
 			if(matchfound)panelToDownload.add(cArchivos[i], "2, " + (int)(iDisc*4+folderaccu+2) + ", 1, 3");
 			
@@ -1407,6 +1336,13 @@ public class SubjectsGUI {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
+								
+							} else{
+								
+								// Not downloaded. Download and open it
+								
+								downloadFiles(index,true);
+								
 								
 							}
 						}
@@ -1608,9 +1544,7 @@ public class SubjectsGUI {
 								
 								// Not downloaded yet. Download it
 								
-								downloadFileFromList(myFileIndex);
-								setDownloadButtonsText();
-								
+								downloadFiles(myFileIndex,false); // Caution! Asynchronous!!
 								
 							}
 							
@@ -1624,6 +1558,90 @@ public class SubjectsGUI {
 			
 			if(matchfound)panelToDownload.add(btnAbrirArchivos[i], "6, " + (int)(iDisc*4+folderaccu+2) + ", 1, 3");
 			if(matchfound)iDisc++;
+			
+		}
+		
+		// Post-checkbox event adding
+		
+		for(int i=0; i<fileList.size(); i++){
+			
+			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i).getFileDestination());
+			
+			// Checked changed
+			cArchivos[i].addItemListener(new ItemListener(){
+
+				@Override
+				public void itemStateChanged(ItemEvent arg0) {
+					
+					updateDownloadMarkedText();	// "Download marked files" button text set
+					
+					// Now check if the corresponding folder is (de)selected, only if all the files with this parent are (de)selected
+					
+					// Get check position
+					int currentpos=-1;
+					
+					for(int i=0; i<cArchivos.length && currentpos<0; i++){
+						
+						if(cArchivos[i].equals(arg0.getSource())) currentpos=i;
+						
+					}
+					
+					if(currentpos>=0){ // Position found
+						
+						// System.out.println("Found");
+						
+						// Parent of file checked/unchecked
+						String parentoffile=fileList.get(currentpos).getParent();
+						
+						// Get parent check position
+						int checkparentpos=-1;
+						
+						for(int i=0; i<cFolders.length && checkparentpos<0; i++){
+							
+							if(((String)((JSubjectCheckBox)cFolders[i]).getObject()).equals(parentoffile))
+								checkparentpos=i;
+							
+						}
+						
+						if(checkparentpos>=0){ // There is a parent check
+
+							// System.out.println("Parent found");
+							
+							boolean currentIsSelected=arg0.getStateChange()==arg0.SELECTED;
+							
+							boolean sameselection=true;
+							
+							// Check if all files from same parent share the same state
+							
+							for(int i=0; i<cArchivos.length && sameselection; i++){
+								
+								if(fileList.get(i).getParent().equals(parentoffile) &&
+										cArchivos[i].isSelected()!=currentIsSelected) sameselection=false;
+								
+							}
+							
+							if(sameselection && cFolders[checkparentpos].isSelected() != currentIsSelected){
+								// All selected the same way but not the parent check, change the parent state
+								
+								cFolders[checkparentpos].setSelected(currentIsSelected);
+								
+							}
+							
+						}
+						
+						
+					}
+					
+					
+				}
+				
+			});
+			
+			// checkbox state definition
+
+			cArchivos[i].setSelected(!isAlreadyDownloaded); // Not selected if downloaded
+			
+			
 			
 		}
 		
@@ -1702,6 +1720,173 @@ public class SubjectsGUI {
 			e1.printStackTrace();
 		}
 		
+	}
+	
+	private static void downloadFiles(final int fileindex, final boolean openfile){
+
+		if(descargando){
+
+			faitic.setCancelDownload(true);
+			btnDescargarMarcados.setEnabled(false);
+
+		} else{
+
+			if(isLoading) return;
+			isLoading=true;
+
+			if(fileList==null){
+
+				JOptionPane.showMessageDialog(subjectsFrame, 
+						textdata.getKey("subjectnotselectederror"), 
+						textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
+
+				isLoading=false;
+
+				return;
+			}
+
+			if(cArchivos==null) {
+
+				isLoading=false;
+
+				return;
+			}
+
+			if(subjectPath==null) askToSelectSubjectFolder();
+			if(subjectPath==null) {
+
+				isLoading=false;
+
+				return;
+			}
+
+			blockInterface();
+
+			faitic.setCancelDownload(false);
+			setNDownloadedFiles(0);
+			
+			descargando=true;
+			btnDescargarMarcados.setEnabled(true);
+
+			btnDescargarMarcados.setText(textdata.getKey("btncanceldownload"));
+
+			timerDownloadCheck=new Timer();
+
+			writeLoadingText(textdata.getKey("loadingdownloading", "1", (fileindex<0 ? nFilesToDownload : 1) + "", "-", "-"));
+			setloadingpercent(0);
+			
+			SwingWorker thread=new SwingWorker(){
+
+				@Override
+				protected Object doInBackground() throws Exception {
+
+					if(fileindex<0){ // Not just one file. Download marked files
+						
+						for(int i=0; i<fileList.size(); i++){
+
+							if(cArchivos[i].isSelected()){
+
+								downloadFileFromList(i);
+
+								setNDownloadedFiles(getNDownloadedFiles()+1);
+
+							}
+
+						}
+						
+					} else{ // The selected fileindex file
+						
+						downloadFileFromList(fileindex);
+
+						if(openfile){
+							
+							// Open file after downloaded. Supposed subject path set
+							
+							String fileRelPath=fileList.get(fileindex).getFileDestination();
+							
+							if(fileIsAlreadyDownloaded(subjectPath,fileRelPath)){
+								
+								// Already downloaded. Open it
+								
+								try {
+									
+									Desktop.getDesktop().open(new File(fileDestination(subjectPath,fileRelPath)));
+									
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								
+							}
+							
+						}
+						
+						setNDownloadedFiles(getNDownloadedFiles()+1);
+
+					}
+
+					writeLoadingText(textdata.getKey("loadingdefaulttext"));
+
+					return null;
+				}
+
+				@Override
+				protected void done(){
+
+					isLoading=false;
+					
+					// Stop download timer
+					if(timerDownloadCheck!=null){
+						timerDownloadCheck.cancel();
+						timerDownloadCheck.purge();
+						timerDownloadCheck=null;
+					}
+					
+					setloadingpercent(-1);
+					
+					selectNotDownloadedFiles();
+					setDownloadButtonsText();
+
+					activateInterface();
+
+					faitic.setCancelDownload(false);
+					btnDescargarMarcados.setEnabled(true);
+					descargando=false;
+					
+					updateDownloadMarkedText();
+
+				}
+
+			};
+
+			thread.execute();
+			
+			timerDownloadCheck.scheduleAtFixedRate(new TimerTask(){
+
+				@Override
+				public void run() {
+
+					long downloaded=faitic.getDownloaded();
+					long downloadsize=faitic.getDownloadSize();
+					int ndownloadedfiles=getNDownloadedFiles();
+					
+					if(fileindex<0 && nFilesToDownload == 0 || downloadsize == 0) return; // Divided by zero if not controlled
+					
+					writeLoadingText(textdata.getKey("loadingdownloading", (ndownloadedfiles+1) + "", (fileindex<0 ? nFilesToDownload : 1) + "",
+							(downloaded>1024*1024 ? ((double)(downloaded*10/1024/1024)/10.0) + " MiB" :
+							downloaded>1024 ? ((double)(downloaded*10/1024)/10.0) + " kiB" :
+							downloaded + " B"),
+							(downloadsize>1024*1024 ? ((double)(downloadsize*10/1024/1024)/10.0) + " MiB" :
+								downloadsize>1024 ? ((double)(downloadsize*10/1024)/10.0) + " kiB" :
+									downloadsize + " B")));
+					
+					setloadingpercent(ndownloadedfiles*100/(fileindex<0 ? nFilesToDownload : 1) + (int)(downloaded*100/downloadsize/(fileindex<0 ? nFilesToDownload : 1)));
+					
+				}
+				
+			}, 100, 100);
+
+		}
 	}
 	
 	private static void selectSubjectFolder(){
@@ -2967,135 +3152,8 @@ public class SubjectsGUI {
 		btnDescargarMarcados = new JCustomButton(textdata.getKey("btndownloadmarked",""));
 		btnDescargarMarcados.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
-				if(descargando){
-
-					faitic.setCancelDownload(true);
-					btnDescargarMarcados.setEnabled(false);
-
-				} else{
-
-					if(isLoading) return;
-					isLoading=true;
-
-					if(fileList==null){
-
-						JOptionPane.showMessageDialog(subjectsFrame, 
-								textdata.getKey("subjectnotselectederror"), 
-								textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
-
-						isLoading=false;
-
-						return;
-					}
-
-					if(cArchivos==null) {
-
-						isLoading=false;
-
-						return;
-					}
-
-					if(subjectPath==null) askToSelectSubjectFolder();
-					if(subjectPath==null) {
-
-						isLoading=false;
-
-						return;
-					}
-
-					blockInterface();
-
-					faitic.setCancelDownload(false);
-					setNDownloadedFiles(0);
-					
-					descargando=true;
-					btnDescargarMarcados.setEnabled(true);
-
-					btnDescargarMarcados.setText(textdata.getKey("btncanceldownload"));
-
-					timerDownloadCheck=new Timer();
-
-					writeLoadingText(textdata.getKey("loadingdownloading", "1", nFilesToDownload + "", "-", "-"));
-					setloadingpercent(0);
-					
-					SwingWorker thread=new SwingWorker(){
-
-						@Override
-						protected Object doInBackground() throws Exception {
-
-							for(int i=0; i<fileList.size(); i++){
-
-								if(cArchivos[i].isSelected()){
-
-									downloadFileFromList(i);
-
-									setNDownloadedFiles(getNDownloadedFiles()+1);
-
-								}
-
-							}
-
-							writeLoadingText(textdata.getKey("loadingdefaulttext"));
-
-							return null;
-						}
-
-						@Override
-						protected void done(){
-
-							isLoading=false;
-							
-							// Stop download timer
-							if(timerDownloadCheck!=null){
-								timerDownloadCheck.cancel();
-								timerDownloadCheck.purge();
-								timerDownloadCheck=null;
-							}
-							
-							setloadingpercent(-1);
-							
-							selectNotDownloadedFiles();
-							setDownloadButtonsText();
-
-							activateInterface();
-
-							faitic.setCancelDownload(false);
-							btnDescargarMarcados.setEnabled(true);
-							descargando=false;
-							
-							updateDownloadMarkedText();
-
-						}
-
-					};
-
-					thread.execute();
-					
-					timerDownloadCheck.scheduleAtFixedRate(new TimerTask(){
-
-						@Override
-						public void run() {
-
-							long downloaded=faitic.getDownloaded();
-							long downloadsize=faitic.getDownloadSize();
-							int ndownloadedfiles=getNDownloadedFiles();
-							
-							writeLoadingText(textdata.getKey("loadingdownloading", (ndownloadedfiles+1) + "", nFilesToDownload + "",
-									(downloaded>1024*1024 ? ((double)(downloaded*10/1024/1024)/10.0) + " MiB" :
-									downloaded>1024 ? ((double)(downloaded*10/1024)/10.0) + " kiB" :
-									downloaded + " B"),
-									(downloadsize>1024*1024 ? ((double)(downloadsize*10/1024/1024)/10.0) + " MiB" :
-										downloadsize>1024 ? ((double)(downloadsize*10/1024)/10.0) + " kiB" :
-											downloadsize + " B")));
-							
-							setloadingpercent(ndownloadedfiles*100/nFilesToDownload + (int)(downloaded*100/downloadsize/nFilesToDownload));
-							
-						}
-						
-					}, 250, 250);
-
-				}
+				
+				downloadFiles(-1,false);
 
 			}
 		});
