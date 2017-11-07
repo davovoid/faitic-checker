@@ -1,3 +1,13 @@
+# v.1.2.1 -> v.1.2.2:
+
+### English
+
+ * Better UI for loading animation and file selector and download.
+
+### Español
+
+ * Mejor interfaz de usuario para animación de carga y para la selección y descarga de archivos.
+
 # v.1.2.0 -> v.1.2.1:
 
 ### English

@@ -65,7 +65,7 @@ import java.awt.event.MouseEvent;
 
 public class About {
 
-	protected static final String VERSION="1.2.1";
+	protected static final String VERSION="1.2.2";
 	private static final String WEBPAGE="https://davovoid.github.io/faicheck/";
 	private static final String CHANGELOGURL="https://raw.githubusercontent.com/davovoid/faitic-checker/master/changelog.md";
 

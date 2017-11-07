@@ -137,9 +137,7 @@ public class SubjectsGUI {
 	// private final static Image iconSearch=new ImageIcon(LoginGUI.class.getResource("/daraujo/faiticchecker/search.png")).getImage();
 	
 	private static JCustomButton btnDescargarMarcados;
-	private JCustomButton btnMarcarNuevos;
-	private JCustomButton btnMarcarTodo;
-	private JCustomButton btnMarcarNada;
+	private JLabel btnMarcarNuevos, btnMarcarTodo, btnMarcarNada;
 	
 	private static JLabel[] lblSubjects;
 	private static JCheckBox[] cArchivos, cFolders;
@@ -324,7 +322,7 @@ public class SubjectsGUI {
 		btnSearch.setVisible(false);
 		panelSearch.setVisible(false);
 		btnLogout.setVisible(false);
-		
+
 	}
 	
 	private static void activateInterface(){
@@ -340,6 +338,8 @@ public class SubjectsGUI {
 		if(fileList!=null) if(fileList.size()>0) btnSearch.setVisible(true);
 
 		btnLogout.setVisible(true);
+		
+		panelOptions.setVisible(selectedSubject>=0 && online);
 	}
 	
 	// The rest
@@ -891,6 +891,7 @@ public class SubjectsGUI {
 			
 		}
 		
+		panelOptions.setVisible(selcomp.equals(lblFiles) && online && selectedSubject>=0);
 		
 	}
 	
@@ -1038,7 +1039,7 @@ public class SubjectsGUI {
 				
 				// Check if folder changes
 				
-				if(!fileList.get(i).getParent().equals(lastfolder) && fileList.get(i).getParent().replace("/", "").length()>0){
+				if(!fileList.get(i).getParent().equals(lastfolder)){ // previously checking also if fileList.get(i).getParent().replace("/", "").length()>0
 					
 					folders++;
 					lastfolder=fileList.get(i).getParent();
@@ -1093,7 +1094,7 @@ public class SubjectsGUI {
 			boolean isAlreadyDownloaded=fileIsAlreadyDownloaded(subjectPath, fileList.get(i).getFileDestination());
 			boolean matchfound=matcheswithtext[i];
 			
-			if(matchfound && !fileList.get(i).getParent().equals(lastfolder) && fileList.get(i).getParent().replace("/", "").length()>0){
+			if(matchfound && !fileList.get(i).getParent().equals(lastfolder)){ // Same check than before
 				
 				// Add label for folder
 				
@@ -1101,8 +1102,8 @@ public class SubjectsGUI {
 				if(textforlabel.length()>0) if(textforlabel.charAt(0)=='/') textforlabel=textforlabel.substring(1, textforlabel.length());
 				if(textforlabel.length()>0) if(textforlabel.charAt(textforlabel.length()-1)=='/') textforlabel=textforlabel.substring(0, textforlabel.length()-1);
 				textforlabel=textforlabel.replace("/", " > ").replace("_", " ");
-				
-				lGeneralParentPaths[currentgeneralparentpath]=new JLabel(textforlabel);
+
+				lGeneralParentPaths[currentgeneralparentpath]=new JLabel(textforlabel.length()>0 ? textforlabel : textdata.getKey("filelistrootfolder"));
 				lGeneralParentPaths[currentgeneralparentpath].setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				lGeneralParentPaths[currentgeneralparentpath].setFont(new Font("Dialog", Font.BOLD, 18));
 				lGeneralParentPaths[currentgeneralparentpath].setPreferredSize(new Dimension(10,40));
@@ -1985,7 +1986,7 @@ public class SubjectsGUI {
 		
 		//activateInterface();
 		
-		panelOptions.setVisible(online);
+		panelOptions.setVisible(false);
 		
 		if(!online) subjectsFrame.setTitle(textdata.getKey("subjectsframetitleoffline"));
 		
@@ -2124,7 +2125,7 @@ public class SubjectsGUI {
 				
 				int panellogoheight=panelLogos != null ? panelLogos.getHeight()-1 : 100;
 				int panelsubjectswidth=panelSubjects != null ? panelSubjects.getWidth()-1 : 220;
-				int paneloptionsheight=panelOptions != null ? panelOptions.getHeight() : 50;
+				int paneloptionsheight=panelLoading != null ? panelLoading.getHeight() : 50;
 				
 				int subjectypos=panellogoheight+10, subjectheight=0;
 				
@@ -2285,12 +2286,11 @@ public class SubjectsGUI {
 		panelEverything.setOpaque(false);
 		subjectsFrame.getContentPane().add(panelEverything, BorderLayout.CENTER);
 		panelEverything.setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("220px:grow"),
-				FormFactory.PREF_COLSPEC,},
+				FormFactory.GLUE_COLSPEC,},
 			new RowSpec[] {
 				RowSpec.decode("100px"),
 				FormFactory.GLUE_ROWSPEC,
-				FormFactory.MIN_ROWSPEC,}));
+				RowSpec.decode("max(20px;min)"),}));
 		
 		panelLogos = new JPanel(){
 			
@@ -2328,7 +2328,7 @@ public class SubjectsGUI {
 		};
 		
 		panelLogos.setOpaque(false);
-		panelEverything.add(panelLogos, "1, 1, 2, 1, fill, fill");
+		panelEverything.add(panelLogos, "1, 1, fill, fill");
 		panelLogos.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.MIN_COLSPEC,
 				FormFactory.UNRELATED_GAP_COLSPEC,
@@ -2653,15 +2653,21 @@ public class SubjectsGUI {
 			    g2.setFont(textFont);
 			    
 			    Rectangle2D textBounds=getFontMetrics(textFont).getStringBounds(text, g2);
-			    int loadingSide=super.getHeight()/2;
+			    // int loadingSide=super.getHeight()/2;
 			    
-			    g2.drawString(text, (int)(super.getHeight()-loadingSide)/2 + loadingSide + 10, (int)(super.getHeight()+textBounds.getHeight())/2);
+			    //g2.drawString(text, (int)(super.getHeight()-loadingSide)/2 + loadingSide + 10, (int)(super.getHeight()+textBounds.getHeight())/2);
+			    g2.drawString(text, (int)(super.getWidth()-textBounds.getWidth())/2, (int)(super.getHeight()+textBounds.getHeight()-4)/2);
 			    
 				//g2.setColor(new Color(255,171,43,255));
+			    /*
 			    g2.setColor(new Color(0,110,198,255));
 				g2.setStroke(new BasicStroke(4));
 				
 				g2.drawArc((int)(super.getHeight()-loadingSide)/2, (int)(super.getHeight()-loadingSide)/2, loadingSide, loadingSide, -angleBase, !filled ? -angle : 360-angle);
+				*/
+			    
+				g.setColor(new Color(0,110,198,255));
+				g.fillRect(!filled ? 0 : angle*super.getWidth()/360, super.getHeight()-4, !filled ? angle*super.getWidth()/360 : (360-angle)*super.getWidth()/360, 4);
 				
 			}
 			
@@ -2729,7 +2735,7 @@ public class SubjectsGUI {
 			
 		});
 		
-		panelEverything.add(splitPane, "1, 2, 2, 1, fill, fill");
+		panelEverything.add(splitPane, "1, 2, fill, fill");
 		
 		panelSubject = new JPanel();
 		splitPane.setRightComponent(panelSubject);
@@ -2739,6 +2745,7 @@ public class SubjectsGUI {
 			new RowSpec[] {
 				FormFactory.PREF_ROWSPEC,
 				FormFactory.GLUE_ROWSPEC,
+				FormFactory.PREF_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,}));
 		
 		panelSearch = new JPanel(){
@@ -3029,7 +3036,7 @@ public class SubjectsGUI {
 		fl_panelSections.setVgap(8);
 		fl_panelSections.setHgap(10);
 		panelSections.setOpaque(false);
-		panelSubject.add(panelSections, "1, 3, fill, fill");
+		panelSubject.add(panelSections, "1, 4, fill, fill");
 		
 		lblIntroduction = new JLabel(textdata.getKey("sectionintroduction"));
 		lblIntroduction.addMouseListener(new MouseAdapter() {
@@ -3094,6 +3101,120 @@ public class SubjectsGUI {
 		});
 		panelSections.add(lblFiles);
 		
+		panelOptions = new JPanel(){
+			
+			@Override
+			public void paintComponent(Graphics g){
+				
+				Color borderColor=new Color(110,110,110,180);
+				
+				g.setColor(borderColor);
+				g.drawLine(0, 0, getWidth(), 0);
+				
+			}
+			
+		};
+		
+		panelSubject.add(panelOptions, "1, 3");
+		panelOptions.setOpaque(false);
+		panelOptions.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 8));
+		
+		btnMarcarTodo = new JLabel(textdata.getKey("btnmarkall"));
+		btnMarcarTodo.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+
+				if(!e.getComponent().isEnabled()) return;
+				
+				if(fileList==null){
+
+					JOptionPane.showMessageDialog(subjectsFrame, 
+							textdata.getKey("subjectnotselectederror"), 
+							textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
+					
+					return;
+				}
+				
+				if(cArchivos==null) return;
+				
+				for(int i=0; i<cArchivos.length; i++){
+					cArchivos[i].setSelected(cArchivos[i].isVisible());
+				}
+				
+			}
+		});
+		btnMarcarTodo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnMarcarTodo.setForeground(new Color(0,110,198,255));
+		panelOptions.add(btnMarcarTodo);
+		
+		btnMarcarNada = new JLabel(textdata.getKey("btnmarknone"));
+		btnMarcarNada.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+
+				if(!e.getComponent().isEnabled()) return;
+				
+				if(fileList==null){
+
+					JOptionPane.showMessageDialog(subjectsFrame, 
+							textdata.getKey("subjectnotselectederror"), 
+							textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
+					
+					return;
+				}
+				
+				if(cArchivos==null) return;
+				
+				for(int i=0; i<cArchivos.length; i++){
+					cArchivos[i].setSelected(false);
+				}
+				
+			}
+		});
+		btnMarcarNada.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnMarcarNada.setForeground(new Color(0,110,198,255));
+		panelOptions.add(btnMarcarNada);
+		
+		btnDescargarMarcados = new JCustomButton(textdata.getKey("btndownloadmarked",""));
+		btnDescargarMarcados.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				downloadFiles(-1,false);
+
+			}
+		});
+		
+		btnMarcarNuevos = new JLabel(textdata.getKey("btnmarknew"));
+		btnMarcarNuevos.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+
+				if(!e.getComponent().isEnabled()) return;
+				
+				if(fileList==null){
+
+					JOptionPane.showMessageDialog(subjectsFrame, 
+							textdata.getKey("subjectnotselectederror"), 
+							textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
+					
+					return;
+				}
+				
+				if(subjectPath==null) askToSelectSubjectFolder();
+				if(subjectPath==null) {
+
+					return;
+				}
+				
+				selectNotDownloadedFiles();
+				//setDownloadButtonsText();
+				
+			}
+		});
+		
+		btnMarcarNuevos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnMarcarNuevos.setForeground(new Color(0,110,198,255));
+		
+		panelOptions.add(btnMarcarNuevos);
+		panelOptions.add(btnDescargarMarcados);
+		
 		scrollPane_1 = new JScrollPane();
 		scrollPane_1.setOpaque(false);
 		scrollPane_1.setBorder(null);
@@ -3130,106 +3251,6 @@ public class SubjectsGUI {
 		splitPane.setDividerLocation(252);
 		panelLoading.setOpaque(false);
 		panelEverything.add(panelLoading, "1, 3, fill, fill");
-		
-		panelOptions = new JPanel();
-		panelOptions.setOpaque(false);
-		panelEverything.add(panelOptions, "2, 3, fill, fill");
-		panelOptions.setLayout(new FormLayout(new ColumnSpec[] {
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,},
-			new RowSpec[] {
-				FormFactory.PARAGRAPH_GAP_ROWSPEC,
-				FormFactory.MIN_ROWSPEC,
-				FormFactory.PARAGRAPH_GAP_ROWSPEC,}));
-		
-		btnDescargarMarcados = new JCustomButton(textdata.getKey("btndownloadmarked",""));
-		btnDescargarMarcados.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				downloadFiles(-1,false);
-
-			}
-		});
-		panelOptions.add(btnDescargarMarcados, "2, 2");
-		
-		btnMarcarNuevos = new JCustomButton(textdata.getKey("btnmarknew"));
-		btnMarcarNuevos.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				if(fileList==null){
-
-					JOptionPane.showMessageDialog(subjectsFrame, 
-							textdata.getKey("subjectnotselectederror"), 
-							textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
-					
-					return;
-				}
-				
-				if(subjectPath==null) askToSelectSubjectFolder();
-				if(subjectPath==null) {
-
-					return;
-				}
-				
-				selectNotDownloadedFiles();
-				//setDownloadButtonsText();
-				
-			}
-		});
-		panelOptions.add(btnMarcarNuevos, "4, 2");
-		
-		btnMarcarTodo = new JCustomButton(textdata.getKey("btnmarkall"));
-		btnMarcarTodo.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				if(fileList==null){
-
-					JOptionPane.showMessageDialog(subjectsFrame, 
-							textdata.getKey("subjectnotselectederror"), 
-							textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
-					
-					return;
-				}
-				
-				if(cArchivos==null) return;
-				
-				for(int i=0; i<cArchivos.length; i++){
-					cArchivos[i].setSelected(cArchivos[i].isVisible());
-				}
-				
-			}
-		});
-		panelOptions.add(btnMarcarTodo, "6, 2");
-		
-		btnMarcarNada = new JCustomButton(textdata.getKey("btnmarknone"));
-		btnMarcarNada.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				if(fileList==null){
-
-					JOptionPane.showMessageDialog(subjectsFrame, 
-							textdata.getKey("subjectnotselectederror"), 
-							textdata.getKey("subjectnotselectederrortitle"), JOptionPane.ERROR_MESSAGE);
-					
-					return;
-				}
-				
-				if(cArchivos==null) return;
-				
-				for(int i=0; i<cArchivos.length; i++){
-					cArchivos[i].setSelected(false);
-				}
-				
-			}
-		});
-		panelOptions.add(btnMarcarNada, "8, 2");
 	}
 	private static void addPopup(Component component, final JPopupMenu popup) {
 	}
