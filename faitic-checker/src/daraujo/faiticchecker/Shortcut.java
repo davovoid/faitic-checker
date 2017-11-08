@@ -93,6 +93,31 @@ public class Shortcut {
 		
 	}
 
+
+	public static void copyFile(String from, String to) throws IOException{
+
+		InputStream reader=new FileInputStream(new File(from));
+		
+		FileOutputStream writer=new FileOutputStream(new File(to));
+		
+		byte[] temp=new byte[1024];
+		int tempint=reader.read(temp); // Number of bytes read, -1 if EOF
+		
+		while(tempint>=0){
+			
+			writer.write(temp, 0, tempint); // Write data to file
+			writer.flush();
+			
+			tempint=reader.read(temp); // Recursive
+			
+		}
+		
+		reader.close();
+		writer.close();
+
+	}
+
+	
 	public static void createShortcut(String shortcutfolder){
 		
 		if(System.getProperty("os.name").toUpperCase().contains("WIN")){
@@ -114,6 +139,30 @@ public class Shortcut {
 		String shortcutfile=ClassicRoutines.cpath(shortcutfolder + "/Faicheck");
 		String iconfile=ClassicRoutines.createNeededFolders(ClassicRoutines.getUserDataPath(true) + "/icon");
 		String jarpath=LoginGUI.getJarPath();
+		
+		// New way of creating shortcuts: self-copying to the config. folder and shortcutting that
+		if(new File(jarpath).exists())
+			if(new File(jarpath).isFile()){
+				
+				// Can be copied
+				String jardestination=ClassicRoutines.createNeededFolders(ClassicRoutines.getUserDataPath(true) + "/faicheck.jar");
+				
+				try {
+					
+					if(!new File(jardestination).exists()){
+						
+							copyFile(jarpath, jardestination);
+	
+					}
+					
+					jarpath=jardestination;
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
 		
 		if(os==WINDOWS){
 			

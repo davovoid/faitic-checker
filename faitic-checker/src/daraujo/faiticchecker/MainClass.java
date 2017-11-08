@@ -41,6 +41,8 @@ public class MainClass {
 	protected static boolean verbose=false;
 	
 	protected static boolean detectupdateenabled=true;
+	
+	protected static boolean errorupdating=false, updatedsuccessfully=false;
 
 	/**
 	 * Launch the application.
@@ -60,6 +62,9 @@ public class MainClass {
 				verbose=true;
 			
 			else if(arg.toLowerCase().equals("--update")){
+				
+				// For the case the program opens in this situation the GUI
+				errorupdating=true; // Doesn't mean anything by now
 				
 				// Updating. Copy one file to the other
 				String from=args[i+1];	// New
@@ -151,6 +156,11 @@ public class MainClass {
 				
 			} else if(arg.toLowerCase().equals("--deleteupdate")){
 				
+				// The program is updated, but it needs to delete the temporal update jar
+
+				updatedsuccessfully=true;
+				errorupdating=true;	// If deleting the temporal update jar wasn't possible
+				
 				String todelete=args[i+1];
 				i++;
 				
@@ -188,6 +198,8 @@ public class MainClass {
 					//JOptionPane.showMessageDialog(null, 
 					//		"Successfully updated.");
 
+					errorupdating=false;
+					
 				}
 					
 				
@@ -243,6 +255,11 @@ public class MainClass {
 							// Open GUI
 							
 							LoginGUI window = new LoginGUI(verbose);
+							
+							// For notifying the updating status
+							window.errorupdating=errorupdating;
+							window.updatedsuccessfully=updatedsuccessfully;
+							
 							window.loginFrame.setVisible(true);
 						
 						//}

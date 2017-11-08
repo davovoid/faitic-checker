@@ -70,6 +70,7 @@ public class About {
 	private static final String CHANGELOGURL="https://raw.githubusercontent.com/davovoid/faitic-checker/master/changelog.md";
 
 	protected static TextData textdata;
+	protected boolean openchangelog=false;
 	
 	private final static Image imgIcon=new ImageIcon(About.class.getResource("/daraujo/faiticchecker/icon.png")).getImage();
 
@@ -221,7 +222,8 @@ public class About {
 				lblFaiticChecker.setText(lblFaiticChecker.getText() + " v." + VERSION);
 				
 				// Open option
-				selectOption(lblLicensesAndAttributions,"about.txt");
+				if(!openchangelog) selectOption(lblLicensesAndAttributions,"about.txt");
+				else selectchangelog();
 				
 			}
 		});

@@ -3,10 +3,14 @@
 ### English
 
  * Better UI for loading animation and file selector and download.
+ * Notification when application was self updated, and an option to see changelog.
+ * Now on first start, when creating shortcuts, the app would self-copy to the config folder, and the shortcuts would point the copy.
 
 ### Español
 
  * Mejor interfaz de usuario para animación de carga y para la selección y descarga de archivos.
+ * Notificación tras una actualización, y opción de ver cambios.
+ * Ahora en primer arranque, cuando se crean accesos directos, la aplicación se autocopia en la carpeta de configuración, y los accesos directos apuntarán a la copia.
 
 # v.1.2.0 -> v.1.2.1:
 

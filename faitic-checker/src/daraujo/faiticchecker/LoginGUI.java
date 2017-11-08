@@ -88,6 +88,7 @@ import javax.swing.JTextPane;
 public class LoginGUI {
 
 	protected static boolean verbose;
+	protected static boolean errorupdating=false, updatedsuccessfully=false;
 	
 	protected static Locale language;
 	protected static TextData textdata=new TextData(new Locale("es"));
@@ -150,7 +151,6 @@ public class LoginGUI {
 	
 	private static Semaphore semLang=new Semaphore(1);
 	private JPanel panelSettings;
-	private JPanel panel_3;
 	private JCheckBox cCheckForUpdates;
 	private JPanel panel_1;
 	private JPanel panel_4;
@@ -161,7 +161,7 @@ public class LoginGUI {
 	private static JTextField txtUpdateChannel;
 	private JButton btnGuardar;
 	private JButton btnPredeterminado;
-	private JPanel panel;
+	private static JLabel lblUpdateNotification, lblShowChangelog;
 	
 	protected static String getJarPath(){
 
@@ -686,6 +686,20 @@ public class LoginGUI {
 				
 				if(isTheJarPathAFile() && !settings.jsonConf.containsKey("noupdatecheck")) showUpdates();
 				
+				// Notify if update action was accomplished
+
+				if(errorupdating && updatedsuccessfully)
+					lblUpdateNotification.setText(textdata.getKey("lblupdatenotifsuccesserror",About.VERSION));
+
+				else if(errorupdating && !updatedsuccessfully)
+					lblUpdateNotification.setText(textdata.getKey("lblupdatenotiferror",About.VERSION));
+
+				else if(!errorupdating && updatedsuccessfully)
+					lblUpdateNotification.setText(textdata.getKey("lblupdatenotifsuccess",About.VERSION));
+				
+				lblUpdateNotification.setVisible(errorupdating || updatedsuccessfully);
+				lblShowChangelog.setVisible(updatedsuccessfully);
+				
 			}
 		});
 		loginFrame.getContentPane().setBackground(Color.WHITE);
@@ -733,6 +747,8 @@ public class LoginGUI {
 				int logoposy=(loginposy-imgheight-settingsendy)*3/4 + settingsendy;
 				
 				g2.drawImage(imgFaicheck, logoposx, logoposy, imgwidth, imgheight, null);
+				
+				// Brief description
 				
 				String briefdesc=textdata.getKey("appbriefdescription");
 				Font briefdescfont=new Font(Font.DIALOG,Font.BOLD,12);
@@ -1132,16 +1148,16 @@ public class LoginGUI {
 			}
 		});
 		
-		panel = new JPanel();
-		panel.setOpaque(false);
-		panelWithEverything.add(panel, "2, 2, fill, fill");
-		panel.setLayout(new FormLayout(new ColumnSpec[] {},
-			new RowSpec[] {}));
-		
 		panel_1 = new JPanel();
 		panel_1.setOpaque(false);
-		panelWithEverything.add(panel_1, "3, 2, fill, fill");
+		panelWithEverything.add(panel_1, "1, 2, 3, 1, fill, fill");
 		panel_1.setLayout(new FormLayout(new ColumnSpec[] {
+				FormFactory.RELATED_GAP_COLSPEC,
+				ColumnSpec.decode("30px"),
+				FormFactory.GLUE_COLSPEC,
+				FormFactory.PREF_COLSPEC,
+				FormFactory.UNRELATED_GAP_COLSPEC,
+				FormFactory.PREF_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
 				FormFactory.PREF_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,},
@@ -1176,11 +1192,41 @@ public class LoginGUI {
 				panelLogin.setVisible(!panelSettings.isVisible());
 			}
 		});
+		
+		lblShowChangelog = new JLabel(textdata.getKey("lblshowchangelog"));
+		lblShowChangelog.setVisible(false);
+		lblShowChangelog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+				if(arg0.getComponent().isEnabled()){
+					
+					try {
+						
+						About window = new About(textdata);
+						window.openchangelog=true;
+						window.frameAbout.setVisible(true);
+						
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+					
+				}
+				
+			}
+		});
+		
+		lblUpdateNotification = new JLabel("Faicheck updated");
+		lblUpdateNotification.setVisible(false);
+		panel_1.add(lblUpdateNotification, "4, 2");
+		lblShowChangelog.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		lblShowChangelog.setForeground(new Color(0,110,198,255));
+		panel_1.add(lblShowChangelog, "6, 2");
 		panel_4.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		panel_4.setPreferredSize(new Dimension(30, 30));
 		panel_4.setMinimumSize(new Dimension(30, 30));
 		panel_4.setOpaque(false);
-		panel_1.add(panel_4, "2, 2, fill, fill");
+		panel_1.add(panel_4, "8, 2, fill, fill");
 		
 		
 		panelLogin = new JCustomPanel();
