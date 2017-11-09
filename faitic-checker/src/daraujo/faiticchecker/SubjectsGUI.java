@@ -2983,23 +2983,17 @@ public class SubjectsGUI {
 		scrollPane.setViewportView(panelToDownload);
 		panelToDownload.setLayout(new FormLayout(new ColumnSpec[] {
 				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
 				FormFactory.GLUE_COLSPEC,
-				FormFactory.RELATED_GAP_COLSPEC,
-				FormFactory.PREF_COLSPEC,
 				FormFactory.RELATED_GAP_COLSPEC,},
 			new RowSpec[] {
-				FormFactory.UNRELATED_GAP_ROWSPEC,
+				FormFactory.GLUE_ROWSPEC,
 				FormFactory.PREF_ROWSPEC,
-				FormFactory.RELATED_GAP_ROWSPEC,
-				FormFactory.PREF_ROWSPEC,
-				FormFactory.UNRELATED_GAP_ROWSPEC,}));
+				FormFactory.GLUE_ROWSPEC,}));
 		
 		lblSeleccioneUnaAsignatura = new JLabel(textdata.getKey("lblchooseasubject"));
 		lblSeleccioneUnaAsignatura.setForeground(new Color(117,117,117,255));
 		lblSeleccioneUnaAsignatura.setHorizontalAlignment(SwingConstants.CENTER);
-		panelToDownload.add(lblSeleccioneUnaAsignatura, "2, 2, 3, 1");
+		panelToDownload.add(lblSeleccioneUnaAsignatura, "2, 2");
 		
 		panelSections = new JPanel(){
 			
